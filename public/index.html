@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC PCBA — PCB & SMT Assembly, Small Batch to Production</title>
+<meta name="description" content="One-stop PCBA service. PCB fabrication, SMT assembly, through-hole, turnkey. Small batch from 5 pcs. Worldwide shipping.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:1200px}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.cbg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.04}
+.cbg svg{width:100%;height:100%}
+nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
+.nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
+.ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
+.nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
+.nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
+.ticker{position:relative;z-index:1;background:var(--dim);border-bottom:1px solid var(--border);padding:.4rem 0;overflow:hidden}
+.ticker-inner{display:flex;gap:3rem;white-space:nowrap;animation:tick 40s linear infinite}
+.ti{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em;flex-shrink:0}.ti em{color:var(--green);font-style:normal}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.hero{position:relative;z-index:1;min-height:90vh;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;max-width:var(--max);margin:0 auto;padding:4rem 5% 3rem}
+.hero-badge{display:inline-flex;align-items:center;background:rgba(0,255,65,.07);border:1px solid rgba(0,255,65,.2);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.12em;padding:.3rem .8rem;margin-bottom:1.5rem}
+.hero h1{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;line-height:1.15;color:var(--white);margin-bottom:1rem}.acc{color:var(--green)}
+.hero-sub{color:var(--muted);font-size:.92rem;line-height:1.75;margin-bottom:2rem}
+.hbtns{display:flex;gap:1rem;flex-wrap:wrap}
+.bp{display:inline-block;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.75rem;font-weight:700;letter-spacing:.08em;padding:.8rem 1.6rem;transition:background .2s}.bp:hover{background:var(--green2)}
+.bg{display:inline-block;background:transparent;color:var(--green);font-size:.82rem;letter-spacing:.06em;padding:.8rem 1.4rem;border:1px solid var(--green3);transition:all .2s}.bg:hover{background:rgba(0,255,65,.07)}
+.hstats{display:flex;gap:2rem;margin-top:2.5rem;flex-wrap:wrap}
+.snum{font-family:'Orbitron',monospace;font-size:1.5rem;color:var(--green);font-weight:700}
+.slbl{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-top:2px}
+.hero-right{position:relative}
+.hero-img-wrap{position:relative;border:2px solid var(--green3);overflow:hidden}
+.hero-img-wrap img{width:100%;height:380px;object-fit:cover;display:block;filter:brightness(.75) saturate(1.2)}
+.hero-img-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,15,10,.6) 0%,transparent 60%)}
+.hero-img-badge{position:absolute;bottom:0;left:0;right:0;background:rgba(10,15,10,.85);border-top:1px solid var(--green3);padding:.7rem 1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.hib-item .hib-val{font-family:'Orbitron',monospace;font-size:.8rem;color:var(--green);font-weight:700}
+.hib-item .hib-lbl{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.08em}
+.sec{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:4rem 5%}
+.slabel{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
+.stitle{font-family:'Orbitron',monospace;font-size:clamp(1.2rem,2.5vw,1.6rem);color:var(--white);margin-bottom:2.5rem}
+.divider{position:relative;z-index:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 5%}
+.sgrd{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+.sc{background:var(--bg2);border:1px solid var(--border);overflow:hidden;transition:border-color .2s,transform .2s}.sc:hover{border-color:var(--green);transform:translateY(-4px)}
+.sc-img{width:100%;height:140px;object-fit:cover;display:block;filter:brightness(.6) saturate(1.1);transition:filter .3s}.sc:hover .sc-img{filter:brightness(.75) saturate(1.3)}
+.sc-body{padding:1.2rem}
+.sn{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--white);letter-spacing:.1em;margin-bottom:.4rem}
+.sd{font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:.7rem}
+.stag{display:inline-block;background:rgba(0,255,65,.06);border:1px solid var(--green3);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.1em;padding:.2rem .55rem}
+.mode-tabs{display:flex;gap:0;margin-bottom:2rem;border:1px solid var(--border)}
+.mtab{flex:1;padding:.7rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.1em;color:var(--muted);cursor:pointer;border-right:1px solid var(--border);transition:all .2s}
+.mtab:last-child{border-right:none}
+.mtab:hover{color:var(--green);background:rgba(0,255,65,.04)}
+.mtab.active{background:var(--green);color:#000;font-weight:700}
+.qwrap{display:grid;grid-template-columns:1.3fr 1fr;gap:2rem;align-items:start}
+.qform,.qres{background:var(--bg2);border:1px solid var(--border)}
+.fhdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.fht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.fhs{font-size:.72rem;color:var(--muted)}
+.fbody{padding:1.2rem}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem}
+.fg{display:flex;flex-direction:column;gap:.3rem}
+.fg label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em}
+.fg select,.fg input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.fg select:focus,.fg input:focus{border-color:var(--green3)}
+.fg select option{background:var(--bg)}
+.mode-panel{display:none}.mode-panel.active{display:block}
+.rhdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
+.rht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.rbody{padding:1.2rem}
+.pdis{text-align:center;padding:1.5rem 0 1.2rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
+.plbl{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.15em;margin-bottom:.4rem}
+.pbig{font-family:'Orbitron',monospace;font-size:2.4rem;font-weight:700;color:var(--green);line-height:1}
+.pper{font-size:.72rem;color:var(--muted);margin-top:.4rem}
+.rrows{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem}
+.rrow{display:flex;justify-content:space-between;font-size:.82rem}
+.rl{color:var(--muted)}.rv{color:var(--text);font-weight:500}.rv.g{color:var(--green)}.rv.a{color:var(--amber)}
+.obtn{width:100%;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;letter-spacing:.1em;padding:.9rem;border:none;cursor:pointer;transition:opacity .2s;margin-bottom:.8rem}.obtn:hover{opacity:.85}
+.rnote{font-size:.72rem;color:var(--muted);line-height:1.6}
+.psteps{display:grid;grid-template-columns:repeat(5,1fr);position:relative}
+.psteps::before{content:'';position:absolute;top:23px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--green3),var(--green3),transparent)}
+.ps{text-align:center;padding:0 .5rem;position:relative;z-index:1}
+.pn{width:48px;height:48px;background:var(--bg2);border:2px solid var(--green3);display:flex;align-items:center;justify-content:center;margin:0 auto .8rem;font-family:'Orbitron',monospace;font-size:.75rem;color:var(--green);font-weight:700;transition:all .2s}
+.ps:hover .pn{background:var(--green);color:#000;border-color:var(--green)}
+.pnm{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--white);letter-spacing:.08em;margin-bottom:.4rem}
+.pd{font-size:.75rem;color:var(--muted);line-height:1.55}
+.twrap{overflow-x:auto}
+.sptbl{width:100%;border-collapse:collapse;font-size:.83rem;white-space:nowrap}
+.sptbl th{background:var(--dim);padding:.65rem 1rem;text-align:left;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.1em;border:1px solid var(--border)}
+.sptbl td{padding:.6rem 1rem;border:1px solid var(--border);color:var(--text)}
+.sptbl tr:nth-child(even) td{background:rgba(255,255,255,.012)}
+.sptbl tr:hover td{background:rgba(0,255,65,.025)}
+.tdg{color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.78rem}
+.wgrd{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+.wc{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--green3);padding:1.4rem}
+.wn{font-family:'Orbitron',monospace;font-size:1.8rem;color:var(--green);opacity:.25;font-weight:700;margin-bottom:.5rem}
+.wt{font-size:.9rem;color:var(--white);font-weight:600;margin-bottom:.5rem}
+.wd{font-size:.8rem;color:var(--muted);line-height:1.65}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.pay-card{background:var(--bg2);border:1px solid var(--border);padding:1.5rem}
+.pay-logo{font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--green);margin-bottom:.8rem;letter-spacing:.08em}
+.pay-desc{font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:1rem}
+.pay-tag{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--amber);letter-spacing:.1em}
+.ctasec{text-align:center}
+.ctasub{color:var(--muted);font-size:.9rem;margin-bottom:2rem}
+.ctabtns{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
+.bwa{display:inline-flex;align-items:center;gap:.6rem;background:var(--wa);color:#fff;font-weight:600;font-size:.88rem;padding:.85rem 2rem;transition:opacity .2s}.bwa:hover{opacity:.88}
+.bem{display:inline-block;border:1px solid var(--green3);color:var(--green);font-size:.88rem;padding:.85rem 2rem;transition:all .2s}.bem:hover{background:rgba(0,255,65,.07)}
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
+.fi{max-width:var(--max);margin:0 auto;text-align:center}
+.flogo{font-family:'Orbitron',monospace;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
+.flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
+.fcopy{font-size:.75rem;color:var(--muted)}
+.waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
+/* TOAST */
+.toast{position:fixed;bottom:6rem;right:2rem;background:var(--bg2);border:1px solid var(--green3);color:var(--white);padding:1rem 1.5rem;font-size:.85rem;z-index:1000;transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--red);color:var(--red)}
+@media(max-width:1024px){.hero{grid-template-columns:1fr}.hero-right{display:none}.qwrap{grid-template-columns:1fr}.sgrd{grid-template-columns:repeat(2,1fr)}.wgrd{grid-template-columns:repeat(2,1fr)}.psteps{grid-template-columns:repeat(3,1fr);row-gap:2rem}.psteps::before{display:none}.pay-grid{grid-template-columns:1fr}}
+@media(max-width:768px){.nav-links{display:none}.hero h1{font-size:1.8rem}.sgrd{grid-template-columns:1fr}.wgrd{grid-template-columns:1fr}.psteps{grid-template-columns:1fr}.frow{grid-template-columns:1fr}.mode-tabs{flex-wrap:wrap}.mtab{min-width:45%}}
+</style>
+</head>
+<body>
+
+<div class="cbg" aria-hidden="true">
+<svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0L0 0 0 40" fill="none" stroke="#00FF41" stroke-width=".5"/></pattern></defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <g stroke="#00FF41" stroke-width="1.5" fill="none">
+    <line x1="0" y1="200" x2="300" y2="200"/><circle cx="300" cy="200" r="4" fill="#00FF41"/>
+    <line x1="300" y1="200" x2="300" y2="400"/><line x1="300" y1="400" x2="600" y2="400"/><circle cx="600" cy="400" r="4" fill="#00FF41"/>
+    <line x1="800" y1="100" x2="1100" y2="100"/><circle cx="800" cy="100" r="4" fill="#00FF41"/>
+    <line x1="800" y1="100" x2="800" y2="600"/>
+    <line x1="500" y1="600" x2="900" y2="600"/><circle cx="500" cy="600" r="6"/><circle cx="900" cy="600" r="6"/>
+  </g>
+</svg>
+</div>
+
+<nav>
+  <a href="#" class="nav-logo"><span class="ldot"></span>CC PCBA</a>
+  <ul class="nav-links">
+    <li><a href="#quote">Quote</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#capabilities">Capabilities</a></li>
+    <li><a href="#process">Process</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="track.html">Track Order</a></li>
+  </ul>
+  <a href="#quote" class="nav-cta">GET QUOTE</a>
+</nav>
+
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ti">PCB: <em>1–16 LAYERS</em></span>
+    <span class="ti">SMT: <em>0201 / 01005</em></span>
+    <span class="ti">MIN QTY: <em>5 PCS</em></span>
+    <span class="ti">TURNKEY: <em>BOM + GERBER</em></span>
+    <span class="ti">AOI: <em>100% INSPECTION</em></span>
+    <span class="ti">X-RAY: <em>BGA / QFN</em></span>
+    <span class="ti">LEAD TIME: <em>3–7 DAYS</em></span>
+    <span class="ti">PAYMENT: <em>PAYPAL · PINGPONG B2B</em></span>
+    <span class="ti">SHIP: <em>DHL · FEDEX · WORLDWIDE</em></span>
+    <span class="ti">IPC: <em>CLASS 2 / CLASS 3</em></span>
+    <span class="ti">PCB: <em>1–16 LAYERS</em></span>
+    <span class="ti">SMT: <em>0201 / 01005</em></span>
+    <span class="ti">MIN QTY: <em>5 PCS</em></span>
+    <span class="ti">TURNKEY: <em>BOM + GERBER</em></span>
+    <span class="ti">AOI: <em>100% INSPECTION</em></span>
+    <span class="ti">X-RAY: <em>BGA / QFN</em></span>
+    <span class="ti">LEAD TIME: <em>3–7 DAYS</em></span>
+    <span class="ti">PAYMENT: <em>PAYPAL · PINGPONG B2B</em></span>
+    <span class="ti">SHIP: <em>DHL · FEDEX · WORLDWIDE</em></span>
+    <span class="ti">IPC: <em>CLASS 2 / CLASS 3</em></span>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">▶ ONE-STOP PCBA · PCB + SMT + DIP + TURNKEY</div>
+    <h1>Your <span class="acc">PCBA Partner</span><br>From Prototype<br>to Production</h1>
+    <p class="hero-sub">PCB fabrication, SMT placement, through-hole assembly — all under one roof. Upload your Gerber + BOM, get a quote in minutes. Small batch from 5 pcs. Worldwide delivery.</p>
+    <div class="hbtns">
+      <a href="#quote" class="bp">⬆ GET INSTANT QUOTE</a>
+      <a href="quote.html" class="bg">SUBMIT INQUIRY →</a>
+    </div>
+    <div class="hstats">
+      <div><div class="snum">5</div><div class="slbl">MIN QTY</div></div>
+      <div><div class="snum">3D</div><div class="slbl">EXPRESS</div></div>
+      <div><div class="snum">01005</div><div class="slbl">MIN SMT</div></div>
+      <div><div class="snum">100%</div><div class="slbl">AOI FREE</div></div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-img-wrap">
+      <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&q=80" alt="PCBA SMT assembly">
+      <div class="hero-img-overlay"></div>
+      <div class="hero-img-badge">
+        <div class="hib-item"><div class="hib-val">SMT</div><div class="hib-lbl">SERVICE</div></div>
+        <div class="hib-item"><div class="hib-val">2L</div><div class="hib-lbl">PCB</div></div>
+        <div class="hib-item"><div class="hib-val">AOI</div><div class="hib-lbl">INSPECT</div></div>
+        <div class="hib-item"><div class="hib-val">50pcs</div><div class="hib-lbl">BATCH</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec" id="services">
+  <div class="slabel">// OUR SERVICES</div>
+  <div class="stitle">Four Ways We Can Help</div>
+  <div class="sgrd">
+    <div class="sc">
+      <img class="sc-img" src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=75" alt="PCB Fabrication">
+      <div class="sc-body"><div class="sn">PCB FABRICATION</div><div class="sd">1–16 layers. FR4, Rogers, Al. ENIG / HASL / OSP. Min trace 3/3 mil.</div><span class="stag">FROM 5 PCS</span></div>
+    </div>
+    <div class="sc">
+      <img class="sc-img" src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&q=75" alt="SMT Assembly">
+      <div class="sc-body"><div class="sn">SMT ASSEMBLY</div><div class="sd">0201 down to 01005. BGA, QFN, LGA. Single & double side. 100% AOI.</div><span class="stag">01005 CAPABLE</span></div>
+    </div>
+    <div class="sc">
+      <img class="sc-img" src="https://images.unsplash.com/photo-1563770660941-20978e870e26?w=600&q=75" alt="Through-Hole">
+      <div class="sc-body"><div class="sn">THROUGH-HOLE / DIP</div><div class="sd">Manual & wave soldering. Mixed SMT + DIP orders welcome.</div><span class="stag">WAVE SOLDER</span></div>
+    </div>
+    <div class="sc">
+      <img class="sc-img" src="https://images.unsplash.com/photo-1601134467661-3d775b999c18?w=600&q=75" alt="Turnkey PCBA">
+      <div class="sc-body"><div class="sn">TURNKEY PCBA</div><div class="sd">Full one-stop service. We source components, fabricate PCB, assemble and test.</div><span class="stag">FULL TURNKEY</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec" id="quote">
+  <div class="slabel">// INSTANT QUOTE CALCULATOR</div>
+  <div class="stitle">Configure Your Order</div>
+  <div class="mode-tabs">
+    <div class="mtab active" data-mode="pcb">PCB ONLY</div>
+    <div class="mtab" data-mode="smt">SMT ASSEMBLY</div>
+    <div class="mtab" data-mode="dip">THROUGH-HOLE</div>
+    <div class="mtab" data-mode="turnkey">TURNKEY</div>
+  </div>
+  <div class="qwrap">
+    <div class="qform">
+      <div class="fhdr"><span class="fht" id="form-title">PCB PARAMETERS</span><span class="fhs">Prices in USD</span></div>
+      <div class="fbody">
+        <div class="mode-panel active" id="panel-pcb">
+          <div class="frow">
+            <div class="fg"><label>LAYERS</label>
+              <select id="pcb-layers"><option value="1" data-base="8">1 Layer</option><option value="2" data-base="12" selected>2 Layers</option><option value="4" data-base="28">4 Layers</option><option value="6" data-base="55">6 Layers</option><option value="8" data-base="90">8 Layers</option></select>
+            </div>
+            <div class="fg"><label>QUANTITY</label>
+              <select id="pcb-qty"><option value="5" data-f="1.2">5 pcs</option><option value="10" data-f="1.0" selected>10 pcs</option><option value="25" data-f="0.85">25 pcs</option><option value="50" data-f="0.72">50 pcs</option><option value="100" data-f="0.6">100 pcs</option><option value="500" data-f="0.42">500 pcs</option></select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>WIDTH (mm)</label><input type="number" id="pcb-w" value="100" min="5" max="500"></div>
+            <div class="fg"><label>HEIGHT (mm)</label><input type="number" id="pcb-h" value="100" min="5" max="500"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>SURFACE FINISH</label>
+              <select id="pcb-finish"><option value="0" selected>HASL Lead-Free</option><option value="8">ENIG (+$8)</option><option value="2">OSP (+$2)</option><option value="25">Hard Gold (+$25)</option></select>
+            </div>
+            <div class="fg"><label>LEAD TIME</label>
+              <select id="pcb-lt"><option value="15" data-lbl="3 days">3 Day Express (+$15)</option><option value="5" data-lbl="5 days" selected>5 Days (+$5)</option><option value="0" data-lbl="7 days">7 Days (Standard)</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="mode-panel" id="panel-smt">
+          <div class="frow">
+            <div class="fg"><label>UNIQUE PARTS</label>
+              <select id="smt-parts"><option value="10" data-base="40">≤10 types</option><option value="20" data-base="65" selected>11–20 types</option><option value="30" data-base="90">21–30 types</option><option value="50" data-base="130">31–50 types</option></select>
+            </div>
+            <div class="fg"><label>SMT POINTS</label>
+              <select id="smt-points"><option value="50" data-m="1.0">≤50 points</option><option value="150" data-m="1.3" selected>51–150 pts</option><option value="300" data-m="1.6">151–300 pts</option><option value="500" data-m="2.0">301–500 pts</option></select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>QUANTITY</label>
+              <select id="smt-qty"><option value="5" data-f="1.4">5 pcs</option><option value="10" data-f="1.0" selected>10 pcs</option><option value="25" data-f="0.82">25 pcs</option><option value="50" data-f="0.68">50 pcs</option><option value="100" data-f="0.55">100 pcs</option></select>
+            </div>
+            <div class="fg"><label>SIDES</label>
+              <select id="smt-sides"><option value="1" selected>Single Side</option><option value="1.5">Double Side (+50%)</option></select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>INCLUDES PCB?</label>
+              <select id="smt-pcb"><option value="0" selected>No (supply own PCB)</option><option value="20">Yes, 2L 100×100mm (+$20)</option><option value="35">Yes, 4L 100×100mm (+$35)</option></select>
+            </div>
+            <div class="fg"><label>X-RAY INSPECT</label>
+              <select id="smt-xray"><option value="0" selected>No</option><option value="30">Yes (+$30)</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="mode-panel" id="panel-dip">
+          <div class="frow">
+            <div class="fg"><label>DIP POINTS</label>
+              <select id="dip-points"><option value="20" data-base="30">≤20 points</option><option value="50" data-base="50" selected>21–50 pts</option><option value="100" data-base="80">51–100 pts</option><option value="200" data-base="120">101–200 pts</option></select>
+            </div>
+            <div class="fg"><label>QUANTITY</label>
+              <select id="dip-qty"><option value="5" data-f="1.3">5 pcs</option><option value="10" data-f="1.0" selected>10 pcs</option><option value="25" data-f="0.8">25 pcs</option><option value="50" data-f="0.65">50 pcs</option><option value="100" data-f="0.5">100 pcs</option></select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>SOLDERING METHOD</label>
+              <select id="dip-wave"><option value="0" selected>Manual Soldering</option><option value="15">Wave Soldering (+$15)</option></select>
+            </div>
+            <div class="fg"><label>INCLUDES PCB?</label>
+              <select id="dip-pcb"><option value="0" selected>No (supply own PCB)</option><option value="20">Yes, 2L 100×100mm (+$20)</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="mode-panel" id="panel-turnkey">
+          <div class="frow">
+            <div class="fg"><label>PCB LAYERS</label>
+              <select id="tk-layers"><option value="2" data-base="15" selected>2 Layers</option><option value="4" data-base="32">4 Layers</option><option value="6" data-base="60">6 Layers</option></select>
+            </div>
+            <div class="fg"><label>QUANTITY</label>
+              <select id="tk-qty"><option value="5" data-f="1.5">5 pcs</option><option value="10" data-f="1.0" selected>10 pcs</option><option value="25" data-f="0.8">25 pcs</option><option value="50" data-f="0.65">50 pcs</option><option value="100" data-f="0.5">100 pcs</option></select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>UNIQUE PARTS</label>
+              <select id="tk-parts"><option value="10" data-m="1.0">≤10 types</option><option value="20" data-m="1.3" selected>11–20 types</option><option value="30" data-m="1.6">21–30 types</option><option value="50" data-m="2.0">31–50 types</option></select>
+            </div>
+            <div class="fg"><label>SMT POINTS</label>
+              <select id="tk-points"><option value="50" data-p="1.0">≤50 points</option><option value="150" data-p="1.3" selected>51–150 pts</option><option value="300" data-p="1.7">151–300 pts</option><option value="500" data-p="2.2">301–500 pts</option></select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>COMPONENT SOURCE</label>
+              <select id="tk-bom"><option value="1.0" selected>We source all (Turnkey)</option><option value="0.7">You supply all (Consignment)</option><option value="0.85">Mixed supply</option></select>
+            </div>
+            <div class="fg"><label>LEAD TIME</label>
+              <select id="tk-lt"><option value="25" data-lbl="5 days">5 Day Express (+$25)</option><option value="10" data-lbl="7 days" selected>7 Days (+$10)</option><option value="0" data-lbl="10 days">10 Days (Standard)</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="frow" style="margin-top:.4rem;padding-top:.8rem;border-top:1px solid var(--border)">
+          <div class="fg"><label>SHIPPING</label>
+            <select id="ship"><option value="12" selected>DHL Express</option><option value="14">FedEx International</option><option value="8">EMS Post</option></select>
+          </div>
+          <div class="fg"><label>DESTINATION</label>
+            <select id="dest"><option>United States</option><option>Europe</option><option>United Kingdom</option><option>Australia</option><option>Other</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="qres">
+      <div class="rhdr"><span class="rht">// LIVE QUOTE</span></div>
+      <div class="rbody">
+        <div class="pdis">
+          <div class="plbl">ESTIMATED TOTAL (USD)</div>
+          <div class="pbig" id="total">$0.00</div>
+          <div class="pper" id="per">Configure above to get your quote</div>
+        </div>
+        <div class="rrows">
+          <div class="rrow"><span class="rl">Service type</span><span class="rv g" id="r-mode">PCB Only</span></div>
+          <div class="rrow"><span class="rl">Base price</span><span class="rv" id="r-base">—</span></div>
+          <div class="rrow"><span class="rl">Options / add-ons</span><span class="rv" id="r-opts">—</span></div>
+          <div class="rrow"><span class="rl">Lead time</span><span class="rv g" id="r-lt">—</span></div>
+          <div class="rrow"><span class="rl">Shipping</span><span class="rv" id="r-ship">—</span></div>
+          <div class="rrow"><span class="rl">AOI inspection</span><span class="rv g">FREE</span></div>
+          <div class="rrow"><span class="rl">DFM review</span><span class="rv g">FREE</span></div>
+          <div class="rrow"><span class="rl">Payment</span><span class="rv a">PayPal · PingPong B2B</span></div>
+        </div>
+        <button class="obtn" id="obtn">SUBMIT INQUIRY →</button>
+        <div class="rnote">This is an estimate. Final quote confirmed after DFM review.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec" id="process">
+  <div class="slabel">// HOW IT WORKS</div>
+  <div class="stitle">From Files to Your Door</div>
+  <div class="psteps">
+    <div class="ps"><div class="pn">01</div><div class="pnm">UPLOAD FILES</div><div class="pd">Gerber + BOM + Pick & Place. Free DFM review.</div></div>
+    <div class="ps"><div class="pn">02</div><div class="pnm">GET QUOTE</div><div class="pd">Instant estimate online. Final quote within 24h.</div></div>
+    <div class="ps"><div class="pn">03</div><div class="pnm">CONFIRM & PAY</div><div class="pd">PayPal or PingPong B2B. Invoice provided.</div></div>
+    <div class="ps"><div class="pn">04</div><div class="pnm">PRODUCTION</div><div class="pd">PCB fab → SMT → DIP → AOI → X-Ray → Test.</div></div>
+    <div class="ps"><div class="pn">05</div><div class="pnm">SHIP & TRACK</div><div class="pd">DHL / FedEx worldwide. Real-time tracking.</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec" id="capabilities">
+  <div class="slabel">// TECHNICAL CAPABILITIES</div>
+  <div class="stitle">What We Can Build</div>
+  <div class="twrap">
+    <table class="sptbl">
+      <thead><tr><th>Category</th><th>Parameter</th><th>Standard</th><th>Advanced</th></tr></thead>
+      <tbody>
+        <tr><td>PCB</td><td>Layer Count</td><td class="tdg">1–8 layers</td><td class="tdg">10–16 layers</td></tr>
+        <tr><td>PCB</td><td>Min Trace / Space</td><td class="tdg">3/3 mil (75μm)</td><td class="tdg">2/2 mil (50μm)</td></tr>
+        <tr><td>PCB</td><td>Surface Finish</td><td class="tdg">HASL-LF / OSP</td><td class="tdg">ENIG / Hard Gold</td></tr>
+        <tr><td>SMT</td><td>Min Component</td><td class="tdg">0201 (0.6×0.3mm)</td><td class="tdg">01005 (0.4×0.2mm)</td></tr>
+        <tr><td>SMT</td><td>BGA / QFN</td><td class="tdg">0.5mm pitch BGA</td><td class="tdg">0.3mm pitch BGA</td></tr>
+        <tr><td>SMT</td><td>Inspection</td><td class="tdg">100% AOI (free)</td><td class="tdg">X-Ray BGA (optional)</td></tr>
+        <tr><td>DIP</td><td>Soldering</td><td class="tdg">Manual</td><td class="tdg">Wave soldering</td></tr>
+        <tr><td>General</td><td>IPC Standard</td><td class="tdg">IPC Class 2</td><td class="tdg">IPC Class 3</td></tr>
+        <tr><td>General</td><td>Min Batch</td><td class="tdg">5 pcs</td><td class="tdg">No maximum</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec">
+  <div class="slabel">// PAYMENT OPTIONS</div>
+  <div class="stitle">Secure International Payment</div>
+  <div class="pay-grid">
+    <div class="pay-card">
+      <div class="pay-logo">▶ PAYPAL</div>
+      <div class="pay-desc">Fast, secure online payment. Ideal for small batches and prototype orders. Buyer protection included. Instant order confirmation upon payment.</div>
+      <div class="pay-tag">RECOMMENDED FOR SMALL ORDERS · INSTANT CONFIRMATION</div>
+    </div>
+    <div class="pay-card">
+      <div class="pay-logo">▶ PINGPONG B2B</div>
+      <div class="pay-desc">Professional B2B international wire transfer. Lower fees for large orders. Supports USD, EUR, GBP and more. Manual confirmation within 1 business day.</div>
+      <div class="pay-tag">RECOMMENDED FOR VOLUME ORDERS · LOWER FEES</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec">
+  <div class="slabel">// WHY CC PCBA</div>
+  <div class="stitle">Your Reliable PCBA Partner</div>
+  <div class="wgrd">
+    <div class="wc"><div class="wn">01</div><div class="wt">One-Stop Service</div><div class="wd">PCB + SMT + DIP + test under one roof. One point of contact, one invoice.</div></div>
+    <div class="wc"><div class="wn">02</div><div class="wt">Small Batch Welcome</div><div class="wd">From 5 pcs prototype to 5,000 pcs production. Same quality, same team.</div></div>
+    <div class="wc"><div class="wn">03</div><div class="wt">100% AOI Free</div><div class="wd">Every board goes through automated optical inspection at no extra charge.</div></div>
+    <div class="wc"><div class="wn">04</div><div class="wt">Real-Time Tracking</div><div class="wd">Track your order from production to delivery via your order number.</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec ctasec" id="contact">
+  <div class="slabel">// GET IN TOUCH</div>
+  <div class="stitle">Ready to Start Your Order?</div>
+  <p class="ctasub">Have a complex board or a large batch? Talk to our engineers directly.</p>
+  <div class="ctabtns">
+    <a href="https://wa.me/YOUR_NUMBER?text=Hello+CC+PCBA" class="bwa" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
+      CHAT ON WHATSAPP
+    </a>
+    <a href="quote.html" class="bem">📋 SUBMIT INQUIRY</a>
+  </div>
+</section>
+
+<footer>
+  <div class="fi">
+    <div class="flogo">▶ CC PCBA</div>
+    <div class="flinks">
+      <a href="#services">Services</a><a href="#quote">Get Quote</a><a href="#capabilities">Capabilities</a>
+      <a href="#process">Process</a><a href="quote.html">Submit Inquiry</a><a href="track.html">Track Order</a>
+    </div>
+    <div class="fcopy">© 2026 CC PCBA · PCB Fabrication · SMT Assembly · Through-Hole · Turnkey PCBA · Worldwide</div>
+  </div>
+</footer>
+
+<a href="https://wa.me/YOUR_NUMBER" class="waf" target="_blank" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
+</a>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var currentMode='pcb';
+document.querySelectorAll('.mtab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.mtab').forEach(function(t){t.classList.remove('active')});
+    document.querySelectorAll('.mode-panel').forEach(function(p){p.classList.remove('active')});
+    tab.classList.add('active');
+    currentMode=tab.dataset.mode;
+    document.getElementById('panel-'+currentMode).classList.add('active');
+    var titles={pcb:'PCB PARAMETERS',smt:'SMT ASSEMBLY PARAMETERS',dip:'THROUGH-HOLE PARAMETERS',turnkey:'TURNKEY PCBA PARAMETERS'};
+    document.getElementById('form-title').textContent=titles[currentMode];
+    calc();
+  });
+});
+function calcPCB(){
+  var lo=document.getElementById('pcb-layers').options[document.getElementById('pcb-layers').selectedIndex];
+  var qo=document.getElementById('pcb-qty').options[document.getElementById('pcb-qty').selectedIndex];
+  var base=parseFloat(lo.dataset.base)||12,qty=parseFloat(qo.value)||10,qf=parseFloat(qo.dataset.f)||1;
+  var W=parseFloat(document.getElementById('pcb-w').value)||100,H=parseFloat(document.getElementById('pcb-h').value)||100;
+  var af=Math.max(0.5,(W*H)/10000);
+  var fab=parseFloat((base*af*qf*(qty/10)).toFixed(2));
+  var fin=parseFloat(document.getElementById('pcb-finish').value)||0;
+  var lto=document.getElementById('pcb-lt').options[document.getElementById('pcb-lt').selectedIndex];
+  var ltp=parseFloat(lto.value)||0,ltlbl=lto.dataset.lbl||'7 days';
+  var shp=parseFloat(document.getElementById('ship').value)||12;
+  return{total:fab+fin+ltp+shp,qty:qty,base:fab,opts:fin,ltp:ltp,ltlbl:ltlbl,shp:shp,mode:'PCB Only'};
+}
+function calcSMT(){
+  var po=document.getElementById('smt-parts').options[document.getElementById('smt-parts').selectedIndex];
+  var pto=document.getElementById('smt-points').options[document.getElementById('smt-points').selectedIndex];
+  var qo=document.getElementById('smt-qty').options[document.getElementById('smt-qty').selectedIndex];
+  var base=parseFloat(po.dataset.base)||65,pm=parseFloat(pto.dataset.m)||1.3;
+  var qty=parseFloat(qo.value)||10,qf=parseFloat(qo.dataset.f)||1;
+  var sides=parseFloat(document.getElementById('smt-sides').value)||1;
+  var pcbAdd=parseFloat(document.getElementById('smt-pcb').value)||0;
+  var xray=parseFloat(document.getElementById('smt-xray').value)||0;
+  var fab=parseFloat((base*pm*qf*sides*(qty/10)).toFixed(2));
+  var shp=parseFloat(document.getElementById('ship').value)||12;
+  return{total:fab+pcbAdd+xray+shp,qty:qty,base:fab,opts:pcbAdd+xray,ltp:0,ltlbl:'5–7 days',shp:shp,mode:'SMT Assembly'};
+}
+function calcDIP(){
+  var po=document.getElementById('dip-points').options[document.getElementById('dip-points').selectedIndex];
+  var qo=document.getElementById('dip-qty').options[document.getElementById('dip-qty').selectedIndex];
+  var base=parseFloat(po.dataset.base)||50,qty=parseFloat(qo.value)||10,qf=parseFloat(qo.dataset.f)||1;
+  var wave=parseFloat(document.getElementById('dip-wave').value)||0;
+  var pcbAdd=parseFloat(document.getElementById('dip-pcb').value)||0;
+  var fab=parseFloat((base*qf*(qty/10)).toFixed(2));
+  var shp=parseFloat(document.getElementById('ship').value)||12;
+  return{total:fab+wave+pcbAdd+shp,qty:qty,base:fab,opts:wave+pcbAdd,ltp:0,ltlbl:'5–7 days',shp:shp,mode:'Through-Hole'};
+}
+function calcTurnkey(){
+  var lo=document.getElementById('tk-layers').options[document.getElementById('tk-layers').selectedIndex];
+  var qo=document.getElementById('tk-qty').options[document.getElementById('tk-qty').selectedIndex];
+  var po=document.getElementById('tk-parts').options[document.getElementById('tk-parts').selectedIndex];
+  var pto=document.getElementById('tk-points').options[document.getElementById('tk-points').selectedIndex];
+  var lto=document.getElementById('tk-lt').options[document.getElementById('tk-lt').selectedIndex];
+  var base=parseFloat(lo.dataset.base)||15,qty=parseFloat(qo.value)||10,qf=parseFloat(qo.dataset.f)||1;
+  var pm=parseFloat(po.dataset.m)||1.3,pp=parseFloat(pto.dataset.p)||1.3;
+  var bom=parseFloat(document.getElementById('tk-bom').value)||1.0;
+  var ltp=parseFloat(lto.value)||10,ltlbl=lto.dataset.lbl||'7 days';
+  var fab=parseFloat((base*pm*pp*qf*bom*(qty/10)).toFixed(2));
+  var shp=parseFloat(document.getElementById('ship').value)||12;
+  return{total:fab+ltp+shp,qty:qty,base:fab,opts:0,ltp:ltp,ltlbl:ltlbl,shp:shp,mode:'Turnkey PCBA'};
+}
+function calc(){
+  var r;
+  if(currentMode==='pcb') r=calcPCB();
+  else if(currentMode==='smt') r=calcSMT();
+  else if(currentMode==='dip') r=calcDIP();
+  else r=calcTurnkey();
+  document.getElementById('total').textContent='$'+r.total.toFixed(2);
+  document.getElementById('per').textContent='$'+(r.total/r.qty).toFixed(2)+' per board · '+r.qty+' pcs';
+  document.getElementById('r-mode').textContent=r.mode;
+  document.getElementById('r-base').textContent='$'+r.base.toFixed(2);
+  document.getElementById('r-opts').textContent=r.opts>0?'+$'+r.opts.toFixed(2):'Included';
+  document.getElementById('r-lt').textContent=r.ltlbl+(r.ltp>0?' (+$'+r.ltp.toFixed(2)+')':'');
+  document.getElementById('r-ship').textContent='$'+r.shp.toFixed(2);
+  return r;
+}
+document.querySelectorAll('select,input[type=number]').forEach(function(el){
+  el.addEventListener('change',calc);
+  if(el.type==='number') el.addEventListener('input',calc);
+});
+function showToast(msg,isError){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(isError?' error':'');
+  setTimeout(function(){t.classList.add('show')},10);
+  setTimeout(function(){t.classList.remove('show')},4000);
+}
+document.getElementById('obtn').addEventListener('click',function(){
+  var r=calc();
+  window.location.href='quote.html?mode='+currentMode+'&qty='+r.qty+'&estimate='+r.total.toFixed(2);
+});
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}
+  });
+});
+calc();
+</script>
+</body>
+</html>

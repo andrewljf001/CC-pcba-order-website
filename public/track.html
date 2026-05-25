@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Order — CC PCBA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--max:760px}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh}
+a{color:inherit;text-decoration:none}
+nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
+.ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
+.nav-back{font-size:.82rem;color:var(--muted);transition:color .2s}.nav-back:hover{color:var(--green)}
+.wrap{max-width:var(--max);margin:0 auto;padding:3rem 5%}
+.page-label{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
+.page-title{font-family:'Orbitron',monospace;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.5rem}
+.page-sub{font-size:.88rem;color:var(--muted);margin-bottom:2.5rem}
+
+/* SEARCH */
+.search-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:2rem}
+.search-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
+.search-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.search-body{padding:1.5rem}
+.search-row{display:flex;gap:.75rem}
+.search-row input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.65rem 1rem;font-size:.95rem;font-family:'Share Tech Mono',monospace;letter-spacing:.06em;outline:none;transition:border-color .2s}
+.search-row input:focus{border-color:var(--green3)}
+.search-row input::placeholder{color:var(--muted);letter-spacing:.04em}
+.search-btn{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.6rem;border:none;cursor:pointer;transition:opacity .2s;white-space:nowrap}
+.search-btn:hover{opacity:.85}
+.search-btn:disabled{opacity:.4;cursor:not-allowed}
+.search-hint{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted);margin-top:.75rem;letter-spacing:.04em}
+
+/* RESULT */
+.result{display:none}
+.result.show{display:block}
+
+/* ORDER HEADER */
+.order-top{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
+.order-top-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.order-no{font-family:'Orbitron',monospace;font-size:1rem;color:var(--white);letter-spacing:.1em}
+.status-pill{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.1em;padding:.25rem .8rem;border:1px solid}
+.s-pending{color:var(--amber);border-color:var(--amber);background:rgba(255,179,0,.08)}
+.s-quoted{color:#64B5F6;border-color:#1565C0;background:rgba(21,101,192,.1)}
+.s-paid{color:var(--green);border-color:var(--green3);background:rgba(0,255,65,.07)}
+.s-production{color:#FF8A65;border-color:#BF360C;background:rgba(191,54,12,.1)}
+.s-shipped{color:#CE93D8;border-color:#6A1B9A;background:rgba(106,27,154,.1)}
+.s-completed{color:var(--green);border-color:var(--green3);background:rgba(0,255,65,.07)}
+.s-cancelled{color:var(--red);border-color:var(--red);background:rgba(255,68,68,.08)}
+.order-top-body{padding:1.2rem}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.ig-item{}
+.ig-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.3rem}
+.ig-val{font-size:.88rem;color:var(--white)}
+
+/* TIMELINE */
+.timeline-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
+.timeline-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
+.timeline-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.timeline-body{padding:1.5rem 1.2rem}
+.tl{position:relative;display:flex;flex-direction:column;gap:0}
+.tl-step{display:flex;gap:1rem;position:relative;padding-bottom:1.5rem}
+.tl-step:last-child{padding-bottom:0}
+.tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.tl-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);background:var(--bg);flex-shrink:0;position:relative;z-index:1}
+.tl-step.done .tl-dot{background:var(--green3);border-color:var(--green)}
+.tl-step.active .tl-dot{background:var(--green);border-color:var(--green);box-shadow:0 0 0 4px rgba(0,255,65,.15)}
+.tl-line{flex:1;width:2px;background:var(--border);margin-top:2px}
+.tl-step.done .tl-line{background:var(--green3)}
+.tl-step:last-child .tl-line{display:none}
+.tl-content{padding-top:0}
+.tl-name{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.08em}
+.tl-step.done .tl-name,.tl-step.active .tl-name{color:var(--white)}
+.tl-desc{font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.5}
+.tl-step.active .tl-desc{color:var(--text)}
+
+/* NOTES / TRACKING */
+.note-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
+.note-hdr{background:var(--dim);padding:.7rem 1.2rem;border-bottom:1px solid var(--border)}
+.note-ht{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--green);letter-spacing:.12em}
+.note-body{padding:1rem 1.2rem;font-size:.85rem;color:var(--text);line-height:1.7}
+
+/* ERROR / EMPTY */
+.msg-box{background:var(--bg2);border:1px solid var(--border);padding:3rem;text-align:center}
+.msg-icon{font-size:2.5rem;margin-bottom:1rem}
+.msg-title{font-family:'Orbitron',monospace;font-size:1rem;color:var(--white);margin-bottom:.5rem}
+.msg-sub{font-size:.82rem;color:var(--muted)}
+
+/* SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.actions{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
+.act-btn{display:inline-block;font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.4rem;cursor:pointer;border:1px solid var(--green3);color:var(--green);background:transparent;transition:all .2s}
+.act-btn:hover{background:rgba(0,255,65,.07)}
+.act-btn.primary{background:var(--green);color:#000;border-color:var(--green)}
+.act-btn.primary:hover{background:var(--green2)}
+
+@media(max-width:560px){
+  .info-grid{grid-template-columns:1fr 1fr}
+  .search-row{flex-direction:column}
+  .order-top-hdr{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><span class="ldot"></span>CC PCBA</a>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="wrap">
+  <div class="page-label">// ORDER TRACKING</div>
+  <h1 class="page-title">Track Your Order</h1>
+  <p class="page-sub">Enter your order number to check real-time status and updates.</p>
+
+  <div class="search-card">
+    <div class="search-hdr"><span class="search-ht">ENTER ORDER NUMBER</span></div>
+    <div class="search-body">
+      <div class="search-row">
+        <input type="text" id="orderInput" placeholder="CC1234567890000" maxlength="30"
+               onkeydown="if(event.key==='Enter')doTrack()"/>
+        <button class="search-btn" onclick="doTrack()" id="trackBtn">TRACK</button>
+      </div>
+      <div class="search-hint">» Order number was emailed to you after submission (format: CC + timestamp)</div>
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+const STEPS = [
+  {key:'pending',    label:'INQUIRY RECEIVED',   desc:'Your inquiry has been received and is pending review by our team.'},
+  {key:'quoted',     label:'QUOTE SENT',          desc:'A detailed quotation has been sent to your email. Please confirm to proceed.'},
+  {key:'paid',       label:'PAYMENT CONFIRMED',   desc:'Payment received. Your order is queued for production.'},
+  {key:'production', label:'IN PRODUCTION',       desc:'Your PCBs and assemblies are being manufactured on our production line.'},
+  {key:'shipped',    label:'SHIPPED',             desc:'Your order has been dispatched. Tracking information is below.'},
+  {key:'completed',  label:'COMPLETED',           desc:'Order delivered successfully. Thank you for choosing CC PCBA!'},
+];
+
+const STATUS_CLASS = {pending:'s-pending',quoted:'s-quoted',paid:'s-paid',production:'s-production',shipped:'s-shipped',completed:'s-completed',cancelled:'s-cancelled'};
+
+function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function fmtDate(s){
+  if(!s)return'—';
+  try{return new Date(s.includes('T')?s:s+' UTC').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+  catch{return s}
+}
+
+function doTrack(){
+  const no = document.getElementById('orderInput').value.trim().toUpperCase();
+  if(!no){alert('Please enter your order number.');return;}
+  const btn = document.getElementById('trackBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>SEARCHING';
+
+  fetch('/api/track/'+encodeURIComponent(no))
+    .then(r=>r.json())
+    .then(d=>{
+      btn.disabled=false; btn.textContent='TRACK';
+      if(d.error) renderError(); else renderResult(d);
+    })
+    .catch(()=>{
+      btn.disabled=false; btn.textContent='TRACK';
+      renderNetError();
+    });
+}
+
+function renderError(){
+  document.getElementById('result').innerHTML=`
+    <div class="msg-box">
+      <div class="msg-icon">🔍</div>
+      <div class="msg-title">Order Not Found</div>
+      <div class="msg-sub">Please double-check your order number. It was included in your confirmation email.</div>
+    </div>`;
+  document.getElementById('result').className='result show';
+}
+
+function renderNetError(){
+  document.getElementById('result').innerHTML=`
+    <div class="msg-box">
+      <div class="msg-icon">⚠️</div>
+      <div class="msg-title">Connection Error</div>
+      <div class="msg-sub">Unable to reach the server. Please try again in a moment.</div>
+    </div>`;
+  document.getElementById('result').className='result show';
+}
+
+function renderResult(d){
+  const isCancelled = d.status==='cancelled';
+  const stepIdx = STEPS.findIndex(s=>s.key===d.status);
+
+  // Timeline
+  let tlHtml='';
+  if(!isCancelled){
+    tlHtml = STEPS.map((s,i)=>{
+      const cls = i<stepIdx?'done': i===stepIdx?'active':'';
+      return `<div class="tl-step ${cls}">
+        <div class="tl-left">
+          <div class="tl-dot"></div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-name">${s.label}</div>
+          ${cls==='active'?`<div class="tl-desc">${s.desc}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    tlHtml=`<div class="tl-step"><div class="tl-left"><div class="tl-dot" style="border-color:var(--red);background:var(--red)"></div></div><div class="tl-content"><div class="tl-name" style="color:var(--red)">ORDER CANCELLED</div><div class="tl-desc">This order has been cancelled. Please contact us for details.</div></div></div>`;
+  }
+
+  // Extra notes
+  let extras='';
+  if(d.admin_notes){
+    extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM CC PCBA TEAM</span></div><div class="note-body">${esc(d.admin_notes)}</div></div>`;
+  }
+  if(d.tracking_no){
+    extras+=`<div class="note-card" style="border-color:#1565C0"><div class="note-hdr" style="background:rgba(21,101,192,.15)"><span class="note-ht" style="color:#64B5F6">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
+  }
+
+  document.getElementById('result').innerHTML=`
+    <div class="order-top">
+      <div class="order-top-hdr">
+        <div class="order-no">${esc(d.order_no)}</div>
+        <div class="status-pill ${STATUS_CLASS[d.status]||'s-pending'}">${(d.status||'pending').toUpperCase()}</div>
+      </div>
+      <div class="order-top-body">
+        <div class="info-grid">
+          <div class="ig-item"><div class="ig-label">CUSTOMER</div><div class="ig-val">${esc(d.name)}</div></div>
+          <div class="ig-item"><div class="ig-label">SERVICE</div><div class="ig-val">${esc(d.service_type)}</div></div>
+          <div class="ig-item"><div class="ig-label">QUANTITY</div><div class="ig-val">${d.quantity?d.quantity+' pcs':'—'}</div></div>
+          <div class="ig-item"><div class="ig-label">QUOTED AMOUNT</div><div class="ig-val">${d.quote_amount?'$'+Number(d.quote_amount).toFixed(2):'Pending'}</div></div>
+          <div class="ig-item"><div class="ig-label">SUBMITTED</div><div class="ig-val">${fmtDate(d.created_at)}</div></div>
+          <div class="ig-item"><div class="ig-label">LAST UPDATED</div><div class="ig-val">${fmtDate(d.updated_at)}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-card">
+      <div class="timeline-hdr"><span class="timeline-ht">// PROGRESS TIMELINE</span></div>
+      <div class="timeline-body"><div class="tl">${tlHtml}</div></div>
+    </div>
+
+    ${extras}
+
+    <div class="actions">
+      <a href="quote.html" class="act-btn primary">Submit New Inquiry</a>
+      <a href="index.html" class="act-btn">← Back to Home</a>
+    </div>
+  `;
+  document.getElementById('result').className='result show';
+}
+
+// Auto-track from URL ?order=CC…
+const p = new URLSearchParams(location.search);
+if(p.get('order')){
+  document.getElementById('orderInput').value = p.get('order');
+  doTrack();
+}
+</script>
+</body>
+</html>
