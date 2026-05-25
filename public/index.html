@@ -76,12 +76,16 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .pdis{text-align:center;padding:1.5rem 0 1.2rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
 .plbl{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.15em;margin-bottom:.4rem}
 .pbig{font-family:'Orbitron',monospace;font-size:2.4rem;font-weight:700;color:var(--green);line-height:1}
+.pbig.manual{font-size:1.3rem;color:var(--amber)}
 .pper{font-size:.72rem;color:var(--muted);margin-top:.4rem}
 .rrows{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem}
 .rrow{display:flex;justify-content:space-between;font-size:.82rem}
-.rl{color:var(--muted)}.rv{color:var(--text);font-weight:500}.rv.g{color:var(--green)}.rv.a{color:var(--amber)}
+.rl{color:var(--muted)}.rv{color:var(--text);font-weight:500}.rv.g{color:var(--green)}.rv.a{color:var(--amber)}.rv.r{color:var(--red)}
 .obtn{width:100%;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;letter-spacing:.1em;padding:.9rem;border:none;cursor:pointer;transition:opacity .2s;margin-bottom:.8rem}.obtn:hover{opacity:.85}
+.obtn.manual-btn{background:var(--amber)}
 .rnote{font-size:.72rem;color:var(--muted);line-height:1.6}
+.manual-notice{background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.25);padding:.9rem 1rem;margin-bottom:1rem;font-size:.8rem;color:var(--amber);line-height:1.6}
+.manual-notice strong{display:block;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;margin-bottom:.3rem}
 .psteps{display:grid;grid-template-columns:repeat(5,1fr);position:relative}
 .psteps::before{content:'';position:absolute;top:23px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--green3),var(--green3),transparent)}
 .ps{text-align:center;padding:0 .5rem;position:relative;z-index:1}
@@ -118,7 +122,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 .flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
-/* TOAST */
 .toast{position:fixed;bottom:6rem;right:2rem;background:var(--bg2);border:1px solid var(--green3);color:var(--white);padding:1rem 1.5rem;font-size:.85rem;z-index:1000;transform:translateY(100px);opacity:0;transition:all .3s}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.error{border-color:var(--red);color:var(--red)}
@@ -236,117 +239,156 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   <div class="slabel">// INSTANT QUOTE CALCULATOR</div>
   <div class="stitle">Configure Your Order</div>
   <div class="mode-tabs">
-    <div class="mtab active" data-mode="pcb">PCB ONLY</div>
-    <div class="mtab" data-mode="smt">SMT ASSEMBLY</div>
-    <div class="mtab" data-mode="dip">THROUGH-HOLE</div>
-    <div class="mtab" data-mode="turnkey">TURNKEY</div>
+    <div class="mtab active" data-mode="pcb">PCB FABRICATION</div>
+    <div class="mtab" data-mode="smt">PCB + SMT ASSEMBLY</div>
+    <div class="mtab" data-mode="turnkey">FULL TURNKEY + TESTING</div>
   </div>
   <div class="qwrap">
     <div class="qform">
       <div class="fhdr"><span class="fht" id="form-title">PCB PARAMETERS</span><span class="fhs">Prices in USD</span></div>
       <div class="fbody">
+
+        <!-- PCB ONLY -->
         <div class="mode-panel active" id="panel-pcb">
           <div class="frow">
-            <div class="fg"><label>LAYERS</label>
-              <select id="pcb-layers"><option value="1" data-base="8">1 Layer</option><option value="2" data-base="12" selected>2 Layers</option><option value="4" data-base="28">4 Layers</option><option value="6" data-base="55">6 Layers</option><option value="8" data-base="90">8 Layers</option></select>
+            <div class="fg"><label>MATERIAL</label>
+              <select id="pcb-material">
+                <option value="fr4">FR4</option>
+                <option value="other">Other (Rogers / Al / Flex...)</option>
+              </select>
             </div>
             <div class="fg"><label>QUANTITY</label>
-              <select id="pcb-qty"><option value="5" data-f="1.2">5 pcs</option><option value="10" data-f="1.0" selected>10 pcs</option><option value="25" data-f="0.85">25 pcs</option><option value="50" data-f="0.72">50 pcs</option><option value="100" data-f="0.6">100 pcs</option><option value="500" data-f="0.42">500 pcs</option></select>
+              <select id="pcb-qty">
+                <option value="5">5 pcs</option>
+                <option value="10" selected>10 pcs</option>
+                <option value="manual">More than 10 pcs</option>
+              </select>
             </div>
           </div>
           <div class="frow">
-            <div class="fg"><label>WIDTH (mm)</label><input type="number" id="pcb-w" value="100" min="5" max="500"></div>
-            <div class="fg"><label>HEIGHT (mm)</label><input type="number" id="pcb-h" value="100" min="5" max="500"></div>
+            <div class="fg"><label>WIDTH (mm)</label><input type="number" id="pcb-w" value="100" min="1" max="500"></div>
+            <div class="fg"><label>HEIGHT (mm)</label><input type="number" id="pcb-h" value="100" min="1" max="500"></div>
           </div>
           <div class="frow">
+            <div class="fg"><label>MIN DRILL SIZE</label>
+              <select id="pcb-drill">
+                <option value="0.3">≥ 0.3mm (Standard)</option>
+                <option value="0.25">0.25mm</option>
+                <option value="0.2">0.2mm</option>
+              </select>
+            </div>
+            <div class="fg"><label>IMPEDANCE CONTROL</label>
+              <select id="pcb-impedance">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>BOARD THICKNESS</label>
+              <select id="pcb-thick">
+                <option value="0.6">0.6mm</option>
+                <option value="0.8">0.8mm</option>
+                <option value="1.0">1.0mm</option>
+                <option value="1.2">1.2mm</option>
+                <option value="1.6" selected>1.6mm</option>
+                <option value="2.0">2.0mm</option>
+              </select>
+            </div>
             <div class="fg"><label>SURFACE FINISH</label>
-              <select id="pcb-finish"><option value="0" selected>HASL Lead-Free</option><option value="8">ENIG (+$8)</option><option value="2">OSP (+$2)</option><option value="25">Hard Gold (+$25)</option></select>
-            </div>
-            <div class="fg"><label>LEAD TIME</label>
-              <select id="pcb-lt"><option value="15" data-lbl="3 days">3 Day Express (+$15)</option><option value="5" data-lbl="5 days" selected>5 Days (+$5)</option><option value="0" data-lbl="7 days">7 Days (Standard)</option></select>
+              <select id="pcb-finish">
+                <option value="hasl">HASL Lead-Free</option>
+                <option value="enig">ENIG</option>
+              </select>
             </div>
           </div>
         </div>
+
+        <!-- PCB + SMT -->
         <div class="mode-panel" id="panel-smt">
           <div class="frow">
-            <div class="fg"><label>UNIQUE PARTS</label>
-              <select id="smt-parts"><option value="10" data-base="40">≤10 types</option><option value="20" data-base="65" selected>11–20 types</option><option value="30" data-base="90">21–30 types</option><option value="50" data-base="130">31–50 types</option></select>
-            </div>
-            <div class="fg"><label>SMT POINTS</label>
-              <select id="smt-points"><option value="50" data-m="1.0">≤50 points</option><option value="150" data-m="1.3" selected>51–150 pts</option><option value="300" data-m="1.6">151–300 pts</option><option value="500" data-m="2.0">301–500 pts</option></select>
-            </div>
-          </div>
-          <div class="frow">
             <div class="fg"><label>QUANTITY</label>
-              <select id="smt-qty"><option value="5" data-f="1.4">5 pcs</option><option value="10" data-f="1.0" selected>10 pcs</option><option value="25" data-f="0.82">25 pcs</option><option value="50" data-f="0.68">50 pcs</option><option value="100" data-f="0.55">100 pcs</option></select>
+              <select id="smt-qty">
+                <option value="5">5 pcs</option>
+                <option value="10" selected>10 pcs</option>
+                <option value="manual">More than 10 pcs</option>
+              </select>
             </div>
-            <div class="fg"><label>SIDES</label>
-              <select id="smt-sides"><option value="1" selected>Single Side</option><option value="1.5">Double Side (+50%)</option></select>
+            <div class="fg"><label>ASSEMBLY SIDES</label>
+              <select id="smt-sides">
+                <option value="single" selected>Single Side — $200</option>
+                <option value="double">Double Side — $400</option>
+              </select>
             </div>
           </div>
           <div class="frow">
-            <div class="fg"><label>INCLUDES PCB?</label>
-              <select id="smt-pcb"><option value="0" selected>No (supply own PCB)</option><option value="20">Yes, 2L 100×100mm (+$20)</option><option value="35">Yes, 4L 100×100mm (+$35)</option></select>
+            <div class="fg"><label>TOTAL COMPONENTS</label>
+              <input type="number" id="smt-parts" value="50" min="1" max="9999" placeholder="Total component count">
             </div>
-            <div class="fg"><label>X-RAY INSPECT</label>
-              <select id="smt-xray"><option value="0" selected>No</option><option value="30">Yes (+$30)</option></select>
+            <div class="fg"><label>COMPLEX IC COUNT</label>
+              <input type="number" id="smt-ic" value="2" min="0" max="9999" placeholder="BGA / QFN / LGA etc.">
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>DIP / THROUGH-HOLE PINS</label>
+              <input type="number" id="smt-dip" value="0" min="0" max="9999" placeholder="0 if none">
+            </div>
+            <div class="fg"><label>COMPONENT SUPPLY</label>
+              <select id="smt-supply">
+                <option value="customer">Customer supplied</option>
+                <option value="us">We source (add-on quote)</option>
+              </select>
             </div>
           </div>
         </div>
-        <div class="mode-panel" id="panel-dip">
-          <div class="frow">
-            <div class="fg"><label>DIP POINTS</label>
-              <select id="dip-points"><option value="20" data-base="30">≤20 points</option><option value="50" data-base="50" selected>21–50 pts</option><option value="100" data-base="80">51–100 pts</option><option value="200" data-base="120">101–200 pts</option></select>
-            </div>
-            <div class="fg"><label>QUANTITY</label>
-              <select id="dip-qty"><option value="5" data-f="1.3">5 pcs</option><option value="10" data-f="1.0" selected>10 pcs</option><option value="25" data-f="0.8">25 pcs</option><option value="50" data-f="0.65">50 pcs</option><option value="100" data-f="0.5">100 pcs</option></select>
-            </div>
-          </div>
-          <div class="frow">
-            <div class="fg"><label>SOLDERING METHOD</label>
-              <select id="dip-wave"><option value="0" selected>Manual Soldering</option><option value="15">Wave Soldering (+$15)</option></select>
-            </div>
-            <div class="fg"><label>INCLUDES PCB?</label>
-              <select id="dip-pcb"><option value="0" selected>No (supply own PCB)</option><option value="20">Yes, 2L 100×100mm (+$20)</option></select>
-            </div>
-          </div>
-        </div>
+
+        <!-- FULL TURNKEY + TESTING -->
         <div class="mode-panel" id="panel-turnkey">
-          <div class="frow">
-            <div class="fg"><label>PCB LAYERS</label>
-              <select id="tk-layers"><option value="2" data-base="15" selected>2 Layers</option><option value="4" data-base="32">4 Layers</option><option value="6" data-base="60">6 Layers</option></select>
+          <div style="padding:.5rem 0 1rem">
+            <div class="manual-notice">
+              <strong>⚠ MANUAL QUOTE REQUIRED</strong>
+              Full Turnkey + Testing orders are individually assessed by our engineers. Please submit an inquiry and we will contact you within 24 hours.<br><br>
+              Please prepare: PCB Gerber files, BOM, placement files, and your functional test plan / validation document.
             </div>
-            <div class="fg"><label>QUANTITY</label>
-              <select id="tk-qty"><option value="5" data-f="1.5">5 pcs</option><option value="10" data-f="1.0" selected>10 pcs</option><option value="25" data-f="0.8">25 pcs</option><option value="50" data-f="0.65">50 pcs</option><option value="100" data-f="0.5">100 pcs</option></select>
+            <div class="frow">
+              <div class="fg"><label>PCB LAYERS</label>
+                <select id="tk-layers">
+                  <option value="2" selected>2 Layers</option>
+                  <option value="4">4 Layers</option>
+                  <option value="6">6 Layers</option>
+                  <option value="other">8+ Layers</option>
+                </select>
+              </div>
+              <div class="fg"><label>QUANTITY</label>
+                <select id="tk-qty">
+                  <option value="5">5 pcs</option>
+                  <option value="10" selected>10 pcs</option>
+                  <option value="manual">More than 10 pcs</option>
+                </select>
+              </div>
             </div>
-          </div>
-          <div class="frow">
-            <div class="fg"><label>UNIQUE PARTS</label>
-              <select id="tk-parts"><option value="10" data-m="1.0">≤10 types</option><option value="20" data-m="1.3" selected>11–20 types</option><option value="30" data-m="1.6">21–30 types</option><option value="50" data-m="2.0">31–50 types</option></select>
-            </div>
-            <div class="fg"><label>SMT POINTS</label>
-              <select id="tk-points"><option value="50" data-p="1.0">≤50 points</option><option value="150" data-p="1.3" selected>51–150 pts</option><option value="300" data-p="1.7">151–300 pts</option><option value="500" data-p="2.2">301–500 pts</option></select>
-            </div>
-          </div>
-          <div class="frow">
-            <div class="fg"><label>COMPONENT SOURCE</label>
-              <select id="tk-bom"><option value="1.0" selected>We source all (Turnkey)</option><option value="0.7">You supply all (Consignment)</option><option value="0.85">Mixed supply</option></select>
-            </div>
-            <div class="fg"><label>LEAD TIME</label>
-              <select id="tk-lt"><option value="25" data-lbl="5 days">5 Day Express (+$25)</option><option value="10" data-lbl="7 days" selected>7 Days (+$10)</option><option value="0" data-lbl="10 days">10 Days (Standard)</option></select>
+            <div class="frow">
+              <div class="fg"><label>COMPONENT SUPPLY</label>
+                <select id="tk-supply">
+                  <option value="us" selected>We source all</option>
+                  <option value="customer">Customer supplied</option>
+                  <option value="mixed">Mixed</option>
+                </select>
+              </div>
+              <div class="fg"><label>TESTING TYPE</label>
+                <select id="tk-test">
+                  <option value="functional" selected>Functional Verification</option>
+                  <option value="remote">Functional + Remote Debug</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
-        <div class="frow" style="margin-top:.4rem;padding-top:.8rem;border-top:1px solid var(--border)">
-          <div class="fg"><label>SHIPPING</label>
-            <select id="ship"><option value="12" selected>DHL Express</option><option value="14">FedEx International</option><option value="8">EMS Post</option></select>
-          </div>
-          <div class="fg"><label>DESTINATION</label>
-            <select id="dest"><option>United States</option><option>Europe</option><option>United Kingdom</option><option>Australia</option><option>Other</option></select>
-          </div>
-        </div>
+
       </div>
     </div>
+
+    <!-- QUOTE RESULT -->
     <div class="qres">
       <div class="rhdr"><span class="rht">// LIVE QUOTE</span></div>
       <div class="rbody">
@@ -356,17 +398,16 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div class="pper" id="per">Configure above to get your quote</div>
         </div>
         <div class="rrows">
-          <div class="rrow"><span class="rl">Service type</span><span class="rv g" id="r-mode">PCB Only</span></div>
+          <div class="rrow"><span class="rl">Service type</span><span class="rv g" id="r-mode">PCB Fabrication</span></div>
+          <div class="rrow"><span class="rl">Quote type</span><span class="rv g" id="r-qtype">—</span></div>
           <div class="rrow"><span class="rl">Base price</span><span class="rv" id="r-base">—</span></div>
-          <div class="rrow"><span class="rl">Options / add-ons</span><span class="rv" id="r-opts">—</span></div>
-          <div class="rrow"><span class="rl">Lead time</span><span class="rv g" id="r-lt">—</span></div>
-          <div class="rrow"><span class="rl">Shipping</span><span class="rv" id="r-ship">—</span></div>
+          <div class="rrow"><span class="rl">Shipping</span><span class="rv a">Quoted after production</span></div>
           <div class="rrow"><span class="rl">AOI inspection</span><span class="rv g">FREE</span></div>
           <div class="rrow"><span class="rl">DFM review</span><span class="rv g">FREE</span></div>
           <div class="rrow"><span class="rl">Payment</span><span class="rv a">PayPal · PingPong B2B</span></div>
         </div>
         <button class="obtn" id="obtn">SUBMIT INQUIRY →</button>
-        <div class="rnote">This is an estimate. Final quote confirmed after DFM review.</div>
+        <div class="rnote" id="rnote">Standard orders: online payment after confirmation. Manual quote: our engineer contacts you within 24h.</div>
       </div>
     </div>
   </div>
@@ -475,6 +516,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 
 <script>
 var currentMode='pcb';
+
 document.querySelectorAll('.mtab').forEach(function(tab){
   tab.addEventListener('click',function(){
     document.querySelectorAll('.mtab').forEach(function(t){t.classList.remove('active')});
@@ -482,97 +524,141 @@ document.querySelectorAll('.mtab').forEach(function(tab){
     tab.classList.add('active');
     currentMode=tab.dataset.mode;
     document.getElementById('panel-'+currentMode).classList.add('active');
-    var titles={pcb:'PCB PARAMETERS',smt:'SMT ASSEMBLY PARAMETERS',dip:'THROUGH-HOLE PARAMETERS',turnkey:'TURNKEY PCBA PARAMETERS'};
+    var titles={pcb:'PCB PARAMETERS',smt:'PCB + SMT PARAMETERS',turnkey:'FULL TURNKEY + TESTING'};
     document.getElementById('form-title').textContent=titles[currentMode];
     calc();
   });
 });
+
+function isManualPCB(){
+  var mat=document.getElementById('pcb-material').value;
+  var qty=document.getElementById('pcb-qty').value;
+  var W=parseFloat(document.getElementById('pcb-w').value)||0;
+  var H=parseFloat(document.getElementById('pcb-h').value)||0;
+  if(mat==='other') return {manual:true, reason:'Non-FR4 material requires manual quote'};
+  if(qty==='manual') return {manual:true, reason:'Quantity over 10 pcs requires manual quote'};
+  if(W>200||H>200) return {manual:true, reason:'Board size over 200×200mm requires manual quote'};
+  return {manual:false};
+}
+
+function getPCBTier(){
+  var drill=document.getElementById('pcb-drill').value;
+  var imp=document.getElementById('pcb-impedance').value;
+  // Tier 2: drill 0.2 or 0.25 with impedance
+  if((drill==='0.2'||drill==='0.25') && imp==='yes') return 2;
+  // Tier 1: drill >=0.3, no impedance
+  if(drill==='0.3' && imp==='no') return 1;
+  // Mixed: drill fine but no impedance, or standard drill but with impedance -> manual
+  return 0;
+}
+
+function isManualSMT(){
+  var qty=document.getElementById('smt-qty').value;
+  var parts=parseInt(document.getElementById('smt-parts').value)||0;
+  var ic=parseInt(document.getElementById('smt-ic').value)||0;
+  var dip=parseInt(document.getElementById('smt-dip').value)||0;
+  var supply=document.getElementById('smt-supply').value;
+  if(qty==='manual') return {manual:true, reason:'Quantity over 10 pcs requires manual quote'};
+  if(parts>=200) return {manual:true, reason:'Over 200 components requires manual quote'};
+  if(ic>=10) return {manual:true, reason:'10 or more complex ICs requires manual quote'};
+  if(dip>100) return {manual:true, reason:'Over 100 DIP pins requires manual quote'};
+  if(supply==='us') return {manual:true, reason:'Component sourcing requires manual quote'};
+  return {manual:false};
+}
+
 function calcPCB(){
-  var lo=document.getElementById('pcb-layers').options[document.getElementById('pcb-layers').selectedIndex];
-  var qo=document.getElementById('pcb-qty').options[document.getElementById('pcb-qty').selectedIndex];
-  var base=parseFloat(lo.dataset.base)||12,qty=parseFloat(qo.value)||10,qf=parseFloat(qo.dataset.f)||1;
-  var W=parseFloat(document.getElementById('pcb-w').value)||100,H=parseFloat(document.getElementById('pcb-h').value)||100;
-  var af=Math.max(0.5,(W*H)/10000);
-  var fab=parseFloat((base*af*qf*(qty/10)).toFixed(2));
-  var fin=parseFloat(document.getElementById('pcb-finish').value)||0;
-  var lto=document.getElementById('pcb-lt').options[document.getElementById('pcb-lt').selectedIndex];
-  var ltp=parseFloat(lto.value)||0,ltlbl=lto.dataset.lbl||'7 days';
-  var shp=parseFloat(document.getElementById('ship').value)||12;
-  return{total:fab+fin+ltp+shp,qty:qty,base:fab,opts:fin,ltp:ltp,ltlbl:ltlbl,shp:shp,mode:'PCB Only'};
+  var m=isManualPCB();
+  if(m.manual){
+    return{isManual:true, reason:m.reason, mode:'PCB Fabrication'};
+  }
+  var tier=getPCBTier();
+  if(tier===0){
+    return{isManual:true, reason:'This specification combination requires manual quote', mode:'PCB Fabrication'};
+  }
+  var base=tier===1?50:100;
+  var qty=parseInt(document.getElementById('pcb-qty').value)||10;
+  var W=parseFloat(document.getElementById('pcb-w').value)||100;
+  var H=parseFloat(document.getElementById('pcb-h').value)||100;
+  var af=Math.max(1,(W*H)/10000);
+  var total=parseFloat((base*af).toFixed(2));
+  var tierLabel=tier===1?'Tier 1 — From $50':'Tier 2 — From $100';
+  return{isManual:false, total:total, qty:qty, base:base, tierLabel:tierLabel, mode:'PCB Fabrication'};
 }
+
 function calcSMT(){
-  var po=document.getElementById('smt-parts').options[document.getElementById('smt-parts').selectedIndex];
-  var pto=document.getElementById('smt-points').options[document.getElementById('smt-points').selectedIndex];
-  var qo=document.getElementById('smt-qty').options[document.getElementById('smt-qty').selectedIndex];
-  var base=parseFloat(po.dataset.base)||65,pm=parseFloat(pto.dataset.m)||1.3;
-  var qty=parseFloat(qo.value)||10,qf=parseFloat(qo.dataset.f)||1;
-  var sides=parseFloat(document.getElementById('smt-sides').value)||1;
-  var pcbAdd=parseFloat(document.getElementById('smt-pcb').value)||0;
-  var xray=parseFloat(document.getElementById('smt-xray').value)||0;
-  var fab=parseFloat((base*pm*qf*sides*(qty/10)).toFixed(2));
-  var shp=parseFloat(document.getElementById('ship').value)||12;
-  return{total:fab+pcbAdd+xray+shp,qty:qty,base:fab,opts:pcbAdd+xray,ltp:0,ltlbl:'5–7 days',shp:shp,mode:'SMT Assembly'};
+  var m=isManualSMT();
+  if(m.manual){
+    return{isManual:true, reason:m.reason, mode:'PCB + SMT Assembly'};
+  }
+  var sides=document.getElementById('smt-sides').value;
+  var base=sides==='single'?200:400;
+  var qty=parseInt(document.getElementById('smt-qty').value)||10;
+  var sidesLabel=sides==='single'?'Single Side — $200':'Double Side — $400';
+  return{isManual:false, total:base, qty:qty, base:base, sidesLabel:sidesLabel, mode:'PCB + SMT Assembly'};
 }
-function calcDIP(){
-  var po=document.getElementById('dip-points').options[document.getElementById('dip-points').selectedIndex];
-  var qo=document.getElementById('dip-qty').options[document.getElementById('dip-qty').selectedIndex];
-  var base=parseFloat(po.dataset.base)||50,qty=parseFloat(qo.value)||10,qf=parseFloat(qo.dataset.f)||1;
-  var wave=parseFloat(document.getElementById('dip-wave').value)||0;
-  var pcbAdd=parseFloat(document.getElementById('dip-pcb').value)||0;
-  var fab=parseFloat((base*qf*(qty/10)).toFixed(2));
-  var shp=parseFloat(document.getElementById('ship').value)||12;
-  return{total:fab+wave+pcbAdd+shp,qty:qty,base:fab,opts:wave+pcbAdd,ltp:0,ltlbl:'5–7 days',shp:shp,mode:'Through-Hole'};
-}
+
 function calcTurnkey(){
-  var lo=document.getElementById('tk-layers').options[document.getElementById('tk-layers').selectedIndex];
-  var qo=document.getElementById('tk-qty').options[document.getElementById('tk-qty').selectedIndex];
-  var po=document.getElementById('tk-parts').options[document.getElementById('tk-parts').selectedIndex];
-  var pto=document.getElementById('tk-points').options[document.getElementById('tk-points').selectedIndex];
-  var lto=document.getElementById('tk-lt').options[document.getElementById('tk-lt').selectedIndex];
-  var base=parseFloat(lo.dataset.base)||15,qty=parseFloat(qo.value)||10,qf=parseFloat(qo.dataset.f)||1;
-  var pm=parseFloat(po.dataset.m)||1.3,pp=parseFloat(pto.dataset.p)||1.3;
-  var bom=parseFloat(document.getElementById('tk-bom').value)||1.0;
-  var ltp=parseFloat(lto.value)||10,ltlbl=lto.dataset.lbl||'7 days';
-  var fab=parseFloat((base*pm*pp*qf*bom*(qty/10)).toFixed(2));
-  var shp=parseFloat(document.getElementById('ship').value)||12;
-  return{total:fab+ltp+shp,qty:qty,base:fab,opts:0,ltp:ltp,ltlbl:ltlbl,shp:shp,mode:'Turnkey PCBA'};
+  return{isManual:true, reason:'All Full Turnkey + Testing orders require manual quote', mode:'Full Turnkey + Testing'};
 }
+
 function calc(){
   var r;
   if(currentMode==='pcb') r=calcPCB();
   else if(currentMode==='smt') r=calcSMT();
-  else if(currentMode==='dip') r=calcDIP();
   else r=calcTurnkey();
-  document.getElementById('total').textContent='$'+r.total.toFixed(2);
-  document.getElementById('per').textContent='$'+(r.total/r.qty).toFixed(2)+' per board · '+r.qty+' pcs';
+
+  var totalEl=document.getElementById('total');
+  var perEl=document.getElementById('per');
+  var obtn=document.getElementById('obtn');
+  var rnote=document.getElementById('rnote');
+
   document.getElementById('r-mode').textContent=r.mode;
-  document.getElementById('r-base').textContent='$'+r.base.toFixed(2);
-  document.getElementById('r-opts').textContent=r.opts>0?'+$'+r.opts.toFixed(2):'Included';
-  document.getElementById('r-lt').textContent=r.ltlbl+(r.ltp>0?' (+$'+r.ltp.toFixed(2)+')':'');
-  document.getElementById('r-ship').textContent='$'+r.shp.toFixed(2);
+
+  if(r.isManual){
+    totalEl.textContent='MANUAL QUOTE';
+    totalEl.className='pbig manual';
+    perEl.textContent=r.reason;
+    document.getElementById('r-qtype').textContent='Manual — Engineer will contact you';
+    document.getElementById('r-qtype').className='rv a';
+    document.getElementById('r-base').textContent='To be confirmed';
+    obtn.textContent='REQUEST MANUAL QUOTE →';
+    obtn.className='obtn manual-btn';
+    rnote.textContent='Our engineer will contact you within 24 hours to discuss your requirements and provide a formal quote.';
+  } else {
+    totalEl.textContent='FROM $'+r.total.toFixed(0);
+    totalEl.className='pbig';
+    if(currentMode==='pcb'){
+      perEl.textContent=r.tierLabel;
+      document.getElementById('r-base').textContent='$'+r.base+' minimum';
+    } else {
+      perEl.textContent=r.sidesLabel;
+      document.getElementById('r-base').textContent='$'+r.base+' flat rate';
+    }
+    document.getElementById('r-qtype').textContent='Standard — Online payment';
+    document.getElementById('r-qtype').className='rv g';
+    obtn.textContent='SUBMIT INQUIRY →';
+    obtn.className='obtn';
+    rnote.textContent='Standard orders: confirm spec → pay online (PayPal / PingPong) → production starts. Shipping quoted after production completes.';
+  }
   return r;
 }
-document.querySelectorAll('select,input[type=number]').forEach(function(el){
-  el.addEventListener('change',calc);
-  if(el.type==='number') el.addEventListener('input',calc);
+
+document.querySelectorAll('select, input[type=number]').forEach(function(el){
+  el.addEventListener('change', calc);
+  if(el.type==='number') el.addEventListener('input', calc);
 });
-function showToast(msg,isError){
-  var t=document.getElementById('toast');
-  t.textContent=msg;
-  t.className='toast'+(isError?' error':'');
-  setTimeout(function(){t.classList.add('show')},10);
-  setTimeout(function(){t.classList.remove('show')},4000);
-}
+
 document.getElementById('obtn').addEventListener('click',function(){
-  var r=calc();
-  window.location.href='quote.html?mode='+currentMode+'&qty='+r.qty+'&estimate='+r.total.toFixed(2);
+  window.location.href='quote.html?mode='+currentMode;
 });
+
 document.querySelectorAll('a[href^="#"]').forEach(function(a){
   a.addEventListener('click',function(e){
     var t=document.querySelector(a.getAttribute('href'));
     if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}
   });
 });
+
 calc();
 </script>
 </body>
