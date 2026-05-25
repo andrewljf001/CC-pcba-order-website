@@ -569,9 +569,11 @@ function isManualPCB(){
   var qty=document.getElementById('pcb-qty').value;
   var W=parseFloat(document.getElementById('pcb-w').value)||0;
   var H=parseFloat(document.getElementById('pcb-h').value)||0;
-  if(mat==='other') return {manual:true, reason:'Non-FR4 material requires manual quote'};
+  var copper=document.getElementById('pcb-copper').value;
+  if(mat!=='fr4') return {manual:true, reason:'Non-FR4 material requires manual quote'};
   if(qty==='manual') return {manual:true, reason:'Quantity over 10 pcs requires manual quote'};
   if(W>200||H>200) return {manual:true, reason:'Board size over 200×200mm requires manual quote'};
+  if(copper!=='1oz') return {manual:true, reason:'Copper weight over 1oz requires manual quote'};
   return {manual:false};
 }
 
@@ -703,5 +705,6 @@ calc();
 </script>
 </body>
 </html>
+
 
 
