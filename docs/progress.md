@@ -8,7 +8,7 @@
 
 ## 📌 当前阶段
 
-🟡 **Phase 2 — 报价计算器（三模式）**
+🟡 **Phase 3 — 询价下单 & 支付接入**
 
 ---
 
@@ -16,8 +16,8 @@
 
 ```
 Phase 1  业务架构定稿 & 首页 DEMO              ✅ 完成
-Phase 2  报价计算器（三模式）                   ← 当前
-Phase 3  询价下单 & 支付接入
+Phase 2  报价计算器（三模式）                   ✅ 完成
+Phase 3  询价下单 & 支付接入                    ← 当前
 Phase 4  运营后台 & 订单管理
 Phase 5  本地同步工具（Mac）
 Phase 6  上线优化 & 运营功能
@@ -27,8 +27,6 @@ Phase 6  上线优化 & 运营功能
 
 ## ✅ Phase 1 — 业务架构定稿 & 首页 DEMO
 
-**目标：** 完成所有业务逻辑讨论定稿，单文件首页可在 GitHub Pages 访问
-
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
 | 1.1 | 私有仓库初始化 | ✅ 完成 | |
@@ -37,33 +35,29 @@ Phase 6  上线优化 & 运营功能
 | 1.4 | docs/progress.md 进度管理 | ✅ 完成 | |
 | 1.5 | 业务闭环讨论定稿 | ✅ 完成 | 见 design.md |
 | 1.6 | 技术架构定稿 | ✅ 完成 | 见 backend-plan.md |
-| 1.7 | docs/design.md 功能模块定稿（第三版） | ✅ 完成 | 三栏服务、两档PCB、运费实收 |
+| 1.7 | docs/design.md 功能模块定稿（第三版） | ✅ 完成 | |
 | 1.8 | docs/backend-plan.md 技术架构定稿 | ✅ 完成 | |
-| 1.9 | Hero Banner — 品牌定位 + CTA | ✅ 完成 | public/index.html 已存在完整 Hero |
-| 1.10 | 服务三栏更新（PCB / PCB+SMT / Full Turnkey+Testing） | ✅ 完成 | 内容与 design.md 第三版完全匹配 |
-| 1.11 | 下单流程图（标准单 & 非标单） | ✅ 完成 | 5步流程已在 #process section |
-| 1.12 | 响应式布局（手机端适配） | ✅ 完成 | 1024px + 768px 断点已存在 |
-| 1.13 | GitHub Pages 部署，生成可访问链接 | ✅ 完成 | 根目录 index.html 重定向，Pages 已 built |
-
-**GitHub Pages 地址：** https://andrewljf001.github.io/CC-pcba-order-website/
+| 1.9 | Hero Banner — 品牌定位 + CTA | ✅ 完成 | |
+| 1.10 | 服务三栏更新（PCB / PCB+SMT / Full Turnkey+Testing） | ✅ 完成 | |
+| 1.11 | 下单流程图（标准单 & 非标单） | ✅ 完成 | |
+| 1.12 | 响应式布局（手机端适配） | ✅ 完成 | |
+| 1.13 | GitHub Pages 部署，生成可访问链接 | ✅ 完成 | https://andrewljf001.github.io/CC-pcba-order-website/ |
 
 ---
 
-## ⏳ Phase 2 — 报价计算器（三模式）
-
-**目标：** 客户自助估价，系统自动判断标准单/非标单
+## ✅ Phase 2 — 报价计算器（三模式）
 
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
-| 2.1 | PCB 报价模式（两档：$50/$100，其余人工） | ⬜ 待开始 | 参考 design.md |
-| 2.2 | SMT 报价模式（单面$200/双面$400，其余人工） | ⬜ 待开始 | |
-| 2.3 | Full Turnkey + Testing（全部人工报价） | ⬜ 待开始 | |
-| 2.4 | 实时判断标准单/非标单 UI | ⬜ 待开始 | |
-| 2.5 | WhatsApp 报价跳转（非标单预填消息链接） | ⬜ 待开始 | |
+| 2.1 | PCB 报价模式（两档：$50/$100，其余人工） | ✅ 完成 | |
+| 2.2 | SMT 报价模式（单面$200/双面$400，其余人工） | ✅ 完成 | |
+| 2.3 | Full Turnkey + Testing（全部人工报价） | ✅ 完成 | |
+| 2.4 | 实时判断标准单/非标单 UI | ✅ 完成 | |
+| 2.5 | WhatsApp 报价跳转（非标单预填消息链接） | ✅ 完成 | |
 
 ---
 
-## ⏳ Phase 3 — 询价下单 & 支付接入
+## 🟡 Phase 3 — 询价下单 & 支付接入
 
 **目标：** 客户完成询价、确认报价、完成支付的完整流程
 
@@ -81,8 +75,6 @@ Phase 6  上线优化 & 运营功能
 
 ## ⏳ Phase 4 — 运营后台 & 订单管理
 
-**目标：** 完整的内部管理系统，支撑日常运营
-
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
 | 4.1 | 订单列表 & 状态管理 | ⬜ 待开始 | |
@@ -98,8 +90,6 @@ Phase 6  上线优化 & 运营功能
 ---
 
 ## ⏳ Phase 5 — 本地同步工具（Mac）
-
-**目标：** Mac 本地工具自动同步供应商订单状态到网站，不绑定任何单一供应商
 
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
@@ -129,27 +119,15 @@ Phase 6  上线优化 & 运营功能
 
 ### 2026-05-25
 - 仓库初始化，README / pricing-logic.md 完成
-- 完整业务闭环讨论定稿：前台展示→询价→支付→生产→追踪→完成
-- 支付方式确认：PayPal + PingPong
+- 完整业务闭环讨论定稿
 - 技术架构确认：Railway + PostgreSQL + Node.js + Express
-- 本地同步工具架构确认：Mac + Playwright，可插拔供应商适配器，订单号映射机制
-- 新增 docs/design.md 功能模块定稿（第一版）
-- 新增 docs/backend-plan.md 技术架构定稿
-- 业务逻辑重新讨论定稿（第三版）：
-  - 服务由四栏改为三栏：PCB Fabrication / PCB+SMT Assembly / Full Turnkey+Testing
-  - PCB 只接两档标准报价（$50/$100），其余全部人工报价
-  - SMT 标准报价：单面$200 / 双面$400，≤10片，元件<200，复杂IC<10
-  - 不接纯插件板、不接电源板、不接PCB外发的SMT
-  - 运费实收，生产完成后报价，客户补付
-  - 交期：生产约1周 + 运输约1周
-  - 文件上传统一打包 RAR/ZIP，工程师人工审核
-  - 客供料收件地址：深圳市龙岗区利好工业园（后台可改）
+- 新增 docs/design.md、docs/backend-plan.md
+- 业务逻辑第三版定稿：三栏服务、两档PCB、运费实收
 
 ### 2026-05-26
-- Phase 1 收尾：核查仓库所有文件，确认 1.9~1.12 已全部实现于 public/index.html
-- 任务 1.13：创建根目录 index.html 做 GitHub Pages 重定向，Pages 已 built
-- GitHub Pages 可访问地址：https://andrewljf001.github.io/CC-pcba-order-website/
-- Phase 1 全部完成，进入 Phase 2（报价计算器）
+- Phase 1 全部完成，GitHub Pages 上线
+- Phase 2 报价计算器完成（三模式 + 标准单/非标单判断）
+- 进入 Phase 3：询价下单 & 支付接入
 
 ---
 
