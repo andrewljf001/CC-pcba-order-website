@@ -254,7 +254,11 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
             <div class="fg"><label>MATERIAL</label>
               <select id="pcb-material">
                 <option value="fr4">FR4</option>
-                <option value="other">Other (Rogers / Al / Flex...)</option>
+                <option value="flex">Flex</option>
+                <option value="aluminum">Aluminum</option>
+                <option value="rogers">Rogers</option>
+                <option value="ptfe">PTFE Teflon</option>
+                <option value="other">Other (Manual Quote)</option>
               </select>
             </div>
             <div class="fg"><label>QUANTITY</label>
@@ -270,23 +274,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
             <div class="fg"><label>HEIGHT (mm)</label><input type="number" id="pcb-h" value="100" min="1" max="500"></div>
           </div>
           <div class="frow">
-            <div class="fg"><label>MIN DRILL SIZE</label>
-              <select id="pcb-drill">
-                <option value="0.3">≥ 0.3mm (Standard)</option>
-                <option value="0.25">0.25mm</option>
-                <option value="0.2">0.2mm</option>
-              </select>
-            </div>
-            <div class="fg"><label>IMPEDANCE CONTROL</label>
-              <select id="pcb-impedance">
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-              </select>
-            </div>
-          </div>
-          <div class="frow">
             <div class="fg"><label>BOARD THICKNESS</label>
               <select id="pcb-thick">
+                <option value="0.4">0.4mm</option>
                 <option value="0.6">0.6mm</option>
                 <option value="0.8">0.8mm</option>
                 <option value="1.0">1.0mm</option>
@@ -295,10 +285,46 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
                 <option value="2.0">2.0mm</option>
               </select>
             </div>
+            <div class="fg"><label>MIN DRILL SIZE</label>
+              <select id="pcb-drill">
+                <option value="0.3">≥ 0.3mm (Standard)</option>
+                <option value="0.25">0.25mm / 0.35mm</option>
+                <option value="0.2">0.2mm / 0.3mm</option>
+                <option value="0.15">0.15mm / 0.25mm</option>
+              </select>
+            </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>IMPEDANCE CONTROL</label>
+              <select id="pcb-impedance">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+            <div class="fg"><label>OUTER COPPER WEIGHT</label>
+              <select id="pcb-copper">
+                <option value="1oz" selected>1 oz</option>
+                <option value="2oz">2 oz</option>
+              </select>
+            </div>
+          </div>
+          <div class="frow">
             <div class="fg"><label>SURFACE FINISH</label>
               <select id="pcb-finish">
-                <option value="hasl">HASL Lead-Free</option>
+                <option value="hasl_lead">HASL (with lead)</option>
+                <option value="hasl_free" selected>LeadFree HASL</option>
                 <option value="enig">ENIG</option>
+              </select>
+            </div>
+            <div class="fg"><label>PCB COLOR</label>
+              <select id="pcb-color">
+                <option value="green" selected>Green</option>
+                <option value="red">Red</option>
+                <option value="blue">Blue</option>
+                <option value="black">Black</option>
+                <option value="white">White</option>
+                <option value="yellow">Yellow</option>
+                <option value="purple">Purple</option>
               </select>
             </div>
           </div>
@@ -663,3 +689,4 @@ calc();
 </script>
 </body>
 </html>
+
