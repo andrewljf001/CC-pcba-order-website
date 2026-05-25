@@ -427,13 +427,21 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div class="rrow"><span class="rl">Service type</span><span class="rv g" id="r-mode">PCB Fabrication</span></div>
           <div class="rrow"><span class="rl">Quote type</span><span class="rv g" id="r-qtype">—</span></div>
           <div class="rrow"><span class="rl">Base price</span><span class="rv" id="r-base">—</span></div>
-          <div class="rrow"><span class="rl">Shipping</span><span class="rv a">Quoted after production</span></div>
+          <div class="rrow"><span class="rl">Production time</span><span class="rv">~7 business days</span></div>
+          <div class="rrow"><span class="rl">Express shipping</span><span class="rv a">~$25 / kg · 5–7 days</span></div>
+          <div class="rrow"><span class="rl">Other shipping</span><span class="rv a">Quote on request</span></div>
           <div class="rrow"><span class="rl">AOI inspection</span><span class="rv g">FREE</span></div>
           <div class="rrow"><span class="rl">DFM review</span><span class="rv g">FREE</span></div>
           <div class="rrow"><span class="rl">Payment</span><span class="rv a">PayPal · PingPong B2B</span></div>
         </div>
         <button class="obtn" id="obtn">SUBMIT INQUIRY →</button>
         <div class="rnote" id="rnote">Standard orders: online payment after confirmation. Manual quote: our engineer contacts you within 24h.</div>
+        <div id="wa-manual-hint" style="display:none;margin-top:.8rem;text-align:center">
+          <a href="https://wa.me/85251234567" target="_blank" style="display:inline-flex;align-items:center;gap:.5rem;background:#25D366;color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.08em;padding:.6rem 1.2rem;text-decoration:none">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#000"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WHATSAPP FOR MANUAL QUOTE
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -570,11 +578,13 @@ function isManualPCB(){
 function getPCBTier(){
   var drill=document.getElementById('pcb-drill').value;
   var imp=document.getElementById('pcb-impedance').value;
-  // Tier 2: drill 0.2 or 0.25 with impedance
-  if((drill==='0.2'||drill==='0.25') && imp==='yes') return 2;
-  // Tier 1: drill >=0.3, no impedance
+  // Tier 1 — $50: drill >=0.3, no impedance
   if(drill==='0.3' && imp==='no') return 1;
-  // Mixed: drill fine but no impedance, or standard drill but with impedance -> manual
+  // Tier 2 — $75: drill >=0.3, with impedance
+  if(drill==='0.3' && imp==='yes') return 2;
+  // Tier 3 — $100: drill 0.2 or 0.25, with impedance
+  if((drill==='0.2'||drill==='0.25') && imp==='yes') return 3;
+  // All other combinations -> manual quote
   return 0;
 }
 
@@ -599,16 +609,17 @@ function calcPCB(){
   }
   var tier=getPCBTier();
   if(tier===0){
-    return{isManual:true, reason:'This specification combination requires manual quote', mode:'PCB Fabrication'};
+    return{isManual:true, reason:'This spec requires manual quote', mode:'PCB Fabrication'};
   }
-  var base=tier===1?50:100;
+  var baseMap={1:50, 2:75, 3:100};
+  var labelMap={1:'Tier 1 — From $50', 2:'Tier 2 — From $75', 3:'Tier 3 — From $100'};
+  var base=baseMap[tier];
   var qty=parseInt(document.getElementById('pcb-qty').value)||10;
   var W=parseFloat(document.getElementById('pcb-w').value)||100;
   var H=parseFloat(document.getElementById('pcb-h').value)||100;
   var af=Math.max(1,(W*H)/10000);
   var total=parseFloat((base*af).toFixed(2));
-  var tierLabel=tier===1?'Tier 1 — From $50':'Tier 2 — From $100';
-  return{isManual:false, total:total, qty:qty, base:base, tierLabel:tierLabel, mode:'PCB Fabrication'};
+  return{isManual:false, total:total, qty:qty, base:base, tierLabel:labelMap[tier], mode:'PCB Fabrication'};
 }
 
 function calcSMT(){
@@ -640,6 +651,7 @@ function calc(){
 
   document.getElementById('r-mode').textContent=r.mode;
 
+  var waHint=document.getElementById('wa-manual-hint');
   if(r.isManual){
     totalEl.textContent='MANUAL QUOTE';
     totalEl.className='pbig manual';
@@ -647,10 +659,12 @@ function calc(){
     document.getElementById('r-qtype').textContent='Manual — Engineer will contact you';
     document.getElementById('r-qtype').className='rv a';
     document.getElementById('r-base').textContent='To be confirmed';
-    obtn.textContent='REQUEST MANUAL QUOTE →';
+    obtn.textContent='SUBMIT INQUIRY →';
     obtn.className='obtn manual-btn';
-    rnote.textContent='Our engineer will contact you within 24 hours to discuss your requirements and provide a formal quote.';
+    rnote.textContent='Our engineer will contact you within 24 hours to confirm pricing.';
+    if(waHint) waHint.style.display='block';
   } else {
+    if(waHint) waHint.style.display='none';
     totalEl.textContent='FROM $'+r.total.toFixed(0);
     totalEl.className='pbig';
     if(currentMode==='pcb'){
@@ -664,7 +678,7 @@ function calc(){
     document.getElementById('r-qtype').className='rv g';
     obtn.textContent='SUBMIT INQUIRY →';
     obtn.className='obtn';
-    rnote.textContent='Standard orders: confirm spec → pay online (PayPal / PingPong) → production starts. Shipping quoted after production completes.';
+    rnote.textContent='Standard orders: confirm spec → pay online (PayPal / PingPong) → production starts. Express shipping ~$25/kg, 5–7 days. Total lead time ~2 weeks.';
   }
   return r;
 }
@@ -689,4 +703,5 @@ calc();
 </script>
 </body>
 </html>
+
 
