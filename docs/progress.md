@@ -8,15 +8,15 @@
 
 ## 📌 当前阶段
 
-🟡 **Phase 1 — 业务架构定稿 & 首页 DEMO**
+🟡 **Phase 2 — 报价计算器（三模式）**
 
 ---
 
 ## 🗂 阶段总览
 
 ```
-Phase 1  业务架构定稿 & 首页 DEMO              ← 当前
-Phase 2  报价计算器（三模式）
+Phase 1  业务架构定稿 & 首页 DEMO              ✅ 完成
+Phase 2  报价计算器（三模式）                   ← 当前
 Phase 3  询价下单 & 支付接入
 Phase 4  运营后台 & 订单管理
 Phase 5  本地同步工具（Mac）
@@ -39,11 +39,13 @@ Phase 6  上线优化 & 运营功能
 | 1.6 | 技术架构定稿 | ✅ 完成 | 见 backend-plan.md |
 | 1.7 | docs/design.md 功能模块定稿（第三版） | ✅ 完成 | 三栏服务、两档PCB、运费实收 |
 | 1.8 | docs/backend-plan.md 技术架构定稿 | ✅ 完成 | |
-| 1.9 | Hero Banner — 品牌定位 + CTA | ⬜ 待开始 | |
-| 1.10 | 服务三栏更新（PCB / PCB+SMT / Full Turnkey+Testing） | ⬜ 待开始 | |
-| 1.11 | 下单流程图（标准单 & 非标单） | ⬜ 待开始 | |
-| 1.12 | 响应式布局（手机端适配） | ⬜ 待开始 | |
-| 1.13 | GitHub Pages 部署，生成可访问链接 | ⬜ 待开始 | |
+| 1.9 | Hero Banner — 品牌定位 + CTA | ✅ 完成 | public/index.html 已存在完整 Hero |
+| 1.10 | 服务三栏更新（PCB / PCB+SMT / Full Turnkey+Testing） | ✅ 完成 | 内容与 design.md 第三版完全匹配 |
+| 1.11 | 下单流程图（标准单 & 非标单） | ✅ 完成 | 5步流程已在 #process section |
+| 1.12 | 响应式布局（手机端适配） | ✅ 完成 | 1024px + 768px 断点已存在 |
+| 1.13 | GitHub Pages 部署，生成可访问链接 | ✅ 完成 | 根目录 index.html 重定向，Pages 已 built |
+
+**GitHub Pages 地址：** https://andrewljf001.github.io/CC-pcba-order-website/
 
 ---
 
@@ -142,6 +144,12 @@ Phase 6  上线优化 & 运营功能
   - 交期：生产约1周 + 运输约1周
   - 文件上传统一打包 RAR/ZIP，工程师人工审核
   - 客供料收件地址：深圳市龙岗区利好工业园（后台可改）
+
+### 2026-05-26
+- Phase 1 收尾：核查仓库所有文件，确认 1.9~1.12 已全部实现于 public/index.html
+- 任务 1.13：创建根目录 index.html 做 GitHub Pages 重定向，Pages 已 built
+- GitHub Pages 可访问地址：https://andrewljf001.github.io/CC-pcba-order-website/
+- Phase 1 全部完成，进入 Phase 2（报价计算器）
 
 ---
 
