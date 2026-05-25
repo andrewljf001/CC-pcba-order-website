@@ -2,7 +2,9 @@ const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('railway')
+    ? { rejectUnauthorized: false }
+    : false
 });
 
 async function init() {
@@ -21,10 +23,11 @@ async function init() {
     pcb_material      TEXT,
     pcb_surface       TEXT,
     pcb_color         TEXT,
-    smt_points        INTEGER,
-    dip_points        INTEGER,
+    smt_points        INTEGER DEFAULT 0,
+    dip_points        INTEGER DEFAULT 0,
     smt_sides         TEXT,
     components_supply TEXT,
+    testing_service   TEXT DEFAULT 'none',
     notes             TEXT,
     manual_quote      INTEGER DEFAULT 0,
     files             TEXT,
@@ -37,6 +40,8 @@ async function init() {
     created_at        TIMESTAMPTZ DEFAULT NOW(),
     updated_at        TIMESTAMPTZ
   )`);
+
+  await pool.query(`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS testing_service TEXT DEFAULT 'none'`).catch(()=>{});
 
   await pool.query(`CREATE TABLE IF NOT EXISTS pricing_config (
     id         SERIAL PRIMARY KEY,
@@ -60,15 +65,15 @@ async function init() {
   const { rows: sc } = await pool.query('SELECT COUNT(*) as cnt FROM site_config');
   if (parseInt(sc[0].cnt) === 0) {
     const siteDefaults = [
-      ['company_name',    'CC PCBA',                                                                     '公司名称'],
-      ['whatsapp_number', process.env.WHATSAPP_NUMBER || '',                                             'WhatsApp号码'],
-      ['contact_email',   process.env.CONTACT_EMAIL || '',                                               '联系邮箱'],
-      ['hero_title',      'Your PCBA Partner in China',                                                  'Hero主标题'],
-      ['hero_subtitle',   'From Prototype to Production — PCB Fab · SMT · DIP · Turnkey',               'Hero副标题'],
-      ['seo_home_title',  'CC PCBA — PCB & SMT Assembly, Small Batch to Production',                    '首页Title'],
-      ['seo_home_desc',   'One-stop PCBA service. PCB fabrication, SMT assembly, through-hole, turnkey.','首页Description'],
-      ['seo_quote_title', 'Submit Inquiry — CC PCBA',                                                    '询价页Title'],
-      ['seo_track_title', 'Track Order — CC PCBA',                                                       '追踪页Title'],
+      ['company_name',    'CC PCBA',                                                                       '公司名称'],
+      ['whatsapp_number', process.env.WHATSAPP_NUMBER || '',                                               'WhatsApp号码'],
+      ['contact_email',   process.env.CONTACT_EMAIL || '',                                                 '联系邮箱'],
+      ['hero_title',      'From Gerber to Working PCBA — Tested & Verified Before Shipping',              'Hero主标题'],
+      ['hero_subtitle',   'PCB Fab · SMT · DIP · Functional Testing · Remote Debug Support',             'Hero副标题'],
+      ['seo_home_title',  'CC PCBA — Tested & Verified PCBA Assembly, Free Shipping to USA',             '首页Title'],
+      ['seo_home_desc',   'One-stop PCBA service with functional testing. PCB fab, SMT, DIP, turnkey.',  '首页Description'],
+      ['seo_quote_title', 'Submit Inquiry — CC PCBA',                                                     '询价页Title'],
+      ['seo_track_title', 'Track Order — CC PCBA',                                                        '追踪页Title'],
     ];
     for (const [key, value, label] of siteDefaults) {
       await pool.query(
@@ -82,15 +87,17 @@ async function init() {
   const { rows: pc } = await pool.query('SELECT COUNT(*) as cnt FROM pricing_config');
   if (parseInt(pc[0].cnt) === 0) {
     const defaults = [
-      ['pcb', 'base_1l',    '1 Layer base price',   '15',  'USD'],
-      ['pcb', 'base_2l',    '2 Layer base price',   '25',  'USD'],
-      ['pcb', 'base_4l',    '4 Layer base price',   '55',  'USD'],
-      ['pcb', 'base_6l',    '6 Layer base price',   '90',  'USD'],
-      ['pcb', 'finish_enig','ENIG surcharge',        '20',  'USD'],
-      ['smt', 'single',     'Single side base',      '150', 'USD'],
-      ['smt', 'double',     'Double side base',      '300', 'USD'],
-      ['dip', 'free_limit', 'Free DIP points limit', '100', 'pts'],
-      ['ship','us_free',    'US shipping',           '0',   'USD'],
+      ['pcb',  'base_1l',    '1 Layer base price',     '15',  'USD'],
+      ['pcb',  'base_2l',    '2 Layer base price',     '25',  'USD'],
+      ['pcb',  'base_4l',    '4 Layer base price',     '55',  'USD'],
+      ['pcb',  'base_6l',    '6 Layer base price',     '90',  'USD'],
+      ['pcb',  'finish_enig','ENIG surcharge',          '20',  'USD'],
+      ['smt',  'single',     'Single side base',        '200', 'USD'],
+      ['smt',  'double',     'Double side base',        '400', 'USD'],
+      ['smt',  'max_points', 'Max SMT points (base)',   '200', 'pts'],
+      ['smt',  'max_ic',     'Max ICs (base)',          '10',  'pcs'],
+      ['dip',  'free_limit', 'Free DIP points limit',   '100', 'pts'],
+      ['ship', 'us_free',    'US shipping',             '0',   'USD'],
     ];
     for (const [category, key, label, value, unit] of defaults) {
       await pool.query(
@@ -101,7 +108,7 @@ async function init() {
     console.log('Default pricing config seeded.');
   }
 
-  console.log('Database initialized.');
+  console.log('Database ready.');
 }
 
 init().catch(err => {
