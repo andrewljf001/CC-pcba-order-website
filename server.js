@@ -4,7 +4,7 @@ const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const db = require('./database');
+const pool = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,9 +22,7 @@ const storage = multer.diskStorage({
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  }
+  filename: function (req, file, cb) { cb(null, file.originalname); }
 });
 const upload = multer({
   storage,
@@ -44,7 +42,7 @@ function adminAuth(req, res, next) {
 
 // --- 客户 API ---
 
-app.post('/api/inquiry', upload.array('files', 5), (req, res) => {
+app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
   try {
     const {
       name, email, whatsapp, service_type, quantity,
@@ -73,15 +71,15 @@ app.post('/api/inquiry', upload.array('files', 5), (req, res) => {
     const files = req.files ? req.files.map(f => f.path).join(',') : '';
     const order_no = 'CC' + Date.now();
 
-    db.prepare(`INSERT INTO inquiries
-      (order_no,name,email,whatsapp,service_type,quantity,
-       pcb_layers,pcb_size_x,pcb_size_y,pcb_thickness,pcb_material,pcb_surface,pcb_color,
-       smt_points,dip_points,smt_sides,components_supply,notes,manual_quote,files,status,created_at)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending',datetime('now'))`
-    ).run(
-      order_no, name, email, whatsapp, service_type, qty,
-      pcb_layers, pcb_size_x, pcb_size_y, pcb_thickness, pcb_material, pcb_surface, pcb_color,
-      smtPts, dipPts, smt_sides, components_supply, notes, manual, files
+    await pool.query(
+      `INSERT INTO inquiries
+        (order_no,name,email,whatsapp,service_type,quantity,
+         pcb_layers,pcb_size_x,pcb_size_y,pcb_thickness,pcb_material,pcb_surface,pcb_color,
+         smt_points,dip_points,smt_sides,components_supply,notes,manual_quote,files,status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'pending')`,
+      [order_no, name, email, whatsapp, service_type, qty,
+       pcb_layers, pcb_size_x, pcb_size_y, pcb_thickness, pcb_material, pcb_surface, pcb_color,
+       smtPts, dipPts, smt_sides, components_supply, notes, manual, files]
     );
 
     res.json({
@@ -98,22 +96,23 @@ app.post('/api/inquiry', upload.array('files', 5), (req, res) => {
   }
 });
 
-app.get('/api/track/:order_no', (req, res) => {
+app.get('/api/track/:order_no', async (req, res) => {
   try {
-    const row = db.prepare(
+    const { rows } = await pool.query(
       `SELECT order_no,name,service_type,quantity,status,quote_amount,notes,admin_notes,tracking_no,created_at,updated_at
-       FROM inquiries WHERE order_no = ?`
-    ).get(req.params.order_no);
-    if (!row) return res.status(404).json({ error: 'Order not found' });
-    res.json(row);
+       FROM inquiries WHERE order_no = $1`,
+      [req.params.order_no]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/config', (req, res) => {
+app.get('/api/config', async (req, res) => {
   try {
-    const rows = db.prepare('SELECT key, value FROM site_config').all();
+    const { rows } = await pool.query('SELECT key, value FROM site_config');
     const cfg = {};
     rows.forEach(r => { cfg[r.key] = r.value; });
     res.json(cfg);
@@ -124,11 +123,11 @@ app.get('/api/config', (req, res) => {
 
 // --- 后台 API ---
 
-app.get('/api/admin/stats', adminAuth, (req, res) => {
+app.get('/api/admin/stats', adminAuth, async (req, res) => {
   try {
-    const row = db.prepare(`SELECT
+    const { rows } = await pool.query(`SELECT
       COUNT(*) as total,
-      SUM(CASE WHEN date(created_at)=date('now') THEN 1 ELSE 0 END) as today,
+      SUM(CASE WHEN created_at::date = CURRENT_DATE THEN 1 ELSE 0 END) as today,
       SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) as pending,
       SUM(CASE WHEN status='quoted' THEN 1 ELSE 0 END) as quoted,
       SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END) as paid,
@@ -136,87 +135,87 @@ app.get('/api/admin/stats', adminAuth, (req, res) => {
       SUM(CASE WHEN status='shipped' THEN 1 ELSE 0 END) as shipped,
       SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed,
       SUM(CASE WHEN manual_quote=1 THEN 1 ELSE 0 END) as manual
-    FROM inquiries`).get();
-    res.json(row);
+    FROM inquiries`);
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/admin/inquiries', adminAuth, (req, res) => {
+app.get('/api/admin/inquiries', adminAuth, async (req, res) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
     let sql = 'SELECT * FROM inquiries';
     const params = [];
-    if (status) { sql += ' WHERE status = ?'; params.push(status); }
-    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    if (status) { sql += ' WHERE status = $1'; params.push(status); }
+    sql += ` ORDER BY created_at DESC LIMIT $${params.length+1} OFFSET $${params.length+2}`;
     params.push(Number(limit), Number(offset));
-    const rows = db.prepare(sql).all(...params);
+    const { rows } = await pool.query(sql, params);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/admin/inquiries/:id', adminAuth, (req, res) => {
+app.get('/api/admin/inquiries/:id', adminAuth, async (req, res) => {
   try {
-    const row = db.prepare('SELECT * FROM inquiries WHERE id = ?').get(req.params.id);
-    if (!row) return res.status(404).json({ error: 'Not found' });
-    res.json(row);
+    const { rows } = await pool.query('SELECT * FROM inquiries WHERE id = $1', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.patch('/api/admin/inquiries/:id', adminAuth, (req, res) => {
+app.patch('/api/admin/inquiries/:id', adminAuth, async (req, res) => {
   try {
     const { status, quote_amount, admin_notes, supplier, supplier_order_no, tracking_no } = req.body;
-    db.prepare(`UPDATE inquiries SET
-      status=COALESCE(?,status), quote_amount=COALESCE(?,quote_amount),
-      admin_notes=COALESCE(?,admin_notes), supplier=COALESCE(?,supplier),
-      supplier_order_no=COALESCE(?,supplier_order_no),
-      tracking_no=COALESCE(?,tracking_no), updated_at=datetime('now')
-      WHERE id=?`
-    ).run(status, quote_amount, admin_notes, supplier, supplier_order_no, tracking_no, req.params.id);
+    await pool.query(
+      `UPDATE inquiries SET
+        status=COALESCE($1,status), quote_amount=COALESCE($2,quote_amount),
+        admin_notes=COALESCE($3,admin_notes), supplier=COALESCE($4,supplier),
+        supplier_order_no=COALESCE($5,supplier_order_no),
+        tracking_no=COALESCE($6,tracking_no), updated_at=NOW()
+       WHERE id=$7`,
+      [status, quote_amount, admin_notes, supplier, supplier_order_no, tracking_no, req.params.id]
+    );
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/admin/pricing', adminAuth, (req, res) => {
+app.get('/api/admin/pricing', adminAuth, async (req, res) => {
   try {
-    const rows = db.prepare('SELECT * FROM pricing_config ORDER BY category, key').all();
+    const { rows } = await pool.query('SELECT * FROM pricing_config ORDER BY category, key');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.patch('/api/admin/pricing/:id', adminAuth, (req, res) => {
+app.patch('/api/admin/pricing/:id', adminAuth, async (req, res) => {
   try {
-    db.prepare('UPDATE pricing_config SET value=?, updated_at=datetime("now") WHERE id=?')
-      .run(req.body.value, req.params.id);
+    await pool.query('UPDATE pricing_config SET value=$1, updated_at=NOW() WHERE id=$2', [req.body.value, req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/admin/config', adminAuth, (req, res) => {
+app.get('/api/admin/config', adminAuth, async (req, res) => {
   try {
-    const rows = db.prepare('SELECT * FROM site_config ORDER BY id').all();
+    const { rows } = await pool.query('SELECT * FROM site_config ORDER BY id');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.patch('/api/admin/config/:key', adminAuth, (req, res) => {
+app.patch('/api/admin/config/:key', adminAuth, async (req, res) => {
   try {
-    db.prepare('UPDATE site_config SET value=?, updated_at=datetime("now") WHERE key=?')
-      .run(req.body.value, req.params.key);
+    await pool.query('UPDATE site_config SET value=$1, updated_at=NOW() WHERE key=$2', [req.body.value, req.params.key]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
