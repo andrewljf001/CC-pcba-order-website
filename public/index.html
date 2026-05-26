@@ -691,7 +691,32 @@ document.querySelectorAll('select, input[type=number]').forEach(function(el){
 });
 
 document.getElementById('obtn').addEventListener('click',function(){
-  window.location.href='quote.html?mode='+currentMode;
+  var r = calc();
+  var p = 'mode=' + currentMode;
+
+  if(currentMode === 'pcb'){
+    p += '&material=' + document.getElementById('pcb-material').value;
+    p += '&qty='      + document.getElementById('pcb-qty').value;
+    p += '&w='        + document.getElementById('pcb-w').value;
+    p += '&h='        + document.getElementById('pcb-h').value;
+    p += '&thick='    + document.getElementById('pcb-thick').value;
+    p += '&drill='    + document.getElementById('pcb-drill').value;
+    p += '&impedance='+ document.getElementById('pcb-impedance').value;
+    p += '&copper='   + document.getElementById('pcb-copper').value;
+    p += '&finish='   + document.getElementById('pcb-finish').value;
+    p += '&color='    + document.getElementById('pcb-color').value;
+    if(!r.isManual) p += '&estimate=' + r.total.toFixed(0);
+  } else if(currentMode === 'smt'){
+    p += '&qty='    + document.getElementById('smt-qty').value;
+    p += '&sides='  + document.getElementById('smt-sides').value;
+    p += '&parts='  + document.getElementById('smt-parts').value;
+    p += '&ic='     + document.getElementById('smt-ic').value;
+    p += '&dip='    + document.getElementById('smt-dip').value;
+    p += '&supply=' + document.getElementById('smt-supply').value;
+    if(!r.isManual) p += '&estimate=' + r.total.toFixed(0);
+  }
+
+  window.location.href = 'quote.html?' + p;
 });
 
 document.querySelectorAll('a[href^="#"]').forEach(function(a){
