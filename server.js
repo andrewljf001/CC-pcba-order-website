@@ -662,6 +662,19 @@ app.put('/api/admin/admins/:id/password', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+// ── 临时开发接口：强制验证邮箱（上线前删除）──────────────
+app.get('/api/dev/verify-email', async (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ error: 'email required' });
+  const { rows } = await pool.query(
+    'UPDATE users SET email_verified=TRUE, verify_token=NULL WHERE email=$1 RETURNING email',
+    [email.toLowerCase()]
+  );
+  if (!rows.length) return res.status(404).json({ error: 'User not found' });
+  res.json({ success: true, message: rows[0].email + ' verified' });
+});
+
 app.listen(PORT, () => {
   console.log(`✅ CC PCBA server running on http://localhost:${PORT}`);
 });
