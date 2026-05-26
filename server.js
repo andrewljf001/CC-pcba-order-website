@@ -663,6 +663,23 @@ app.put('/api/admin/admins/:id/password', adminAuth, async (req, res) => {
 });
 
 
+
+// ── 临时开发接口：创建管理员账号（上线前删除）──────────────
+app.post('/api/dev/create-admin', async (req, res) => {
+  try {
+    const { email, password, name, role } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'email and password required' });
+    const hash = await bcrypt.hash(password, 12);
+    await pool.query(
+      `INSERT INTO admin_users (email, password_hash, name, role)
+       VALUES ($1,$2,$3,$4)
+       ON CONFLICT (email) DO UPDATE SET password_hash=$2, name=$3, role=$4`,
+      [email.toLowerCase(), hash, name || 'Admin', role || 'superadmin']
+    );
+    res.json({ success: true, message: 'Admin account created: ' + email });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ── 临时开发接口：强制验证邮箱（上线前删除）──────────────
 app.get('/api/dev/verify-email', async (req, res) => {
   const { email } = req.query;
