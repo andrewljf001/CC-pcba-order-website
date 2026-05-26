@@ -146,6 +146,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   </ul>
   <a href="index.html" class="nav-cta">← BACK</a>
 </nav>
+<div style="background:var(--dim);border-bottom:1px solid var(--border);padding:.35rem 5%;display:flex;justify-content:flex-end;align-items:center;gap:.8rem">
+  <div id="auth-bar" style="font-family:'Share Tech Mono',monospace;letter-spacing:.06em"></div>
+</div>
 
 <div class="page-wrap">
   <div class="slabel">// SUBMIT INQUIRY</div>
@@ -480,24 +483,62 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 </div>
 
 <script>
-// ── URL PARAMS ──
-var params = new URLSearchParams(window.location.search);
+// ── URL PARAMS & AUTH ──────────────────────────────────
+var params      = new URLSearchParams(window.location.search);
 var currentMode = params.get('mode') || 'pcb';
+var authToken   = localStorage.getItem('cc_token') || null;
+var currentUser = null;
 
-// ── MODE SWITCHING ──
+// 检查登录状态
+async function checkAuth() {
+  if (!authToken) return;
+  try {
+    var res  = await fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + authToken } });
+    if (res.ok) {
+      currentUser = await res.json();
+      updateAuthUI();
+    } else {
+      authToken = null;
+      localStorage.removeItem('cc_token');
+    }
+  } catch(e) {}
+}
+
+function updateAuthUI() {
+  var bar = document.getElementById('auth-bar');
+  if (!bar) return;
+  if (currentUser) {
+    bar.innerHTML = '<span style="font-size:.8rem;color:var(--green)">▶ ' + currentUser.name + '</span>' +
+      ' <button onclick="logout()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:.2rem .6rem;cursor:pointer;margin-left:.5rem">Sign Out</button>';
+    // 如果有名字/邮箱，预填联系信息
+    if (currentUser.name)  { var n=document.getElementById('name');  if(n&&!n.value) n.value=currentUser.name; }
+    if (currentUser.email) { var e=document.getElementById('email'); if(e&&!e.value) e.value=currentUser.email; }
+    if (currentUser.whatsapp) { var w=document.getElementById('whatsapp'); if(w&&!w.value) w.value=currentUser.whatsapp; }
+    if (currentUser.company)  { var c=document.getElementById('company');  if(c&&!c.value) c.value=currentUser.company; }
+  } else {
+    bar.innerHTML = '<a href="/account.html" style="font-size:.8rem;color:var(--muted)">Sign In</a>' +
+      ' <span style="color:var(--border);margin:0 .4rem">|</span>' +
+      '<a href="/account.html?tab=register" style="font-size:.8rem;color:var(--green)">Register</a>';
+  }
+}
+
+function logout() {
+  authToken = null; currentUser = null;
+  localStorage.removeItem('cc_token');
+  updateAuthUI();
+}
+
+// ── MODE SWITCHING ────────────────────────────────────
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll('.mtab').forEach(function(t){ t.classList.remove('active'); });
   document.querySelectorAll('.mode-panel').forEach(function(p){ p.classList.remove('active'); });
   document.getElementById('tab-' + mode).classList.add('active');
   document.getElementById('panel-' + mode).classList.add('active');
-
   var titles = { pcb:'02 · PCB PARAMETERS', smt:'02 · SMT ASSEMBLY PARAMETERS', turnkey:'02 · FULL TURNKEY + TESTING' };
   document.getElementById('params-title').textContent = titles[mode];
-
   var modeLabels = { pcb:'PCB Fabrication', smt:'PCB + SMT Assembly', turnkey:'Full Turnkey + Testing' };
   document.getElementById('s-mode').textContent = modeLabels[mode];
-
   updateSummary();
 }
 
@@ -505,11 +546,9 @@ document.querySelectorAll('.mtab').forEach(function(tab){
   tab.addEventListener('click', function(){ setMode(tab.dataset.mode); });
 });
 
-// ── PRE-FILL FROM HOMEPAGE CALCULATOR ──
+// ── PRE-FILL FROM URL ────────────────────────────────
 function prefillFromParams() {
   if (!params.get('mode')) return;
-
-  // PCB params
   if (currentMode === 'pcb') {
     if (params.get('material')) setVal('pcb-material', params.get('material'));
     if (params.get('qty'))      setVal('pcb-qty',      params.get('qty'));
@@ -522,8 +561,6 @@ function prefillFromParams() {
     if (params.get('finish'))   setVal('pcb-finish',   params.get('finish'));
     if (params.get('color'))    setVal('pcb-color',    params.get('color'));
   }
-
-  // SMT params
   if (currentMode === 'smt') {
     if (params.get('qty'))    setVal('smt-qty',    params.get('qty'));
     if (params.get('sides'))  setVal('smt-sides',  params.get('sides'));
@@ -532,17 +569,17 @@ function prefillFromParams() {
     if (params.get('dip'))    setVal('smt-dip',    params.get('dip'));
     if (params.get('supply')) setVal('smt-supply', params.get('supply'));
   }
-
-  // Estimate banner
   if (params.get('estimate')) {
     var banner = document.getElementById('estimate-banner');
     banner.style.display = 'block';
     document.getElementById('eb-value').textContent = 'FROM $' + parseFloat(params.get('estimate')).toFixed(0);
     var detail = [];
-    if (params.get('qty')) detail.push(params.get('qty') + ' pcs');
+    if (params.get('qty'))   detail.push(params.get('qty') + ' pcs');
     if (params.get('sides')) detail.push(params.get('sides') === 'single' ? 'Single Side' : 'Double Side');
     document.getElementById('eb-detail').textContent = detail.join(' · ') || '—';
   }
+  // prefill 后重新计算摘要
+  updateSummary();
 }
 
 function setVal(id, val) {
@@ -551,92 +588,70 @@ function setVal(id, val) {
   el.value = val;
 }
 
-// ── SUMMARY UPDATER ──
+// ── SUMMARY UPDATER ──────────────────────────────────
 function updateSummary() {
   if (currentMode === 'pcb') {
-    var mat = document.getElementById('pcb-material').value;
-    var qty = document.getElementById('pcb-qty').value;
-    var W   = parseFloat(document.getElementById('pcb-w').value) || 0;
-    var H   = parseFloat(document.getElementById('pcb-h').value) || 0;
-    var drill = document.getElementById('pcb-drill').value;
-    var imp   = document.getElementById('pcb-impedance').value;
-    var copper= document.getElementById('pcb-copper').value;
-
+    var mat    = document.getElementById('pcb-material').value;
+    var qty    = document.getElementById('pcb-qty').value;
+    var W      = parseFloat(document.getElementById('pcb-w').value) || 0;
+    var H      = parseFloat(document.getElementById('pcb-h').value) || 0;
+    var drill  = document.getElementById('pcb-drill').value;
+    var imp    = document.getElementById('pcb-impedance').value;
+    var copper = document.getElementById('pcb-copper').value;
     var isManual = (mat !== 'fr4' || qty === 'manual' || W > 200 || H > 200 || copper !== '1oz');
     var tier = 0;
     if (!isManual) {
-      if (drill === '0.3' && imp === 'no')  tier = 1;
-      else if (drill === '0.3' && imp === 'yes') tier = 2;
-      else if ((drill === '0.2' || drill === '0.25') && imp === 'yes') tier = 3;
+      if      (drill === '0.3' && imp === 'no')                            tier = 1;
+      else if (drill === '0.3' && imp === 'yes')                           tier = 2;
+      else if ((drill === '0.2' || drill === '0.25') && imp === 'yes')     tier = 3;
       else isManual = true;
     }
-
     if (isManual) {
-      document.getElementById('s-qtype').textContent = 'Manual Quote';
-      document.getElementById('s-qtype').className = 'rv a';
-      document.getElementById('s-price').textContent = 'To be confirmed';
-      document.getElementById('s-price').className = 'rv a';
-      document.getElementById('s-includes').textContent = 'DFM Review · AOI';
-      document.getElementById('submit-btn').className = 'obtn manual';
+      setSummary('Manual Quote','rv a','To be confirmed','rv a','DFM Review · AOI','obtn manual');
     } else {
-      var prices = {1:50, 2:75, 3:100};
-      var af = Math.max(1, (W * H) / 10000);
-      var total = Math.round(prices[tier] * af);
-      document.getElementById('s-qtype').textContent = 'Standard — Est. price shown';
-      document.getElementById('s-qtype').className = 'rv g';
-      document.getElementById('s-price').textContent = 'FROM $' + total;
-      document.getElementById('s-price').className = 'rv g';
-      document.getElementById('s-includes').textContent = 'DFM Review · LeadFree HASL · AOI';
-      document.getElementById('submit-btn').className = 'obtn';
+      var prices = {1:50,2:75,3:100};
+      var total  = Math.round(prices[tier] * Math.max(1,(W*H)/10000));
+      setSummary('Standard — Est. price shown','rv g','FROM $'+total,'rv g','DFM Review · LeadFree HASL · AOI','obtn');
     }
-
   } else if (currentMode === 'smt') {
     var qty2   = document.getElementById('smt-qty').value;
-    var parts  = parseInt(document.getElementById('smt-parts').value) || 0;
-    var ic     = parseInt(document.getElementById('smt-ic').value) || 0;
-    var dip    = parseInt(document.getElementById('smt-dip').value) || 0;
+    var parts  = parseInt(document.getElementById('smt-parts').value)  || 0;
+    var ic     = parseInt(document.getElementById('smt-ic').value)     || 0;
+    var dip    = parseInt(document.getElementById('smt-dip').value)    || 0;
     var supply = document.getElementById('smt-supply').value;
     var sides  = document.getElementById('smt-sides').value;
-
-    var isManual2 = (qty2 === 'manual' || parts >= 200 || ic >= 10 || dip > 100 || supply === 'us');
-    if (isManual2) {
-      document.getElementById('s-qtype').textContent = 'Manual Quote';
-      document.getElementById('s-qtype').className = 'rv a';
-      document.getElementById('s-price').textContent = 'To be confirmed';
-      document.getElementById('s-price').className = 'rv a';
-      document.getElementById('s-includes').textContent = 'SMT + DIP + Stencil + AOI';
-      document.getElementById('submit-btn').className = 'obtn manual';
+    var isM    = (qty2 === 'manual' || parts >= 200 || ic >= 10 || dip > 100 || supply === 'us');
+    if (isM) {
+      setSummary('Manual Quote','rv a','To be confirmed','rv a','SMT + DIP + Stencil + AOI','obtn manual');
     } else {
       var base = sides === 'single' ? 200 : 400;
-      document.getElementById('s-qtype').textContent = 'Standard — Est. price shown';
-      document.getElementById('s-qtype').className = 'rv g';
-      document.getElementById('s-price').textContent = 'FROM $' + base + ' (all-in)';
-      document.getElementById('s-price').className = 'rv g';
-      document.getElementById('s-includes').textContent = 'SMT + DIP(≤100 pins) + Stencil + AOI';
-      document.getElementById('submit-btn').className = 'obtn';
+      setSummary('Standard — Est. price shown','rv g','FROM $'+base+' (all-in)','rv g','SMT + DIP(≤100 pins) + Stencil + AOI','obtn');
     }
-
   } else {
-    document.getElementById('s-qtype').textContent = 'Manual Quote';
-    document.getElementById('s-qtype').className = 'rv a';
-    document.getElementById('s-price').textContent = 'To be confirmed';
-    document.getElementById('s-price').className = 'rv a';
-    document.getElementById('s-includes').textContent = 'PCB + SMT + DIP + Functional Test';
-    document.getElementById('submit-btn').className = 'obtn manual';
+    // turnkey
+    setSummary('Manual Quote','rv a','To be confirmed','rv a','PCB + SMT + DIP + Functional Test','obtn manual');
   }
 }
 
-// ── LISTEN TO FORM CHANGES ──
+function setSummary(qtype, qtypeClass, price, priceClass, includes, btnClass) {
+  document.getElementById('s-qtype').textContent   = qtype;
+  document.getElementById('s-qtype').className     = qtypeClass;
+  document.getElementById('s-price').textContent   = price;
+  document.getElementById('s-price').className     = priceClass;
+  document.getElementById('s-includes').textContent = includes;
+  document.getElementById('submit-btn').className   = btnClass;
+}
+
 document.querySelectorAll('select, input[type=number]').forEach(function(el){
   el.addEventListener('change', updateSummary);
   if (el.type === 'number') el.addEventListener('input', updateSummary);
 });
 
-// ── FILE UPLOAD ──
+// ── FILE UPLOAD ──────────────────────────────────────
 var selectedFiles = [];
-var uploadZone = document.getElementById('upload-zone');
-var fileInput  = document.getElementById('files');
-var fileList   = document.getElementById('file-list');
+var uploadZone    = document.getElementById('upload-zone');
+var fileInput     = document.getElementById('files');
+var fileList      = document.getElementById('file-list');
 
 uploadZone.addEventListener('dragover',  function(e){ e.preventDefault(); uploadZone.classList.add('drag'); });
 uploadZone.addEventListener('dragleave', function(){  uploadZone.classList.remove('drag'); });
@@ -647,94 +662,202 @@ uploadZone.addEventListener('drop', function(e){
 fileInput.addEventListener('change', function(){ addFiles(this.files); });
 
 function addFiles(files){
-  for(var i = 0; i < files.length; i++){
-    if(selectedFiles.length >= 5){ alert('Maximum 5 files allowed.'); break; }
+  for(var i=0;i<files.length;i++){
+    if(selectedFiles.length>=5){alert('Maximum 5 files.');break;}
     selectedFiles.push(files[i]);
   }
   renderFileList();
 }
-
 function renderFileList(){
-  fileList.innerHTML = '';
-  selectedFiles.forEach(function(f, idx){
-    var item = document.createElement('div');
-    item.className = 'file-item';
-    var size = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
-    item.innerHTML = '<span class="file-name">📄 '+f.name+'</span><span style="display:flex;align-items:center;gap:.8rem"><span style="font-size:.7rem;color:var(--muted)">'+size+'</span><span class="file-remove" data-idx="'+idx+'">✕</span></span>';
+  fileList.innerHTML='';
+  selectedFiles.forEach(function(f,idx){
+    var item=document.createElement('div'); item.className='file-item';
+    var size=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':(f.size/1024).toFixed(0)+' KB';
+    item.innerHTML='<span class="file-name">📄 '+f.name+'</span><span style="display:flex;align-items:center;gap:.8rem"><span style="font-size:.7rem;color:var(--muted)">'+size+'</span><span class="file-remove" data-idx="'+idx+'">✕</span></span>';
     fileList.appendChild(item);
   });
   fileList.querySelectorAll('.file-remove').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      selectedFiles.splice(parseInt(this.dataset.idx), 1);
-      renderFileList();
-    });
+    btn.addEventListener('click',function(){ selectedFiles.splice(parseInt(this.dataset.idx),1); renderFileList(); });
   });
 }
 
-// ── FORM SUBMIT ──
-document.getElementById('inquiry-form').addEventListener('submit', async function(e){
-  e.preventDefault();
+// ── 收集表单数据 ─────────────────────────────────────
+function collectFormData() {
+  var fd = new FormData();
+  fd.append('mode',     currentMode);
+  fd.append('name',     document.getElementById('name').value);
+  fd.append('email',    document.getElementById('email').value);
+  fd.append('whatsapp', document.getElementById('whatsapp').value);
+  fd.append('company',  document.getElementById('company').value);
+  fd.append('notes',    document.getElementById('notes').value);
+  fd.append('estimate', params.get('estimate') || '');
+  if (currentMode === 'pcb') {
+    fd.append('pcb_material',  document.getElementById('pcb-material').value);
+    fd.append('pcb_qty',       document.getElementById('pcb-qty').value);
+    fd.append('pcb_w',         document.getElementById('pcb-w').value);
+    fd.append('pcb_h',         document.getElementById('pcb-h').value);
+    fd.append('pcb_thick',     document.getElementById('pcb-thick').value);
+    fd.append('pcb_drill',     document.getElementById('pcb-drill').value);
+    fd.append('pcb_impedance', document.getElementById('pcb-impedance').value);
+    fd.append('pcb_copper',    document.getElementById('pcb-copper').value);
+    fd.append('pcb_finish',    document.getElementById('pcb-finish').value);
+    fd.append('pcb_color',     document.getElementById('pcb-color').value);
+  } else if (currentMode === 'smt') {
+    fd.append('smt_qty',    document.getElementById('smt-qty').value);
+    fd.append('smt_sides',  document.getElementById('smt-sides').value);
+    fd.append('smt_parts',  document.getElementById('smt-parts').value);
+    fd.append('smt_ic',     document.getElementById('smt-ic').value);
+    fd.append('smt_dip',    document.getElementById('smt-dip').value);
+    fd.append('smt_supply', document.getElementById('smt-supply').value);
+  }
+  selectedFiles.forEach(function(f){ fd.append('files', f); });
+  return fd;
+}
+
+// ── 提交询价 ─────────────────────────────────────────
+async function doSubmit(fd) {
   var btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>SUBMITTING...';
-
-  var formData = new FormData();
-  formData.append('mode',        currentMode);
-  formData.append('name',        document.getElementById('name').value);
-  formData.append('email',       document.getElementById('email').value);
-  formData.append('whatsapp',    document.getElementById('whatsapp').value);
-  formData.append('company',     document.getElementById('company').value);
-  formData.append('notes',       document.getElementById('notes').value);
-  formData.append('estimate',    params.get('estimate') || '');
-
-  // mode-specific params
-  if (currentMode === 'pcb') {
-    formData.append('pcb_material',   document.getElementById('pcb-material').value);
-    formData.append('pcb_qty',        document.getElementById('pcb-qty').value);
-    formData.append('pcb_w',          document.getElementById('pcb-w').value);
-    formData.append('pcb_h',          document.getElementById('pcb-h').value);
-    formData.append('pcb_thick',      document.getElementById('pcb-thick').value);
-    formData.append('pcb_drill',      document.getElementById('pcb-drill').value);
-    formData.append('pcb_impedance',  document.getElementById('pcb-impedance').value);
-    formData.append('pcb_copper',     document.getElementById('pcb-copper').value);
-    formData.append('pcb_finish',     document.getElementById('pcb-finish').value);
-    formData.append('pcb_color',      document.getElementById('pcb-color').value);
-  } else if (currentMode === 'smt') {
-    formData.append('smt_qty',    document.getElementById('smt-qty').value);
-    formData.append('smt_sides',  document.getElementById('smt-sides').value);
-    formData.append('smt_parts',  document.getElementById('smt-parts').value);
-    formData.append('smt_ic',     document.getElementById('smt-ic').value);
-    formData.append('smt_dip',    document.getElementById('smt-dip').value);
-    formData.append('smt_supply', document.getElementById('smt-supply').value);
-  }
-
-  selectedFiles.forEach(function(f){ formData.append('files', f); });
-
+  var headers = {};
+  if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
   try {
-    var res  = await fetch('/api/inquiry', { method:'POST', body:formData });
+    var res  = await fetch('/api/inquiry', { method:'POST', body:fd, headers:headers });
     var data = await res.json();
-    if(data.success){
+    if (data.success) {
       document.getElementById('inquiry-form').style.display = 'none';
       document.getElementById('estimate-banner').style.display = 'none';
-      var sb = document.getElementById('success-box');
-      sb.classList.add('show');
+      var sb = document.getElementById('success-box'); sb.classList.add('show');
       document.getElementById('success-order').textContent = 'Order #' + data.order_no;
       document.getElementById('track-link').href = 'track.html?order=' + data.order_no;
     } else {
-      alert('Error: ' + (data.error || 'Submission failed. Please try again.'));
-      btn.disabled = false;
-      btn.innerHTML = 'SUBMIT INQUIRY →';
+      alert('Error: ' + (data.error || 'Submission failed.'));
+      btn.disabled=false; btn.innerHTML='SUBMIT INQUIRY →';
     }
   } catch(err) {
-    alert('Network error. Please check your connection and try again.');
-    btn.disabled = false;
-    btn.innerHTML = 'SUBMIT INQUIRY →';
+    alert('Network error. Please try again.');
+    btn.disabled=false; btn.innerHTML='SUBMIT INQUIRY →';
+  }
+}
+
+// ── 提交按钮：已登录直接提交，未登录弹注册弹窗 ────────
+document.getElementById('inquiry-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  if (!document.getElementById('name').value || !document.getElementById('email').value) {
+    alert('Please fill in your name and email.'); return;
+  }
+  if (currentUser) {
+    doSubmit(collectFormData());
+  } else {
+    showAuthModal();
   }
 });
 
-// ── INIT ──
+// ── 注册/登录弹窗 ────────────────────────────────────
+function showAuthModal() {
+  document.getElementById('auth-modal').style.display = 'flex';
+  // 预填邮箱
+  var email = document.getElementById('email').value;
+  var name  = document.getElementById('name').value;
+  if (email) document.getElementById('modal-email').value  = email;
+  if (name)  document.getElementById('modal-name').value   = name;
+}
+function hideAuthModal() {
+  document.getElementById('auth-modal').style.display = 'none';
+}
+// 切 tab
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.modal-tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.modal-tab').forEach(function(x){ x.classList.remove('active'); });
+      document.querySelectorAll('.modal-panel').forEach(function(x){ x.classList.remove('active'); });
+      t.classList.add('active');
+      document.getElementById('modal-panel-' + t.dataset.tab).classList.add('active');
+    });
+  });
+  document.getElementById('modal-close').addEventListener('click', hideAuthModal);
+  document.getElementById('auth-modal').addEventListener('click', function(e){
+    if (e.target === this) hideAuthModal();
+  });
+});
+
+// 注册提交
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('modal-register-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var email    = document.getElementById('modal-email').value;
+    var password = document.getElementById('modal-password').value;
+    var name     = document.getElementById('modal-name').value;
+    var errEl    = document.getElementById('modal-register-error');
+    errEl.textContent = '';
+    try {
+      var res  = await fetch('/api/auth/register', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password, name })
+      });
+      var data = await res.json();
+      if (data.success) {
+        // 注册成功 → 自动登录
+        var loginRes  = await fetch('/api/auth/login', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email, password })
+        });
+        var loginData = await loginRes.json();
+        if (loginData.success) {
+          authToken   = loginData.token;
+          currentUser = loginData.user;
+          localStorage.setItem('cc_token', authToken);
+          // 把表单里填的名字/邮箱/whatsapp/company 同步到账号
+          var fd2 = collectFormData();
+          await fetch('/api/me', {
+            method:'PUT', headers:{'Authorization':'Bearer '+authToken,'Content-Type':'application/json'},
+            body: JSON.stringify({
+              name:     document.getElementById('name').value,
+              whatsapp: document.getElementById('whatsapp').value,
+              company:  document.getElementById('company').value
+            })
+          });
+          hideAuthModal();
+          doSubmit(fd2);
+        } else {
+          errEl.textContent = 'Registered! Please verify your email, then sign in.';
+        }
+      } else {
+        errEl.textContent = data.error || 'Registration failed.';
+      }
+    } catch(err) { errEl.textContent = 'Network error. Please try again.'; }
+  });
+
+  // 登录提交
+  document.getElementById('modal-login-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var email    = document.getElementById('modal-login-email').value;
+    var password = document.getElementById('modal-login-password').value;
+    var errEl    = document.getElementById('modal-login-error');
+    errEl.textContent = '';
+    try {
+      var res  = await fetch('/api/auth/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+      var data = await res.json();
+      if (data.success) {
+        authToken   = data.token;
+        currentUser = data.user;
+        localStorage.setItem('cc_token', authToken);
+        hideAuthModal();
+        doSubmit(collectFormData());
+      } else {
+        errEl.textContent = data.error || 'Login failed.';
+      }
+    } catch(err) { errEl.textContent = 'Network error.'; }
+  });
+});
+
+// ── INIT ────────────────────────────────────────────
 setMode(currentMode);
 prefillFromParams();
+checkAuth();
 </script>
 <footer>
   <div class="fi">
@@ -750,6 +873,75 @@ prefillFromParams();
 <a href="https://wa.me/YOUR_NUMBER" class="waf" target="_blank" aria-label="WhatsApp">
   <svg width="28" height="28" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
 </a>
+
+
+<!-- ── 注册/登录弹窗 ───────────────────────────── -->
+<div id="auth-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--green3);width:100%;max-width:440px;margin:1rem">
+    <div style="background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--green);letter-spacing:.12em">// SIGN IN TO SUBMIT</span>
+      <button id="modal-close" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="padding:1.2rem">
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">Create an account to track your order history and manage your profile. Your filled-in details will be saved automatically.</p>
+      <!-- tab 切换 -->
+      <div style="display:flex;border:1px solid var(--border);margin-bottom:1.2rem">
+        <div class="modal-tab active" data-tab="register" style="flex:1;padding:.6rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;cursor:pointer;background:var(--green);color:#000;font-weight:700">REGISTER</div>
+        <div class="modal-tab" data-tab="login" style="flex:1;padding:.6rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;cursor:pointer;color:var(--muted)">SIGN IN</div>
+      </div>
+
+      <!-- 注册 panel -->
+      <div id="modal-panel-register" class="modal-panel active">
+        <form id="modal-register-form" style="display:flex;flex-direction:column;gap:.8rem">
+          <div style="display:flex;flex-direction:column;gap:.3rem">
+            <label style="font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--muted);letter-spacing:.1em">FULL NAME *</label>
+            <input id="modal-name" type="text" required placeholder="John Smith" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.3rem">
+            <label style="font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--muted);letter-spacing:.1em">EMAIL *</label>
+            <input id="modal-email" type="email" required placeholder="john@company.com" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.3rem">
+            <label style="font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--muted);letter-spacing:.1em">PASSWORD * <span style="color:var(--muted);font-weight:normal">(min 8 chars)</span></label>
+            <input id="modal-password" type="password" required minlength="8" placeholder="••••••••" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;outline:none">
+          </div>
+          <div id="modal-register-error" style="font-size:.75rem;color:var(--red);min-height:1rem"></div>
+          <button type="submit" style="background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.8rem;border:none;cursor:pointer">REGISTER & SUBMIT →</button>
+        </form>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:.8rem;text-align:center">Already have an account? <span style="color:var(--green);cursor:pointer" onclick="document.querySelector('[data-tab=login]').click()">Sign in</span></p>
+      </div>
+
+      <!-- 登录 panel -->
+      <div id="modal-panel-login" class="modal-panel" style="display:none">
+        <form id="modal-login-form" style="display:flex;flex-direction:column;gap:.8rem">
+          <div style="display:flex;flex-direction:column;gap:.3rem">
+            <label style="font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--muted);letter-spacing:.1em">EMAIL *</label>
+            <input id="modal-login-email" type="email" required placeholder="john@company.com" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;outline:none">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.3rem">
+            <label style="font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--muted);letter-spacing:.1em">PASSWORD *</label>
+            <input id="modal-login-password" type="password" required placeholder="••••••••" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;outline:none">
+          </div>
+          <div id="modal-login-error" style="font-size:.75rem;color:var(--red);min-height:1rem"></div>
+          <button type="submit" style="background:var(--amber);color:#000;font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.8rem;border:none;cursor:pointer">SIGN IN & SUBMIT →</button>
+        </form>
+        <p style="font-size:.72rem;color:var(--muted);margin-top:.8rem;text-align:center">No account? <span style="color:var(--green);cursor:pointer" onclick="document.querySelector('[data-tab=register]').click()">Register free</span></p>
+      </div>
+
+      <!-- 访客继续 -->
+      <div style="text-align:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <button onclick="hideAuthModal();doSubmit(collectFormData());" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.78rem;padding:.5rem 1.2rem;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:.08em">CONTINUE AS GUEST →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.modal-tab { transition: all .2s; }
+.modal-tab.active { background: var(--green) !important; color: #000 !important; font-weight: 700; }
+.modal-panel { display: none; }
+.modal-panel.active { display: block; }
+</style>
 
 </body>
 </html>
