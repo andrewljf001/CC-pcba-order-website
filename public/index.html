@@ -376,39 +376,36 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div style="padding:.5rem 0 1rem">
             <div class="manual-notice">
               <strong>⚠ MANUAL QUOTE REQUIRED</strong>
-              Full Turnkey + Testing orders are individually assessed by our engineers. Please submit an inquiry and we will contact you within 24 hours.<br><br>
-              Please prepare: PCB Gerber files, BOM, placement files, and your functional test plan / validation document.
+              Every Full Turnkey + Testing project is unique. No standard pricing applies — our engineer will review your files and contact you within 24 hours with a custom quote.
             </div>
-            <div class="frow">
-              <div class="fg"><label>PCB LAYERS</label>
-                <select id="tk-layers">
-                  <option value="2" selected>2 Layers</option>
-                  <option value="4">4 Layers</option>
-                  <option value="6">6 Layers</option>
-                  <option value="other">8+ Layers</option>
-                </select>
+            <div style="display:flex;flex-direction:column;gap:.75rem;margin-top:1rem">
+              <div style="background:var(--bg3);border:1px solid var(--border);padding:.9rem 1rem">
+                <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.1em;margin-bottom:.5rem">// WHAT'S INCLUDED</div>
+                <div style="font-size:.82rem;color:var(--text);line-height:1.75">
+                  ✔ PCB Fabrication (FR4, multi-layer)<br>
+                  ✔ SMT Assembly + DIP Through-Hole<br>
+                  ✔ Functional Verification (power-on &amp; test)<br>
+                  ✔ Engineer Remote Debug Support<br>
+                  ✔ 100% AOI Inspection<br>
+                  ✔ DFM Review
+                </div>
               </div>
-              <div class="fg"><label>QUANTITY</label>
-                <select id="tk-qty">
-                  <option value="5">5 pcs</option>
-                  <option value="10" selected>10 pcs</option>
-                  <option value="manual">More than 10 pcs</option>
-                </select>
+              <div style="background:var(--bg3);border:1px solid var(--border);padding:.9rem 1rem">
+                <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.1em;margin-bottom:.5rem">// WHAT YOU NEED TO PREPARE</div>
+                <div style="font-size:.82rem;color:var(--text);line-height:1.75">
+                  📁 Gerber files (with stackup &amp; impedance notes)<br>
+                  📋 BOM (Bill of Materials)<br>
+                  📍 Pick &amp; Place / Centroid file<br>
+                  📝 Functional test plan or validation document
+                </div>
               </div>
-            </div>
-            <div class="frow">
-              <div class="fg"><label>COMPONENT SUPPLY</label>
-                <select id="tk-supply">
-                  <option value="us" selected>We source all</option>
-                  <option value="customer">Customer supplied</option>
-                  <option value="mixed">Mixed</option>
-                </select>
-              </div>
-              <div class="fg"><label>TESTING TYPE</label>
-                <select id="tk-test">
-                  <option value="functional" selected>Functional Verification</option>
-                  <option value="remote">Functional + Remote Debug</option>
-                </select>
+              <div style="background:rgba(255,68,68,.05);border:1px solid rgba(255,68,68,.2);padding:.8rem 1rem">
+                <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--red);letter-spacing:.1em;margin-bottom:.4rem">// WE DO NOT ACCEPT</div>
+                <div style="font-size:.8rem;color:var(--muted);line-height:1.7">
+                  ✗ SMT/DIP only (no PCB fabrication)<br>
+                  ✗ Through-hole only boards (no SMT)<br>
+                  ✗ Power supply / high-voltage boards
+                </div>
               </div>
             </div>
           </div>
