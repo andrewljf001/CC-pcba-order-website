@@ -7,227 +7,464 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--max:800px}
+/* ── 与首页完全一致的 CSS 变量与基础样式 ── */
+:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:1200px}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border)}
+
+/* ── NAV（与首页完全一致）── */
+nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
 .nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
 .ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
-.nav-back{font-size:.82rem;color:var(--muted);transition:color .2s}.nav-back:hover{color:var(--green)}
-.wrap{max-width:var(--max);margin:0 auto;padding:3rem 5%}
-.page-label{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
+.nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
+.nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
+
+/* ── PAGE LAYOUT ── */
+.page-wrap{max-width:var(--max);margin:0 auto;padding:3rem 5%}
+.slabel{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
 .page-title{font-family:'Orbitron',monospace;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.5rem}
-.page-sub{font-size:.88rem;color:var(--muted);margin-bottom:2.5rem}
+.page-sub{font-size:.88rem;color:var(--muted);margin-bottom:2rem;line-height:1.7}
+
+/* ── MODE TABS（与首页计算器一致）── */
+.mode-tabs{display:flex;gap:0;margin-bottom:2rem;border:1px solid var(--border)}
+.mtab{flex:1;padding:.7rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.1em;color:var(--muted);cursor:pointer;border-right:1px solid var(--border);transition:all .2s}
+.mtab:last-child{border-right:none}
+.mtab:hover{color:var(--green);background:rgba(0,255,65,.04)}
+.mtab.active{background:var(--green);color:#000;font-weight:700}
+
+/* ── TWO-COLUMN LAYOUT ── */
+.qwrap{display:grid;grid-template-columns:1.3fr 1fr;gap:2rem;align-items:start}
+
+/* ── CARDS ── */
 .card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1.5rem}
 .card-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
 .card-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
-.card-body{padding:1.5rem}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.card-body{padding:1.2rem}
+
+/* ── FORM ELEMENTS（与首页一致）── */
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem}
 .frow.full{grid-template-columns:1fr}
-.fg{display:flex;flex-direction:column;gap:.35rem}
+.fg{display:flex;flex-direction:column;gap:.3rem}
 .fg label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em}
-.fg label span{color:var(--red);margin-left:2px}
-.fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.6rem .8rem;font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;-webkit-appearance:none;width:100%}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--green3)}
+.fg label .req{color:var(--red);margin-left:2px}
+.fg select,.fg input,.fg textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;-webkit-appearance:none;width:100%}
+.fg select:focus,.fg input:focus,.fg textarea:focus{border-color:var(--green3)}
 .fg select option{background:var(--bg)}
-.fg textarea{resize:vertical;min-height:100px}
-.fg .hint{font-size:.72rem;color:var(--muted);margin-top:.2rem}
-/* FILE UPLOAD */
-.upload-zone{border:2px dashed var(--border);padding:2rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.fg textarea{resize:vertical;min-height:90px}
+.fg .hint{font-size:.65rem;color:var(--muted);margin-top:.2rem;font-style:italic}
+
+/* ── MODE PANELS ── */
+.mode-panel{display:none}.mode-panel.active{display:block}
+
+/* ── FILE UPLOAD ── */
+.upload-zone{border:2px dashed var(--border);padding:1.8rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--green3);background:rgba(0,255,65,.03)}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.upload-icon{font-size:2rem;margin-bottom:.5rem;color:var(--green3)}
-.upload-title{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--white);letter-spacing:.08em;margin-bottom:.3rem}
-.upload-sub{font-size:.75rem;color:var(--muted)}
-.file-list{margin-top:1rem;display:flex;flex-direction:column;gap:.5rem}
-.file-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);padding:.5rem .8rem;font-size:.8rem}
-.file-name{color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.72rem}
-.file-size{color:var(--muted);font-size:.7rem}
+.upload-icon{font-size:1.8rem;margin-bottom:.4rem;color:var(--green3)}
+.upload-title{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--white);letter-spacing:.08em;margin-bottom:.25rem}
+.upload-sub{font-size:.72rem;color:var(--muted)}
+.file-list{margin-top:.8rem;display:flex;flex-direction:column;gap:.4rem}
+.file-item{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);padding:.45rem .8rem;font-size:.8rem}
+.file-name{color:var(--text);font-family:'Share Tech Mono',monospace;font-size:.7rem}
 .file-remove{color:var(--red);cursor:pointer;font-size:.8rem;padding:0 .3rem}
-/* ESTIMATE BANNER */
-.estimate-banner{background:rgba(0,255,65,.05);border:1px solid var(--green3);padding:1rem 1.2rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center}
-.eb-label{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em}
-.eb-value{font-family:'Orbitron',monospace;font-size:1.4rem;color:var(--green);font-weight:700}
-.eb-note{font-size:.72rem;color:var(--muted);margin-top:.2rem}
-/* SUBMIT */
-.submit-btn{width:100%;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;letter-spacing:.1em;padding:1rem;border:none;cursor:pointer;transition:opacity .2s;margin-top:.5rem}
-.submit-btn:hover{opacity:.85}
-.submit-btn:disabled{opacity:.4;cursor:not-allowed}
-.submit-note{font-size:.75rem;color:var(--muted);text-align:center;margin-top:.8rem;line-height:1.6}
-/* SUCCESS STATE */
-.success-box{display:none;background:var(--bg2);border:1px solid var(--green3);padding:3rem;text-align:center}
+
+/* ── TURNKEY INFO BLOCKS ── */
+.info-block{background:var(--bg3);border:1px solid var(--border);padding:.9rem 1rem;margin-bottom:.8rem}
+.info-block-title{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.1em;margin-bottom:.5rem}
+.info-block-body{font-size:.82rem;color:var(--text);line-height:1.75}
+.info-block.danger{background:rgba(255,68,68,.05);border-color:rgba(255,68,68,.2)}
+.info-block.danger .info-block-title{color:var(--red)}
+.info-block.danger .info-block-body{color:var(--muted)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{position:sticky;top:80px}
+
+/* ── ESTIMATE BANNER ── */
+.estimate-banner{background:rgba(0,255,65,.05);border:1px solid var(--green3);padding:1rem 1.2rem;margin-bottom:1.5rem}
+.eb-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.12em;margin-bottom:.3rem}
+.eb-value{font-family:'Orbitron',monospace;font-size:1.8rem;color:var(--green);font-weight:700;line-height:1}
+.eb-note{font-size:.7rem;color:var(--muted);margin-top:.3rem}
+.eb-detail{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+
+/* ── SUBMIT BUTTON ── */
+.obtn{width:100%;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;letter-spacing:.1em;padding:.9rem;border:none;cursor:pointer;transition:opacity .2s;margin-bottom:.8rem}
+.obtn:hover{opacity:.85}
+.obtn:disabled{opacity:.4;cursor:not-allowed}
+.obtn.manual{background:var(--amber)}
+.submit-note{font-size:.72rem;color:var(--muted);line-height:1.6;text-align:center}
+
+/* ── MANUAL NOTICE ── */
+.manual-notice{background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.25);padding:.9rem 1rem;margin-bottom:1rem;font-size:.8rem;color:var(--amber);line-height:1.6}
+.manual-notice strong{display:block;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;margin-bottom:.3rem}
+
+/* ── SUMMARY ROWS ── */
+.rrows{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1.2rem}
+.rrow{display:flex;justify-content:space-between;font-size:.82rem}
+.rl{color:var(--muted)}.rv{color:var(--text);font-weight:500}.rv.g{color:var(--green)}.rv.a{color:var(--amber)}
+
+/* ── SUCCESS STATE ── */
+.success-box{display:none;background:var(--bg2);border:1px solid var(--green3);padding:3rem;text-align:center;margin-top:2rem}
 .success-box.show{display:block}
 .success-icon{font-size:3rem;margin-bottom:1rem}
 .success-title{font-family:'Orbitron',monospace;font-size:1.4rem;color:var(--green);margin-bottom:.5rem}
 .success-order{font-family:'Share Tech Mono',monospace;font-size:1rem;color:var(--white);margin-bottom:.5rem}
 .success-sub{font-size:.85rem;color:var(--muted);margin-bottom:2rem;line-height:1.7}
-.track-btn{display:inline-block;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.8rem;font-weight:700;letter-spacing:.1em;padding:.8rem 2rem;cursor:pointer}
-/* LOADING */
-.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.5rem}
+.track-btn{display:inline-block;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.8rem;font-weight:700;letter-spacing:.1em;padding:.8rem 2rem}
+
+/* ── SPINNER ── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.5rem}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:600px){.frow{grid-template-columns:1fr}.estimate-banner{flex-direction:column;gap:.5rem;text-align:center}}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 0 1.5rem}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){.qwrap{grid-template-columns:1fr}.right-panel{position:static}}
+@media(max-width:768px){.nav-links{display:none}.frow{grid-template-columns:1fr}.mode-tabs{flex-wrap:wrap}.mtab{min-width:45%}}
 </style>
 </head>
 <body>
 
 <nav>
   <a href="index.html" class="nav-logo"><span class="ldot"></span>CC PCBA</a>
-  <a href="index.html" class="nav-back">← Back to Home</a>
+  <ul class="nav-links">
+    <li><a href="index.html#quote">Quote</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="index.html#capabilities">Capabilities</a></li>
+    <li><a href="index.html#process">Process</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+    <li><a href="track.html">Track Order</a></li>
+  </ul>
+  <a href="index.html" class="nav-cta">← BACK</a>
 </nav>
 
-<div class="wrap">
-  <div class="page-label">// SUBMIT INQUIRY</div>
+<div class="page-wrap">
+  <div class="slabel">// SUBMIT INQUIRY</div>
   <h1 class="page-title">Request a Quote</h1>
-  <p class="page-sub">Fill in your project details and upload your files. We'll confirm your quote within 24 hours.</p>
+  <p class="page-sub">Fill in your project details below. Our engineer will review and confirm your quote within 24 hours — payment link sent after confirmation.</p>
 
-  <div class="estimate-banner" id="estimate-banner" style="display:none">
-    <div>
-      <div class="eb-label">YOUR ESTIMATE FROM CALCULATOR</div>
-      <div class="eb-value" id="eb-value">$0.00</div>
-      <div class="eb-note">Final quote confirmed after DFM review</div>
-    </div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--muted);text-align:right">
-      <div id="eb-mode">—</div>
-      <div id="eb-qty">—</div>
-    </div>
+  <!-- MODE TABS -->
+  <div class="mode-tabs">
+    <div class="mtab" data-mode="pcb" id="tab-pcb">PCB FABRICATION</div>
+    <div class="mtab" data-mode="smt" id="tab-smt">PCB + SMT ASSEMBLY</div>
+    <div class="mtab" data-mode="turnkey" id="tab-turnkey">FULL TURNKEY + TESTING</div>
   </div>
 
   <form id="inquiry-form">
+  <div class="qwrap">
 
-    <!-- CONTACT INFO -->
-    <div class="card">
-      <div class="card-hdr"><span class="card-ht">01 · CONTACT INFORMATION</span></div>
-      <div class="card-body">
-        <div class="frow">
-          <div class="fg">
-            <label>FULL NAME <span>*</span></label>
-            <input type="text" id="name" name="name" placeholder="John Smith" required>
+    <!-- ═══════════ LEFT: FORM FIELDS ═══════════ -->
+    <div class="left-col">
+
+      <!-- 01 CONTACT -->
+      <div class="card">
+        <div class="card-hdr"><span class="card-ht">01 · CONTACT INFORMATION</span></div>
+        <div class="card-body">
+          <div class="frow">
+            <div class="fg">
+              <label>FULL NAME <span class="req">*</span></label>
+              <input type="text" id="name" placeholder="John Smith" required>
+            </div>
+            <div class="fg">
+              <label>EMAIL ADDRESS <span class="req">*</span></label>
+              <input type="email" id="email" placeholder="john@company.com" required>
+            </div>
           </div>
-          <div class="fg">
-            <label>EMAIL ADDRESS <span>*</span></label>
-            <input type="email" id="email" name="email" placeholder="john@company.com" required>
-          </div>
-        </div>
-        <div class="frow">
-          <div class="fg">
-            <label>WHATSAPP NUMBER</label>
-            <input type="text" id="whatsapp" name="whatsapp" placeholder="+1 234 567 8901">
-            <div class="hint">Include country code. We'll send quote updates here.</div>
-          </div>
-          <div class="fg">
-            <label>COMPANY (OPTIONAL)</label>
-            <input type="text" id="company" name="company" placeholder="Your Company Ltd">
+          <div class="frow">
+            <div class="fg">
+              <label>WHATSAPP</label>
+              <input type="text" id="whatsapp" placeholder="+1 234 567 8901">
+              <span class="hint">Include country code. Quote updates sent here.</span>
+            </div>
+            <div class="fg">
+              <label>COMPANY (OPTIONAL)</label>
+              <input type="text" id="company" placeholder="Your Company Ltd">
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ORDER DETAILS -->
-    <div class="card">
-      <div class="card-hdr"><span class="card-ht">02 · ORDER DETAILS</span></div>
-      <div class="card-body">
-        <div class="frow">
-          <div class="fg">
-            <label>SERVICE TYPE <span>*</span></label>
-            <select id="service_type" name="service_type" required>
-              <option value="">— Select service —</option>
-              <option value="PCB Only">PCB Fabrication Only</option>
-              <option value="SMT Assembly">SMT Assembly (+ PCB)</option>
-              <option value="Through-Hole">Through-Hole / DIP Assembly</option>
-              <option value="Turnkey PCBA">Turnkey PCBA (Full Service)</option>
-            </select>
+      <!-- 02 ORDER PARAMS -->
+      <div class="card">
+        <div class="card-hdr"><span class="card-ht" id="params-title">02 · PCB PARAMETERS</span></div>
+        <div class="card-body">
+
+          <!-- PCB PANEL -->
+          <div class="mode-panel" id="panel-pcb">
+            <div class="frow">
+              <div class="fg">
+                <label>MATERIAL <span class="req">*</span></label>
+                <select id="pcb-material">
+                  <option value="fr4">FR4</option>
+                  <option value="flex">Flex</option>
+                  <option value="aluminum">Aluminum</option>
+                  <option value="rogers">Rogers</option>
+                  <option value="ptfe">PTFE Teflon</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>QUANTITY <span class="req">*</span></label>
+                <select id="pcb-qty">
+                  <option value="5">5 pcs</option>
+                  <option value="10" selected>10 pcs</option>
+                  <option value="manual">More than 10 pcs</option>
+                </select>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg">
+                <label>WIDTH (mm) <span class="req">*</span></label>
+                <input type="number" id="pcb-w" value="100" min="1" max="500">
+              </div>
+              <div class="fg">
+                <label>HEIGHT (mm) <span class="req">*</span></label>
+                <input type="number" id="pcb-h" value="100" min="1" max="500">
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg">
+                <label>BOARD THICKNESS</label>
+                <select id="pcb-thick">
+                  <option value="0.4">0.4mm</option>
+                  <option value="0.6">0.6mm</option>
+                  <option value="0.8">0.8mm</option>
+                  <option value="1.0">1.0mm</option>
+                  <option value="1.2">1.2mm</option>
+                  <option value="1.6" selected>1.6mm (Standard)</option>
+                  <option value="2.0">2.0mm</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>MIN DRILL SIZE</label>
+                <select id="pcb-drill">
+                  <option value="0.3">≥ 0.3mm (Standard)</option>
+                  <option value="0.25">0.25mm / 0.35mm</option>
+                  <option value="0.2">0.2mm / 0.3mm</option>
+                  <option value="0.15">0.15mm / 0.25mm</option>
+                </select>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg">
+                <label>IMPEDANCE CONTROL</label>
+                <select id="pcb-impedance">
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>OUTER COPPER WEIGHT</label>
+                <select id="pcb-copper">
+                  <option value="1oz" selected>1 oz</option>
+                  <option value="2oz">2 oz</option>
+                </select>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg">
+                <label>SURFACE FINISH</label>
+                <select id="pcb-finish">
+                  <option value="hasl_lead">HASL (with lead)</option>
+                  <option value="hasl_free" selected>LeadFree HASL</option>
+                  <option value="enig">ENIG</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>PCB COLOR</label>
+                <select id="pcb-color">
+                  <option value="green" selected>Green</option>
+                  <option value="red">Red</option>
+                  <option value="blue">Blue</option>
+                  <option value="black">Black</option>
+                  <option value="white">White</option>
+                  <option value="yellow">Yellow</option>
+                  <option value="purple">Purple</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div class="fg">
-            <label>QUANTITY <span>*</span></label>
-            <input type="number" id="quantity" name="quantity" placeholder="e.g. 10" min="1" required>
+
+          <!-- SMT PANEL -->
+          <div class="mode-panel" id="panel-smt">
+            <div class="frow">
+              <div class="fg">
+                <label>QUANTITY <span class="req">*</span></label>
+                <select id="smt-qty">
+                  <option value="5">5 pcs</option>
+                  <option value="10" selected>10 pcs</option>
+                  <option value="manual">More than 10 pcs</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>ASSEMBLY SIDES <span class="req">*</span></label>
+                <select id="smt-sides">
+                  <option value="single" selected>Single Side — $200</option>
+                  <option value="double">Double Side — $400</option>
+                </select>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg">
+                <label>TOTAL COMPONENTS <span class="req">*</span></label>
+                <input type="number" id="smt-parts" value="50" min="1" max="9999">
+                <span class="hint">≥ 200 pcs → manual quote</span>
+              </div>
+              <div class="fg">
+                <label>COMPLEX IC COUNT</label>
+                <input type="number" id="smt-ic" value="0" min="0" max="9999">
+                <span class="hint">BGA / QFN / LGA / BTC etc. — ≥ 10 → manual quote</span>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg">
+                <label>DIP / THROUGH-HOLE PINS</label>
+                <input type="number" id="smt-dip" value="0" min="0" max="9999">
+                <span class="hint">≤ 100 pins included in flat rate · > 100 → manual quote</span>
+              </div>
+              <div class="fg">
+                <label>COMPONENT SUPPLY <span class="req">*</span></label>
+                <select id="smt-supply">
+                  <option value="customer">Customer supplied</option>
+                  <option value="us">We source (add-on quote)</option>
+                </select>
+              </div>
+            </div>
           </div>
+
+          <!-- TURNKEY PANEL -->
+          <div class="mode-panel" id="panel-turnkey">
+            <div class="manual-notice">
+              <strong>⚠ MANUAL QUOTE REQUIRED</strong>
+              Every Full Turnkey + Testing project is unique. No standard pricing applies — our engineer will review your files and contact you within 24 hours with a custom quote.
+            </div>
+            <div class="info-block">
+              <div class="info-block-title">// WHAT'S INCLUDED</div>
+              <div class="info-block-body">
+                ✔ PCB Fabrication (FR4, multi-layer)<br>
+                ✔ SMT Assembly + DIP Through-Hole<br>
+                ✔ Functional Verification (power-on &amp; test)<br>
+                ✔ Engineer Remote Debug Support<br>
+                ✔ 100% AOI Inspection · DFM Review
+              </div>
+            </div>
+            <div class="info-block">
+              <div class="info-block-title">// WHAT YOU NEED TO PREPARE</div>
+              <div class="info-block-body">
+                📁 Gerber files (with stackup &amp; impedance notes)<br>
+                📋 BOM (Bill of Materials)<br>
+                📍 Pick &amp; Place / Centroid file<br>
+                📝 Functional test plan or validation document
+              </div>
+            </div>
+            <div class="info-block danger">
+              <div class="info-block-title">// WE DO NOT ACCEPT</div>
+              <div class="info-block-body">
+                ✗ SMT/DIP only (no PCB fabrication)<br>
+                ✗ Through-hole only boards (no SMT)<br>
+                ✗ Power supply / high-voltage boards
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div class="frow">
-          <div class="fg">
-            <label>PCB LAYERS</label>
-            <select id="layers" name="layers">
-              <option value="">— Select —</option>
-              <option>1 Layer</option>
-              <option>2 Layers</option>
-              <option>4 Layers</option>
-              <option>6 Layers</option>
-              <option>8 Layers</option>
-              <option>10+ Layers</option>
-            </select>
+      </div>
+
+      <!-- 03 FILE UPLOAD -->
+      <div class="card">
+        <div class="card-hdr"><span class="card-ht">03 · UPLOAD FILES</span></div>
+        <div class="card-body">
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="files" multiple accept=".zip,.rar,.gbr,.gerber,.drl,.xls,.xlsx,.csv,.txt,.pdf">
+            <div class="upload-icon">📁</div>
+            <div class="upload-title">DROP FILES HERE OR CLICK TO BROWSE</div>
+            <div class="upload-sub">Pack all files in one ZIP / RAR · Max 50MB</div>
           </div>
-          <div class="fg">
-            <label>BOARD SIZE (mm)</label>
-            <input type="text" id="board_size" name="board_size" placeholder="e.g. 100 x 80 mm">
-          </div>
-        </div>
-        <div class="frow">
-          <div class="fg">
-            <label>SURFACE FINISH</label>
-            <select id="finish" name="finish">
-              <option value="">— Select —</option>
-              <option>HASL Lead-Free</option>
-              <option>ENIG</option>
-              <option>OSP</option>
-              <option>Hard Gold</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label>REQUIRED LEAD TIME</label>
-            <select id="lead_time" name="lead_time">
-              <option value="">— Select —</option>
-              <option>3 Days (Express)</option>
-              <option>5 Days (Standard)</option>
-              <option>7 Days (Economy)</option>
-              <option>Flexible</option>
-            </select>
-          </div>
-        </div>
-        <div class="frow full">
-          <div class="fg">
-            <label>PROJECT NOTES</label>
-            <textarea id="notes" name="notes" placeholder="Special requirements, IPC class, test requirements, component sourcing notes, etc."></textarea>
+          <div class="file-list" id="file-list"></div>
+          <div style="margin-top:.8rem;font-size:.75rem;color:var(--muted);line-height:1.8" id="file-hint">
+            <strong style="color:var(--white);font-family:'Share Tech Mono',monospace;font-size:.68rem">REQUIRED FILES:</strong><br>
+            PCB Only: Gerber files (ZIP or individual .gbr / .drl)<br>
+            SMT Assembly: Gerber + BOM + Pick &amp; Place coordinates<br>
+            Turnkey: Gerber + BOM + Pick &amp; Place + Functional test plan
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- FILE UPLOAD -->
-    <div class="card">
-      <div class="card-hdr"><span class="card-ht">03 · UPLOAD FILES</span></div>
-      <div class="card-body">
-        <div class="upload-zone" id="upload-zone">
-          <input type="file" id="files" name="files" multiple accept=".zip,.rar,.gbr,.gerber,.drl,.xls,.xlsx,.csv,.txt,.pdf">
-          <div class="upload-icon">📁</div>
-          <div class="upload-title">DROP FILES HERE OR CLICK TO BROWSE</div>
-          <div class="upload-sub">Gerber (.zip/.gbr) · BOM (.xls/.xlsx/.csv) · Pick & Place (.csv/.txt) · Max 50MB per file</div>
-        </div>
-        <div class="file-list" id="file-list"></div>
-        <div style="margin-top:1rem;font-size:.75rem;color:var(--muted);line-height:1.8">
-          <strong style="color:var(--white);font-family:'Share Tech Mono',monospace;font-size:.7rem">REQUIRED FILES BY SERVICE:</strong><br>
-          PCB Only: Gerber files (.zip or individual .gbr/.drl)<br>
-          SMT Assembly: Gerber + BOM + Pick & Place coordinates<br>
-          Through-Hole: Gerber + BOM<br>
-          Turnkey PCBA: Gerber + BOM + Pick & Place (we source components)
+      <!-- 04 NOTES -->
+      <div class="card">
+        <div class="card-hdr"><span class="card-ht">04 · ADDITIONAL NOTES</span></div>
+        <div class="card-body">
+          <div class="frow full">
+            <div class="fg">
+              <label>SPECIAL REQUIREMENTS</label>
+              <textarea id="notes" placeholder="IPC class, test requirements, component sourcing notes, delivery address for customer-supplied parts, or any other special requirements..."></textarea>
+            </div>
+          </div>
+          <div style="font-size:.78rem;color:var(--muted);line-height:1.7;margin-top:.5rem">
+            📦 Customer-supplied components ship to:<br>
+            <strong style="color:var(--white)">深圳市龙岗区利好工业园 · Ligao Industrial Park, Longgang, Shenzhen</strong>
+          </div>
         </div>
       </div>
+
     </div>
 
-    <!-- SUBMIT -->
-    <button type="submit" class="submit-btn" id="submit-btn">SUBMIT INQUIRY →</button>
-    <p class="submit-note">By submitting you agree to receive a quote via email within 24 hours.<br>Your files are stored securely and never shared with third parties.</p>
+    <!-- ═══════════ RIGHT: SUMMARY + SUBMIT ═══════════ -->
+    <div class="right-panel">
 
+      <!-- ESTIMATE FROM CALCULATOR -->
+      <div class="estimate-banner" id="estimate-banner" style="display:none">
+        <div class="eb-label">ESTIMATE FROM CALCULATOR</div>
+        <div class="eb-value" id="eb-value">—</div>
+        <div class="eb-note">Final quote confirmed after DFM review</div>
+        <div class="eb-detail" id="eb-detail">—</div>
+      </div>
+
+      <!-- ORDER SUMMARY -->
+      <div class="card">
+        <div class="card-hdr"><span class="card-ht">// ORDER SUMMARY</span></div>
+        <div class="card-body">
+          <div class="rrows">
+            <div class="rrow"><span class="rl">Service</span><span class="rv g" id="s-mode">PCB Fabrication</span></div>
+            <div class="rrow"><span class="rl">Quote type</span><span class="rv" id="s-qtype">—</span></div>
+            <div class="rrow"><span class="rl">Est. price</span><span class="rv g" id="s-price">—</span></div>
+            <div class="rrow"><span class="rl">Includes</span><span class="rv" id="s-includes">DFM Review · AOI</span></div>
+            <div class="rrow"><span class="rl">Production</span><span class="rv">~7 business days</span></div>
+            <div class="rrow"><span class="rl">Shipping</span><span class="rv a">Quoted after production</span></div>
+            <div class="rrow"><span class="rl">Payment</span><span class="rv a">After engineer confirmation</span></div>
+          </div>
+          <div class="divider"></div>
+          <button type="submit" class="obtn" id="submit-btn">SUBMIT INQUIRY →</button>
+          <p class="submit-note">Engineer confirms within 24h · Payment link sent after review · No charge until you approve the quote</p>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="card">
+        <div class="card-hdr"><span class="card-ht">// NEED HELP?</span></div>
+        <div class="card-body">
+          <div style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem">Complex project or urgent timeline? Chat with our engineers directly.</div>
+          <a href="https://wa.me/YOUR_NUMBER?text=Hello+CC+PCBA" target="_blank" style="display:flex;align-items:center;gap:.6rem;background:var(--wa);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.08em;padding:.65rem 1rem;text-decoration:none">
+            <svg width="16" height="16" viewBox="0 0 32 32" fill="black"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
+            WHATSAPP US
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
   </form>
 
-  <!-- SUCCESS -->
+  <!-- SUCCESS STATE -->
   <div class="success-box" id="success-box">
     <div class="success-icon">✅</div>
     <div class="success-title">INQUIRY RECEIVED</div>
     <div class="success-order" id="success-order">Order #CC000000000000</div>
     <div class="success-sub">
       Thank you! We've received your inquiry and files.<br>
-      Our team will review your project and send a formal quote to your email within <strong style="color:var(--white)">24 hours</strong>.<br><br>
+      Our engineer will review your project and send a confirmed quote to your email within <strong style="color:var(--white)">24 hours</strong>.<br><br>
       Save your order number to track your project status.
     </div>
     <a href="#" class="track-btn" id="track-link">TRACK MY ORDER →</a>
@@ -236,30 +473,166 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 </div>
 
 <script>
-// Pre-fill from calculator
+// ── URL PARAMS ──
 var params = new URLSearchParams(window.location.search);
-if(params.get('estimate')){
-  document.getElementById('estimate-banner').style.display='flex';
-  document.getElementById('eb-value').textContent = '$' + parseFloat(params.get('estimate')).toFixed(2);
-  document.getElementById('eb-mode').textContent = params.get('mode') ? params.get('mode').toUpperCase() : '';
-  document.getElementById('eb-qty').textContent = params.get('qty') ? params.get('qty') + ' pcs' : '';
-  if(params.get('mode')){
-    var modeMap = {'pcb':'PCB Only','smt':'SMT Assembly','dip':'Through-Hole','turnkey':'Turnkey PCBA'};
-    var sel = document.getElementById('service_type');
-    var val = modeMap[params.get('mode')];
-    if(val) sel.value = val;
-  }
-  if(params.get('qty')) document.getElementById('quantity').value = params.get('qty');
+var currentMode = params.get('mode') || 'pcb';
+
+// ── MODE SWITCHING ──
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mtab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.mode-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('tab-' + mode).classList.add('active');
+  document.getElementById('panel-' + mode).classList.add('active');
+
+  var titles = { pcb:'02 · PCB PARAMETERS', smt:'02 · SMT ASSEMBLY PARAMETERS', turnkey:'02 · FULL TURNKEY + TESTING' };
+  document.getElementById('params-title').textContent = titles[mode];
+
+  var modeLabels = { pcb:'PCB Fabrication', smt:'PCB + SMT Assembly', turnkey:'Full Turnkey + Testing' };
+  document.getElementById('s-mode').textContent = modeLabels[mode];
+
+  updateSummary();
 }
 
-// File upload UI
+document.querySelectorAll('.mtab').forEach(function(tab){
+  tab.addEventListener('click', function(){ setMode(tab.dataset.mode); });
+});
+
+// ── PRE-FILL FROM HOMEPAGE CALCULATOR ──
+function prefillFromParams() {
+  if (!params.get('mode')) return;
+
+  // PCB params
+  if (currentMode === 'pcb') {
+    if (params.get('material')) setVal('pcb-material', params.get('material'));
+    if (params.get('qty'))      setVal('pcb-qty',      params.get('qty'));
+    if (params.get('w'))        setVal('pcb-w',        params.get('w'));
+    if (params.get('h'))        setVal('pcb-h',        params.get('h'));
+    if (params.get('thick'))    setVal('pcb-thick',    params.get('thick'));
+    if (params.get('drill'))    setVal('pcb-drill',    params.get('drill'));
+    if (params.get('impedance'))setVal('pcb-impedance',params.get('impedance'));
+    if (params.get('copper'))   setVal('pcb-copper',   params.get('copper'));
+    if (params.get('finish'))   setVal('pcb-finish',   params.get('finish'));
+    if (params.get('color'))    setVal('pcb-color',    params.get('color'));
+  }
+
+  // SMT params
+  if (currentMode === 'smt') {
+    if (params.get('qty'))    setVal('smt-qty',    params.get('qty'));
+    if (params.get('sides'))  setVal('smt-sides',  params.get('sides'));
+    if (params.get('parts'))  setVal('smt-parts',  params.get('parts'));
+    if (params.get('ic'))     setVal('smt-ic',     params.get('ic'));
+    if (params.get('dip'))    setVal('smt-dip',    params.get('dip'));
+    if (params.get('supply')) setVal('smt-supply', params.get('supply'));
+  }
+
+  // Estimate banner
+  if (params.get('estimate')) {
+    var banner = document.getElementById('estimate-banner');
+    banner.style.display = 'block';
+    document.getElementById('eb-value').textContent = 'FROM $' + parseFloat(params.get('estimate')).toFixed(0);
+    var detail = [];
+    if (params.get('qty')) detail.push(params.get('qty') + ' pcs');
+    if (params.get('sides')) detail.push(params.get('sides') === 'single' ? 'Single Side' : 'Double Side');
+    document.getElementById('eb-detail').textContent = detail.join(' · ') || '—';
+  }
+}
+
+function setVal(id, val) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.value = val;
+}
+
+// ── SUMMARY UPDATER ──
+function updateSummary() {
+  if (currentMode === 'pcb') {
+    var mat = document.getElementById('pcb-material').value;
+    var qty = document.getElementById('pcb-qty').value;
+    var W   = parseFloat(document.getElementById('pcb-w').value) || 0;
+    var H   = parseFloat(document.getElementById('pcb-h').value) || 0;
+    var drill = document.getElementById('pcb-drill').value;
+    var imp   = document.getElementById('pcb-impedance').value;
+    var copper= document.getElementById('pcb-copper').value;
+
+    var isManual = (mat !== 'fr4' || qty === 'manual' || W > 200 || H > 200 || copper !== '1oz');
+    var tier = 0;
+    if (!isManual) {
+      if (drill === '0.3' && imp === 'no')  tier = 1;
+      else if (drill === '0.3' && imp === 'yes') tier = 2;
+      else if ((drill === '0.2' || drill === '0.25') && imp === 'yes') tier = 3;
+      else isManual = true;
+    }
+
+    if (isManual) {
+      document.getElementById('s-qtype').textContent = 'Manual Quote';
+      document.getElementById('s-qtype').className = 'rv a';
+      document.getElementById('s-price').textContent = 'To be confirmed';
+      document.getElementById('s-price').className = 'rv a';
+      document.getElementById('s-includes').textContent = 'DFM Review · AOI';
+      document.getElementById('submit-btn').className = 'obtn manual';
+    } else {
+      var prices = {1:50, 2:75, 3:100};
+      var af = Math.max(1, (W * H) / 10000);
+      var total = Math.round(prices[tier] * af);
+      document.getElementById('s-qtype').textContent = 'Standard — Est. price shown';
+      document.getElementById('s-qtype').className = 'rv g';
+      document.getElementById('s-price').textContent = 'FROM $' + total;
+      document.getElementById('s-price').className = 'rv g';
+      document.getElementById('s-includes').textContent = 'DFM Review · LeadFree HASL · AOI';
+      document.getElementById('submit-btn').className = 'obtn';
+    }
+
+  } else if (currentMode === 'smt') {
+    var qty2   = document.getElementById('smt-qty').value;
+    var parts  = parseInt(document.getElementById('smt-parts').value) || 0;
+    var ic     = parseInt(document.getElementById('smt-ic').value) || 0;
+    var dip    = parseInt(document.getElementById('smt-dip').value) || 0;
+    var supply = document.getElementById('smt-supply').value;
+    var sides  = document.getElementById('smt-sides').value;
+
+    var isManual2 = (qty2 === 'manual' || parts >= 200 || ic >= 10 || dip > 100 || supply === 'us');
+    if (isManual2) {
+      document.getElementById('s-qtype').textContent = 'Manual Quote';
+      document.getElementById('s-qtype').className = 'rv a';
+      document.getElementById('s-price').textContent = 'To be confirmed';
+      document.getElementById('s-price').className = 'rv a';
+      document.getElementById('s-includes').textContent = 'SMT + DIP + Stencil + AOI';
+      document.getElementById('submit-btn').className = 'obtn manual';
+    } else {
+      var base = sides === 'single' ? 200 : 400;
+      document.getElementById('s-qtype').textContent = 'Standard — Est. price shown';
+      document.getElementById('s-qtype').className = 'rv g';
+      document.getElementById('s-price').textContent = 'FROM $' + base + ' (all-in)';
+      document.getElementById('s-price').className = 'rv g';
+      document.getElementById('s-includes').textContent = 'SMT + DIP(≤100 pins) + Stencil + AOI';
+      document.getElementById('submit-btn').className = 'obtn';
+    }
+
+  } else {
+    document.getElementById('s-qtype').textContent = 'Manual Quote';
+    document.getElementById('s-qtype').className = 'rv a';
+    document.getElementById('s-price').textContent = 'To be confirmed';
+    document.getElementById('s-price').className = 'rv a';
+    document.getElementById('s-includes').textContent = 'PCB + SMT + DIP + Functional Test';
+    document.getElementById('submit-btn').className = 'obtn manual';
+  }
+}
+
+// ── LISTEN TO FORM CHANGES ──
+document.querySelectorAll('select, input[type=number]').forEach(function(el){
+  el.addEventListener('change', updateSummary);
+  if (el.type === 'number') el.addEventListener('input', updateSummary);
+});
+
+// ── FILE UPLOAD ──
 var selectedFiles = [];
 var uploadZone = document.getElementById('upload-zone');
-var fileInput = document.getElementById('files');
-var fileList = document.getElementById('file-list');
+var fileInput  = document.getElementById('files');
+var fileList   = document.getElementById('file-list');
 
-uploadZone.addEventListener('dragover', function(e){ e.preventDefault(); uploadZone.classList.add('drag'); });
-uploadZone.addEventListener('dragleave', function(){ uploadZone.classList.remove('drag'); });
+uploadZone.addEventListener('dragover',  function(e){ e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', function(){  uploadZone.classList.remove('drag'); });
 uploadZone.addEventListener('drop', function(e){
   e.preventDefault(); uploadZone.classList.remove('drag');
   addFiles(e.dataTransfer.files);
@@ -267,7 +640,7 @@ uploadZone.addEventListener('drop', function(e){
 fileInput.addEventListener('change', function(){ addFiles(this.files); });
 
 function addFiles(files){
-  for(var i=0;i<files.length;i++){
+  for(var i = 0; i < files.length; i++){
     if(selectedFiles.length >= 5){ alert('Maximum 5 files allowed.'); break; }
     selectedFiles.push(files[i]);
   }
@@ -280,18 +653,18 @@ function renderFileList(){
     var item = document.createElement('div');
     item.className = 'file-item';
     var size = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
-    item.innerHTML = '<span class="file-name">📄 '+f.name+'</span><span style="display:flex;align-items:center;gap:.8rem"><span class="file-size">'+size+'</span><span class="file-remove" data-idx="'+idx+'">✕</span></span>';
+    item.innerHTML = '<span class="file-name">📄 '+f.name+'</span><span style="display:flex;align-items:center;gap:.8rem"><span style="font-size:.7rem;color:var(--muted)">'+size+'</span><span class="file-remove" data-idx="'+idx+'">✕</span></span>';
     fileList.appendChild(item);
   });
   fileList.querySelectorAll('.file-remove').forEach(function(btn){
     btn.addEventListener('click', function(){
-      selectedFiles.splice(parseInt(this.dataset.idx),1);
+      selectedFiles.splice(parseInt(this.dataset.idx), 1);
       renderFileList();
     });
   });
 }
 
-// FORM SUBMIT
+// ── FORM SUBMIT ──
 document.getElementById('inquiry-form').addEventListener('submit', async function(e){
   e.preventDefault();
   var btn = document.getElementById('submit-btn');
@@ -299,23 +672,39 @@ document.getElementById('inquiry-form').addEventListener('submit', async functio
   btn.innerHTML = '<span class="spinner"></span>SUBMITTING...';
 
   var formData = new FormData();
-  formData.append('name', document.getElementById('name').value);
-  formData.append('email', document.getElementById('email').value);
-  formData.append('whatsapp', document.getElementById('whatsapp').value);
-  formData.append('service_type', document.getElementById('service_type').value);
-  formData.append('quantity', document.getElementById('quantity').value);
-  formData.append('notes', [
-    document.getElementById('layers').value,
-    document.getElementById('board_size').value,
-    document.getElementById('finish').value,
-    document.getElementById('lead_time').value,
-    document.getElementById('notes').value
-  ].filter(Boolean).join(' | '));
-  formData.append('quote_estimate', params.get('estimate') || '');
+  formData.append('mode',        currentMode);
+  formData.append('name',        document.getElementById('name').value);
+  formData.append('email',       document.getElementById('email').value);
+  formData.append('whatsapp',    document.getElementById('whatsapp').value);
+  formData.append('company',     document.getElementById('company').value);
+  formData.append('notes',       document.getElementById('notes').value);
+  formData.append('estimate',    params.get('estimate') || '');
+
+  // mode-specific params
+  if (currentMode === 'pcb') {
+    formData.append('pcb_material',   document.getElementById('pcb-material').value);
+    formData.append('pcb_qty',        document.getElementById('pcb-qty').value);
+    formData.append('pcb_w',          document.getElementById('pcb-w').value);
+    formData.append('pcb_h',          document.getElementById('pcb-h').value);
+    formData.append('pcb_thick',      document.getElementById('pcb-thick').value);
+    formData.append('pcb_drill',      document.getElementById('pcb-drill').value);
+    formData.append('pcb_impedance',  document.getElementById('pcb-impedance').value);
+    formData.append('pcb_copper',     document.getElementById('pcb-copper').value);
+    formData.append('pcb_finish',     document.getElementById('pcb-finish').value);
+    formData.append('pcb_color',      document.getElementById('pcb-color').value);
+  } else if (currentMode === 'smt') {
+    formData.append('smt_qty',    document.getElementById('smt-qty').value);
+    formData.append('smt_sides',  document.getElementById('smt-sides').value);
+    formData.append('smt_parts',  document.getElementById('smt-parts').value);
+    formData.append('smt_ic',     document.getElementById('smt-ic').value);
+    formData.append('smt_dip',    document.getElementById('smt-dip').value);
+    formData.append('smt_supply', document.getElementById('smt-supply').value);
+  }
+
   selectedFiles.forEach(function(f){ formData.append('files', f); });
 
   try {
-    var res = await fetch('/api/inquiry', { method: 'POST', body: formData });
+    var res  = await fetch('/api/inquiry', { method:'POST', body:formData });
     var data = await res.json();
     if(data.success){
       document.getElementById('inquiry-form').style.display = 'none';
@@ -335,6 +724,10 @@ document.getElementById('inquiry-form').addEventListener('submit', async functio
     btn.innerHTML = 'SUBMIT INQUIRY →';
   }
 });
+
+// ── INIT ──
+setMode(currentMode);
+prefillFromParams();
 </script>
 </body>
 </html>
