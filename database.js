@@ -3,116 +3,130 @@ const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('railway')
-    ? { rejectUnauthorized: false }
-    : false
+    ? { rejectUnauthorized: false } : false
 });
 
 async function init() {
-  await pool.query(`CREATE TABLE IF NOT EXISTS inquiries (
-    id                SERIAL PRIMARY KEY,
-    order_no          TEXT UNIQUE NOT NULL,
-    name              TEXT NOT NULL,
-    email             TEXT NOT NULL,
-    whatsapp          TEXT,
-    service_type      TEXT NOT NULL,
-    quantity          INTEGER,
-    pcb_layers        TEXT,
-    pcb_size_x        REAL,
-    pcb_size_y        REAL,
-    pcb_thickness     TEXT,
-    pcb_material      TEXT,
-    pcb_surface       TEXT,
-    pcb_color         TEXT,
-    smt_points        INTEGER DEFAULT 0,
-    dip_points        INTEGER DEFAULT 0,
-    smt_sides         TEXT,
-    components_supply TEXT,
-    testing_service   TEXT DEFAULT 'none',
-    notes             TEXT,
-    manual_quote      INTEGER DEFAULT 0,
-    files             TEXT,
-    status            TEXT DEFAULT 'pending',
-    quote_amount      REAL,
-    admin_notes       TEXT,
-    supplier          TEXT,
-    supplier_order_no TEXT,
-    tracking_no       TEXT,
-    created_at        TIMESTAMPTZ DEFAULT NOW(),
-    updated_at        TIMESTAMPTZ
+  // ── users ──────────────────────────────────────────────
+  await pool.query(`CREATE TABLE IF NOT EXISTS users (
+    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email            TEXT UNIQUE NOT NULL,
+    password_hash    TEXT,
+    name             TEXT NOT NULL DEFAULT '',
+    company          TEXT,
+    whatsapp         TEXT,
+    customer_type    TEXT NOT NULL DEFAULT 'normal',
+    note             TEXT,
+    google_id        TEXT UNIQUE,
+    github_id        TEXT UNIQUE,
+    email_verified   BOOLEAN NOT NULL DEFAULT FALSE,
+    verify_token     TEXT,
+    reset_token      TEXT,
+    reset_expires    TIMESTAMPTZ,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_login_at    TIMESTAMPTZ
   )`);
 
-  await pool.query(`ALTER TABLE inquiries ADD COLUMN IF NOT EXISTS testing_service TEXT DEFAULT 'none'`).catch(()=>{});
-
-  await pool.query(`CREATE TABLE IF NOT EXISTS pricing_config (
-    id         SERIAL PRIMARY KEY,
-    category   TEXT NOT NULL,
-    key        TEXT NOT NULL,
-    label      TEXT NOT NULL,
-    value      TEXT NOT NULL,
-    unit       TEXT,
-    updated_at TIMESTAMPTZ,
-    UNIQUE(category, key)
+  // ── addresses ──────────────────────────────────────────
+  await pool.query(`CREATE TABLE IF NOT EXISTS addresses (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    label        TEXT NOT NULL DEFAULT 'Home',
+    recipient    TEXT NOT NULL,
+    phone        TEXT,
+    address_line TEXT NOT NULL,
+    city         TEXT NOT NULL,
+    country      TEXT NOT NULL DEFAULT 'US',
+    is_default   BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`);
 
-  await pool.query(`CREATE TABLE IF NOT EXISTS site_config (
-    id         SERIAL PRIMARY KEY,
-    key        TEXT UNIQUE NOT NULL,
-    value      TEXT,
-    label      TEXT,
-    updated_at TIMESTAMPTZ
+  // ── orders ─────────────────────────────────────────────
+  await pool.query(`CREATE TABLE IF NOT EXISTS orders (
+    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_no       TEXT UNIQUE NOT NULL,
+    user_id        UUID REFERENCES users(id) ON DELETE SET NULL,
+    guest_email    TEXT,
+    mode           TEXT NOT NULL,
+    status         TEXT NOT NULL DEFAULT 'pending',
+    params         JSONB NOT NULL DEFAULT '{}',
+    estimate       NUMERIC(10,2),
+    quoted_price   NUMERIC(10,2),
+    shipping_fee   NUMERIC(10,2),
+    total_paid     NUMERIC(10,2),
+    payment_method TEXT,
+    payment_ref    TEXT,
+    tracking_no    TEXT,
+    notes          TEXT,
+    admin_note     TEXT,
+    files          JSONB NOT NULL DEFAULT '[]',
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`);
 
-  const { rows: sc } = await pool.query('SELECT COUNT(*) as cnt FROM site_config');
-  if (parseInt(sc[0].cnt) === 0) {
-    const siteDefaults = [
-      ['company_name',    'CC PCBA',                                                                       '公司名称'],
-      ['whatsapp_number', process.env.WHATSAPP_NUMBER || '',                                               'WhatsApp号码'],
-      ['contact_email',   process.env.CONTACT_EMAIL || '',                                                 '联系邮箱'],
-      ['hero_title',      'From Gerber to Working PCBA — Tested & Verified Before Shipping',              'Hero主标题'],
-      ['hero_subtitle',   'PCB Fab · SMT · DIP · Functional Testing · Remote Debug Support',             'Hero副标题'],
-      ['seo_home_title',  'CC PCBA — Tested & Verified PCBA Assembly, Free Shipping to USA',             '首页Title'],
-      ['seo_home_desc',   'One-stop PCBA service with functional testing. PCB fab, SMT, DIP, turnkey.',  '首页Description'],
-      ['seo_quote_title', 'Submit Inquiry — CC PCBA',                                                     '询价页Title'],
-      ['seo_track_title', 'Track Order — CC PCBA',                                                        '追踪页Title'],
-    ];
-    for (const [key, value, label] of siteDefaults) {
-      await pool.query(
-        'INSERT INTO site_config (key, value, label, updated_at) VALUES ($1,$2,$3,NOW()) ON CONFLICT (key) DO NOTHING',
-        [key, value, label]
-      );
-    }
-    console.log('Default site_config seeded.');
+  // ── settings ───────────────────────────────────────────
+  await pool.query(`CREATE TABLE IF NOT EXISTS settings (
+    key         TEXT PRIMARY KEY,
+    value       TEXT NOT NULL DEFAULT '',
+    description TEXT,
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`);
+
+  // ── admin_users ────────────────────────────────────────
+  await pool.query(`CREATE TABLE IF NOT EXISTS admin_users (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email         TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    name          TEXT NOT NULL DEFAULT 'Admin',
+    role          TEXT NOT NULL DEFAULT 'admin',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_login_at TIMESTAMPTZ
+  )`);
+
+  // ── seed default settings ──────────────────────────────
+  const defaults = [
+    ['whatsapp_number',     '',                   'WhatsApp 联系号码（含国码，如 +85212345678）'],
+    ['shipping_address',    'Ligao Industrial Park, Longgang, Shenzhen, China', '客供料收件地址'],
+    ['contact_email',       '',                   '运营联系邮箱'],
+    ['company_name',        'CC PCBA',            '公司名称'],
+    ['google_oauth_enabled','false',              'Google OAuth 登录开关（true/false）'],
+    ['github_oauth_enabled','false',              'GitHub OAuth 登录开关（true/false）'],
+    ['pcb_tier1_price',     '50',                 'PCB Tier1 最低价（$）'],
+    ['pcb_tier2_price',     '75',                 'PCB Tier2 最低价（$）'],
+    ['pcb_tier3_price',     '100',                'PCB Tier3 最低价（$）'],
+    ['smt_single_price',    '200',                'SMT 单面全包价（$）'],
+    ['smt_double_price',    '400',                'SMT 双面全包价（$）'],
+    ['smt_max_parts',       '200',                'SMT 标准单最大元件数'],
+    ['smt_max_ic',          '10',                 'SMT 标准单最大复杂IC数'],
+    ['smt_max_dip',         '100',                'SMT 标准单最大插件脚数'],
+  ];
+  for (const [key, value, description] of defaults) {
+    await pool.query(
+      `INSERT INTO settings (key, value, description, updated_at)
+       VALUES ($1,$2,$3,NOW())
+       ON CONFLICT (key) DO NOTHING`,
+      [key, value, description]
+    );
   }
 
-  const { rows: pc } = await pool.query('SELECT COUNT(*) as cnt FROM pricing_config');
-  if (parseInt(pc[0].cnt) === 0) {
-    const defaults = [
-      ['pcb',  'base_1l',    '1 Layer base price',     '15',  'USD'],
-      ['pcb',  'base_2l',    '2 Layer base price',     '25',  'USD'],
-      ['pcb',  'base_4l',    '4 Layer base price',     '55',  'USD'],
-      ['pcb',  'base_6l',    '6 Layer base price',     '90',  'USD'],
-      ['pcb',  'finish_enig','ENIG surcharge',          '20',  'USD'],
-      ['smt',  'single',     'Single side base',        '200', 'USD'],
-      ['smt',  'double',     'Double side base',        '400', 'USD'],
-      ['smt',  'max_points', 'Max SMT points (base)',   '200', 'pts'],
-      ['smt',  'max_ic',     'Max ICs (base)',          '10',  'pcs'],
-      ['dip',  'free_limit', 'Free DIP points limit',   '100', 'pts'],
-      ['ship', 'us_free',    'US shipping',             '0',   'USD'],
-    ];
-    for (const [category, key, label, value, unit] of defaults) {
-      await pool.query(
-        'INSERT INTO pricing_config (category, key, label, value, unit, updated_at) VALUES ($1,$2,$3,$4,$5,NOW()) ON CONFLICT (category, key) DO NOTHING',
-        [category, key, label, value, unit]
-      );
-    }
-    console.log('Default pricing config seeded.');
+  // ── seed default admin（首次部署用，建议上线后修改密码）──
+  const bcrypt = require('bcryptjs');
+  const { rows: admins } = await pool.query('SELECT COUNT(*) AS cnt FROM admin_users');
+  if (parseInt(admins[0].cnt) === 0) {
+    const hash = await bcrypt.hash(process.env.ADMIN_DEFAULT_PASSWORD || 'ccpcba2026', 12);
+    await pool.query(
+      `INSERT INTO admin_users (email, password_hash, name, role)
+       VALUES ($1,$2,'Super Admin','superadmin')`,
+      [process.env.ADMIN_EMAIL || 'admin@ccpcba.com', hash]
+    );
+    console.log('Default admin seeded. PLEASE CHANGE PASSWORD after first login.');
   }
 
-  console.log('Database ready.');
+  console.log('✅ Database ready.');
 }
 
 init().catch(err => {
-  console.error('DB init error:', err);
+  console.error('DB init error:', err.message);
   process.exit(1);
 });
 
