@@ -1,13 +1,18 @@
 require('dotenv').config();
-const express = require('express');
-const multer = require('multer');
-const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
-const pool = require('./database');
+const express  = require('express');
+const cors     = require('cors');
+const path     = require('path');
+const fs       = require('fs');
+const multer   = require('multer');
+const jwt      = require('jsonwebtoken');
+const bcrypt   = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+const pool     = require('./database');
 
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET       = process.env.JWT_SECRET       || 'cc_pcba_jwt_secret_change_me';
+const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET || 'cc_pcba_admin_secret_change_me';
 
 app.use(cors());
 app.use(express.json());
@@ -16,227 +21,647 @@ app.use(express.static('public'));
 app.use('/admin', express.static('admin'));
 app.use('/uploads', express.static('uploads'));
 
+// ── 文件上传 ────────────────────────────────────────────
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination(req, file, cb) {
     const dir = path.join('uploads', Date.now() + '_' + Math.random().toString(36).substr(2,6));
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
-  filename: function (req, file, cb) { cb(null, file.originalname); }
+  filename(req, file, cb) { cb(null, file.originalname); }
 });
 const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 },
-  fileFilter: function (req, file, cb) {
+  fileFilter(req, file, cb) {
     const allowed = ['.zip','.rar','.gerber','.gbr','.drl','.xls','.xlsx','.csv','.txt','.pdf'];
-    const ext = path.extname(file.originalname).toLowerCase();
-    allowed.includes(ext) ? cb(null, true) : cb(new Error('File type not allowed: ' + ext));
+    allowed.includes(path.extname(file.originalname).toLowerCase())
+      ? cb(null, true) : cb(new Error('File type not allowed'));
   }
 });
 
-function adminAuth(req, res, next) {
-  const token = req.headers['x-admin-token'] || req.query.token;
-  if (token === process.env.ADMIN_TOKEN) return next();
-  res.status(401).json({ error: 'Unauthorized' });
+// ── 邮件工具 ────────────────────────────────────────────
+async function sendMail({ to, subject, html }) {
+  if (!process.env.RESEND_API_KEY) {
+    console.log('[MAIL SKIP] No RESEND_API_KEY. To:', to, 'Subject:', subject);
+    return;
+  }
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: process.env.MAIL_FROM || 'noreply@ccpcba.com', to, subject, html })
+  });
+  if (!res.ok) console.error('[MAIL ERROR]', await res.text());
 }
 
-// --- 客户 API ---
+// ── 生成订单号 ────────────────────────────────────────────
+function genOrderNo() {
+  const now  = new Date();
+  const ymd  = now.getFullYear().toString().slice(-2) +
+               String(now.getMonth()+1).padStart(2,'0') +
+               String(now.getDate()).padStart(2,'0');
+  const rand = Math.random().toString(36).substr(2,5).toUpperCase();
+  return 'CC' + ymd + rand;
+}
 
+// ── 中间件：客户 JWT ─────────────────────────────────────
+function userAuth(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch { res.status(401).json({ error: 'Token expired or invalid' }); }
+}
+
+// ── 中间件：管理员 JWT ────────────────────────────────────
+function adminAuth(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Admin not authenticated' });
+  try {
+    req.admin = jwt.verify(token, JWT_ADMIN_SECRET);
+    next();
+  } catch { res.status(401).json({ error: 'Admin token expired or invalid' }); }
+}
+
+// ═══════════════════════════════════════════════════════
+// PUBLIC APIS
+// ═══════════════════════════════════════════════════════
+
+// 前台公开配置（WA号码、收件地址等）
+app.get('/api/settings/public', async (req, res) => {
+  try {
+    const PUBLIC_KEYS = ['whatsapp_number','shipping_address','company_name',
+                         'smt_single_price','smt_double_price','pcb_tier1_price',
+                         'pcb_tier2_price','pcb_tier3_price','smt_max_parts',
+                         'smt_max_ic','smt_max_dip','google_oauth_enabled','github_oauth_enabled'];
+    const placeholders = PUBLIC_KEYS.map((_,i) => `$${i+1}`).join(',');
+    const { rows } = await pool.query(
+      `SELECT key, value FROM settings WHERE key IN (${placeholders})`, PUBLIC_KEYS
+    );
+    const cfg = {};
+    rows.forEach(r => { cfg[r.key] = r.value; });
+    res.json(cfg);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 提交询价
 app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
   try {
-    const {
-      name, email, whatsapp, service_type, quantity,
-      pcb_layers, pcb_size_x, pcb_size_y, pcb_thickness,
-      pcb_material, pcb_surface, pcb_color,
-      smt_points, dip_points, smt_sides,
-      components_supply, testing_service, notes
-    } = req.body;
+    const { mode, name, email, whatsapp, company, notes, estimate } = req.body;
+    if (!name || !email || !mode) return res.status(400).json({ error: 'name, email, mode required' });
 
-    if (!name || !email || !service_type) {
-      return res.status(400).json({ error: 'Missing required fields: name, email, service_type' });
+    const params = {};
+    if (mode === 'pcb') {
+      Object.assign(params, {
+        material: req.body.pcb_material, qty: req.body.pcb_qty,
+        w: req.body.pcb_w, h: req.body.pcb_h, thick: req.body.pcb_thick,
+        drill: req.body.pcb_drill, impedance: req.body.pcb_impedance,
+        copper: req.body.pcb_copper, finish: req.body.pcb_finish, color: req.body.pcb_color
+      });
+    } else if (mode === 'smt') {
+      Object.assign(params, {
+        qty: req.body.smt_qty, sides: req.body.smt_sides, parts: req.body.smt_parts,
+        ic: req.body.smt_ic, dip: req.body.smt_dip, supply: req.body.smt_supply
+      });
     }
 
-    const qty = parseInt(quantity) || 0;
-    const smtPts = parseInt(smt_points) || 0;
-    const dipPts = parseInt(dip_points) || 0;
-    const specialMaterials = ['Rogers','PTFE','Flex','Rigid-Flex','Other'];
-    const hasTestingService = testing_service && testing_service !== 'none';
+    const files = req.files ? req.files.map(f => ({ name: f.originalname, path: f.path, size: f.size })) : [];
+    const order_no = genOrderNo();
 
-    const manual = (
-      qty > 20 ||
-      pcb_layers === '8+' ||
-      specialMaterials.includes(pcb_material) ||
-      smtPts > 200 ||
-      dipPts > 100 ||
-      hasTestingService ||
-      (notes && notes.trim().length > 0)
-    ) ? 1 : 0;
-
-    const files = req.files ? req.files.map(f => f.path).join(',') : '';
-    const order_no = 'CC' + Date.now();
+    // 找已注册用户
+    const { rows: users } = await pool.query('SELECT id FROM users WHERE email=$1', [email]);
+    const user_id = users.length ? users[0].id : null;
 
     await pool.query(
-      `INSERT INTO inquiries
-        (order_no,name,email,whatsapp,service_type,quantity,
-         pcb_layers,pcb_size_x,pcb_size_y,pcb_thickness,pcb_material,pcb_surface,pcb_color,
-         smt_points,dip_points,smt_sides,components_supply,testing_service,notes,
-         manual_quote,files,status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,'pending')`,
-      [order_no, name, email, whatsapp, service_type, qty,
-       pcb_layers, pcb_size_x, pcb_size_y, pcb_thickness, pcb_material, pcb_surface, pcb_color,
-       smtPts, dipPts, smt_sides, components_supply, testing_service||'none', notes,
-       manual, files]
+      `INSERT INTO orders (order_no, user_id, guest_email, mode, params, estimate, notes, files)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [order_no, user_id, user_id ? null : email, mode,
+       JSON.stringify(params), estimate ? parseFloat(estimate) : null, notes, JSON.stringify(files)]
     );
 
-    let message = '';
-    if (manual) {
-      if (hasTestingService) {
-        message = 'Your inquiry includes testing/debug services which require custom quotation. We will contact you within 24 hours via WhatsApp/Email.';
-      } else {
-        message = 'Your order requires manual quotation. We will contact you within 24 hours via WhatsApp/Email.';
-      }
-    } else {
-      message = 'Inquiry received! We will send your quote within 24 hours.';
+    // 通知运营
+    const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='contact_email'`);
+    const adminEmail = cfg[0]?.value;
+    if (adminEmail) {
+      await sendMail({
+        to: adminEmail,
+        subject: `[CC PCBA] New Inquiry ${order_no} — ${mode.toUpperCase()}`,
+        html: `<h2>New Inquiry Received</h2>
+          <p><b>Order:</b> ${order_no}</p>
+          <p><b>Customer:</b> ${name} &lt;${email}&gt;</p>
+          <p><b>Mode:</b> ${mode}</p>
+          <p><b>Notes:</b> ${notes || '—'}</p>
+          <p><a href="${process.env.SITE_URL || ''}/admin">Open Admin Panel</a></p>`
+      });
     }
 
-    res.json({ success: true, order_no, manual_quote: manual === 1, message });
+    res.json({ success: true, order_no });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-app.get('/api/track/:order_no', async (req, res) => {
+// 查询订单（凭订单号+邮箱）
+app.post('/api/order/lookup', async (req, res) => {
   try {
+    const { order_no, email } = req.body;
+    if (!order_no || !email) return res.status(400).json({ error: 'order_no and email required' });
     const { rows } = await pool.query(
-      `SELECT order_no,name,service_type,quantity,status,quote_amount,
-              testing_service,notes,admin_notes,tracking_no,created_at,updated_at
-       FROM inquiries WHERE order_no = $1`,
-      [req.params.order_no]
+      `SELECT o.order_no, o.mode, o.status, o.params, o.estimate, o.quoted_price,
+              o.shipping_fee, o.total_paid, o.tracking_no, o.notes, o.created_at, o.updated_at,
+              u.name as customer_name
+       FROM orders o LEFT JOIN users u ON o.user_id = u.id
+       WHERE o.order_no=$1 AND (o.guest_email=$2 OR u.email=$2)`,
+      [order_no.toUpperCase(), email.toLowerCase()]
     );
     if (!rows.length) return res.status(404).json({ error: 'Order not found' });
     res.json(rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/config', async (req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT key, value FROM site_config');
-    const cfg = {};
-    rows.forEach(r => { cfg[r.key] = r.value; });
-    res.json(cfg);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// ═══════════════════════════════════════════════════════
+// AUTH APIS
+// ═══════════════════════════════════════════════════════
 
-// --- 后台 API ---
-
-app.get('/api/admin/stats', adminAuth, async (req, res) => {
+// 注册
+app.post('/api/auth/register', async (req, res) => {
   try {
-    const { rows } = await pool.query(`SELECT
-      COUNT(*) as total,
-      SUM(CASE WHEN created_at::date = CURRENT_DATE THEN 1 ELSE 0 END) as today,
-      SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) as pending,
-      SUM(CASE WHEN status='quoted' THEN 1 ELSE 0 END) as quoted,
-      SUM(CASE WHEN status='paid' THEN 1 ELSE 0 END) as paid,
-      SUM(CASE WHEN status='production' THEN 1 ELSE 0 END) as production,
-      SUM(CASE WHEN status='shipped' THEN 1 ELSE 0 END) as shipped,
-      SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed,
-      SUM(CASE WHEN manual_quote=1 THEN 1 ELSE 0 END) as manual
-    FROM inquiries`);
-    res.json(rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    const { email, password, name } = req.body;
+    if (!email || !password || !name) return res.status(400).json({ error: 'email, password, name required' });
+    if (password.length < 8) return res.status(400).json({ error: 'Password min 8 characters' });
 
-app.get('/api/admin/inquiries', adminAuth, async (req, res) => {
-  try {
-    const { status, page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
-    let sql = 'SELECT * FROM inquiries';
-    const params = [];
-    if (status) { sql += ' WHERE status = $1'; params.push(status); }
-    sql += ` ORDER BY created_at DESC LIMIT $${params.length+1} OFFSET $${params.length+2}`;
-    params.push(Number(limit), Number(offset));
-    const { rows } = await pool.query(sql, params);
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    const { rows: exists } = await pool.query('SELECT id FROM users WHERE email=$1', [email.toLowerCase()]);
+    if (exists.length) return res.status(409).json({ error: 'Email already registered' });
 
-app.get('/api/admin/inquiries/:id', adminAuth, async (req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT * FROM inquiries WHERE id = $1', [req.params.id]);
-    if (!rows.length) return res.status(404).json({ error: 'Not found' });
-    res.json(rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.patch('/api/admin/inquiries/:id', adminAuth, async (req, res) => {
-  try {
-    const { status, quote_amount, admin_notes, supplier, supplier_order_no, tracking_no } = req.body;
+    const hash         = await bcrypt.hash(password, 12);
+    const verify_token = uuidv4();
     await pool.query(
-      `UPDATE inquiries SET
-        status=COALESCE($1,status),
-        quote_amount=COALESCE($2,quote_amount),
-        admin_notes=COALESCE($3,admin_notes),
-        supplier=COALESCE($4,supplier),
-        supplier_order_no=COALESCE($5,supplier_order_no),
-        tracking_no=COALESCE($6,tracking_no),
-        updated_at=NOW()
-       WHERE id=$7`,
-      [status, quote_amount, admin_notes, supplier, supplier_order_no, tracking_no, req.params.id]
+      `INSERT INTO users (email, password_hash, name, verify_token) VALUES ($1,$2,$3,$4)`,
+      [email.toLowerCase(), hash, name, verify_token]
+    );
+
+    const verifyUrl = `${process.env.SITE_URL || ''}/api/auth/verify?token=${verify_token}`;
+    await sendMail({
+      to: email,
+      subject: 'Verify your CC PCBA account',
+      html: `<h2>Welcome to CC PCBA</h2>
+        <p>Hi ${name}, please verify your email:</p>
+        <p><a href="${verifyUrl}" style="background:#00FF41;color:#000;padding:10px 20px;text-decoration:none;font-weight:bold">VERIFY EMAIL</a></p>
+        <p>Link expires in 24 hours.</p>`
+    });
+
+    res.json({ success: true, message: 'Registration successful. Please check your email to verify.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 邮箱验证
+app.get('/api/auth/verify', async (req, res) => {
+  try {
+    const { token } = req.query;
+    const { rows } = await pool.query(
+      `UPDATE users SET email_verified=TRUE, verify_token=NULL WHERE verify_token=$1 RETURNING id`,
+      [token]
+    );
+    if (!rows.length) return res.status(400).send('Invalid or expired verification link.');
+    res.redirect('/account.html?verified=1');
+  } catch (err) { res.status(500).send('Server error'); }
+});
+
+// 登录
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const { rows } = await pool.query('SELECT * FROM users WHERE email=$1', [email?.toLowerCase()]);
+    if (!rows.length) return res.status(401).json({ error: 'Invalid email or password' });
+
+    const user = rows[0];
+    if (!user.password_hash) return res.status(401).json({ error: 'This account uses social login. Please sign in with Google or GitHub.' });
+    if (!user.email_verified) return res.status(403).json({ error: 'Please verify your email first.' });
+
+    const ok = await bcrypt.compare(password, user.password_hash);
+    if (!ok) return res.status(401).json({ error: 'Invalid email or password' });
+
+    await pool.query('UPDATE users SET last_login_at=NOW() WHERE id=$1', [user.id]);
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Google OAuth（简化版，前端拿 access_token 过来验证）
+app.post('/api/auth/google', async (req, res) => {
+  try {
+    const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='google_oauth_enabled'`);
+    if (cfg[0]?.value !== 'true') return res.status(403).json({ error: 'Google login is disabled' });
+
+    const { access_token } = req.body;
+    const gRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: 'Bearer ' + access_token }
+    });
+    if (!gRes.ok) return res.status(401).json({ error: 'Invalid Google token' });
+    const gUser = await gRes.json();
+
+    let { rows } = await pool.query('SELECT * FROM users WHERE google_id=$1 OR email=$2', [gUser.id, gUser.email]);
+    let user = rows[0];
+    if (!user) {
+      const { rows: newRows } = await pool.query(
+        `INSERT INTO users (email, name, google_id, email_verified)
+         VALUES ($1,$2,$3,TRUE) RETURNING *`,
+        [gUser.email, gUser.name, gUser.id]
+      );
+      user = newRows[0];
+    } else if (!user.google_id) {
+      await pool.query('UPDATE users SET google_id=$1 WHERE id=$2', [gUser.id, user.id]);
+    }
+
+    await pool.query('UPDATE users SET last_login_at=NOW() WHERE id=$1', [user.id]);
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GitHub OAuth
+app.post('/api/auth/github', async (req, res) => {
+  try {
+    const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='github_oauth_enabled'`);
+    if (cfg[0]?.value !== 'true') return res.status(403).json({ error: 'GitHub login is disabled' });
+
+    const { code } = req.body;
+    // 用 code 换 access_token
+    const tRes = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_id: process.env.GITHUB_CLIENT_ID, client_secret: process.env.GITHUB_CLIENT_SECRET, code })
+    });
+    const tData = await tRes.json();
+    if (!tData.access_token) return res.status(401).json({ error: 'GitHub auth failed' });
+
+    const uRes  = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + tData.access_token } });
+    const ghUser = await uRes.json();
+    const eRes  = await fetch('https://api.github.com/user/emails', { headers: { Authorization: 'Bearer ' + tData.access_token } });
+    const emails = await eRes.json();
+    const primaryEmail = emails.find(e => e.primary)?.email || ghUser.email;
+
+    let { rows } = await pool.query('SELECT * FROM users WHERE github_id=$1 OR email=$2', [String(ghUser.id), primaryEmail]);
+    let user = rows[0];
+    if (!user) {
+      const { rows: newRows } = await pool.query(
+        `INSERT INTO users (email, name, github_id, email_verified)
+         VALUES ($1,$2,$3,TRUE) RETURNING *`,
+        [primaryEmail, ghUser.name || ghUser.login, String(ghUser.id)]
+      );
+      user = newRows[0];
+    } else if (!user.github_id) {
+      await pool.query('UPDATE users SET github_id=$1 WHERE id=$2', [String(ghUser.id), user.id]);
+    }
+
+    await pool.query('UPDATE users SET last_login_at=NOW() WHERE id=$1', [user.id]);
+    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ═══════════════════════════════════════════════════════
+// CUSTOMER APIs（需登录）
+// ═══════════════════════════════════════════════════════
+
+// 获取个人信息
+app.get('/api/me', userAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, email, name, company, whatsapp, customer_type,
+              google_id IS NOT NULL as google_linked,
+              github_id IS NOT NULL as github_linked,
+              email_verified, created_at, last_login_at
+       FROM users WHERE id=$1`, [req.user.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 更新个人信息
+app.put('/api/me', userAuth, async (req, res) => {
+  try {
+    const { name, company, whatsapp } = req.body;
+    await pool.query(
+      `UPDATE users SET name=COALESCE($1,name), company=COALESCE($2,company),
+       whatsapp=COALESCE($3,whatsapp) WHERE id=$4`,
+      [name, company, whatsapp, req.user.id]
     );
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/admin/pricing', adminAuth, async (req, res) => {
+// 修改密码
+app.put('/api/me/password', userAuth, async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM pricing_config ORDER BY category, key');
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.patch('/api/admin/pricing/:id', adminAuth, async (req, res) => {
-  try {
-    await pool.query('UPDATE pricing_config SET value=$1, updated_at=NOW() WHERE id=$2', [req.body.value, req.params.id]);
+    const { current_password, new_password } = req.body;
+    if (!new_password || new_password.length < 8) return res.status(400).json({ error: 'Password min 8 characters' });
+    const { rows } = await pool.query('SELECT password_hash FROM users WHERE id=$1', [req.user.id]);
+    if (rows[0].password_hash) {
+      const ok = await bcrypt.compare(current_password, rows[0].password_hash);
+      if (!ok) return res.status(401).json({ error: 'Current password incorrect' });
+    }
+    const hash = await bcrypt.hash(new_password, 12);
+    await pool.query('UPDATE users SET password_hash=$1 WHERE id=$2', [hash, req.user.id]);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/admin/config', adminAuth, async (req, res) => {
+// 历史订单
+app.get('/api/me/orders', userAuth, async (req, res) => {
   try {
-    const { rows } = await pool.query('SELECT * FROM site_config ORDER BY id');
+    const { rows } = await pool.query(
+      `SELECT order_no, mode, status, estimate, quoted_price, shipping_fee,
+              total_paid, tracking_no, created_at, updated_at
+       FROM orders WHERE user_id=$1 ORDER BY created_at DESC`,
+      [req.user.id]
+    );
     res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.patch('/api/admin/config/:key', adminAuth, async (req, res) => {
+// 收货地址 CRUD
+app.get('/api/me/addresses', userAuth, async (req, res) => {
   try {
-    await pool.query('UPDATE site_config SET value=$1, updated_at=NOW() WHERE key=$2', [req.body.value, req.params.key]);
+    const { rows } = await pool.query('SELECT * FROM addresses WHERE user_id=$1 ORDER BY is_default DESC, created_at', [req.user.id]);
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/me/addresses', userAuth, async (req, res) => {
+  try {
+    const { label, recipient, phone, address_line, city, country, is_default } = req.body;
+    if (is_default) await pool.query('UPDATE addresses SET is_default=FALSE WHERE user_id=$1', [req.user.id]);
+    const { rows } = await pool.query(
+      `INSERT INTO addresses (user_id, label, recipient, phone, address_line, city, country, is_default)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [req.user.id, label||'Home', recipient, phone, address_line, city, country||'US', !!is_default]
+    );
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/me/addresses/:id', userAuth, async (req, res) => {
+  try {
+    const { label, recipient, phone, address_line, city, country, is_default } = req.body;
+    if (is_default) await pool.query('UPDATE addresses SET is_default=FALSE WHERE user_id=$1', [req.user.id]);
+    await pool.query(
+      `UPDATE addresses SET label=COALESCE($1,label), recipient=COALESCE($2,recipient),
+       phone=COALESCE($3,phone), address_line=COALESCE($4,address_line),
+       city=COALESCE($5,city), country=COALESCE($6,country),
+       is_default=COALESCE($7,is_default)
+       WHERE id=$8 AND user_id=$9`,
+      [label, recipient, phone, address_line, city, country, is_default, req.params.id, req.user.id]
+    );
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/me/addresses/:id', userAuth, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM addresses WHERE id=$1 AND user_id=$2', [req.params.id, req.user.id]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ═══════════════════════════════════════════════════════
+// ADMIN APIs
+// ═══════════════════════════════════════════════════════
+
+// 管理员登录
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const { rows } = await pool.query('SELECT * FROM admin_users WHERE email=$1', [email?.toLowerCase()]);
+    if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
+    const ok = await bcrypt.compare(password, rows[0].password_hash);
+    if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+    await pool.query('UPDATE admin_users SET last_login_at=NOW() WHERE id=$1', [rows[0].id]);
+    const token = jwt.sign({ id: rows[0].id, email: rows[0].email, role: rows[0].role }, JWT_ADMIN_SECRET, { expiresIn: '12h' });
+    res.json({ success: true, token, admin: { id: rows[0].id, name: rows[0].name, role: rows[0].role } });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Dashboard 统计
+app.get('/api/admin/stats', adminAuth, async (req, res) => {
+  try {
+    const [oRes, uRes, rRes] = await Promise.all([
+      pool.query(`SELECT
+        COUNT(*) as total,
+        SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) as pending,
+        SUM(CASE WHEN status='quoted'  THEN 1 ELSE 0 END) as quoted,
+        SUM(CASE WHEN status='paid'    THEN 1 ELSE 0 END) as paid,
+        SUM(CASE WHEN status='production' THEN 1 ELSE 0 END) as production,
+        SUM(CASE WHEN status='shipped' THEN 1 ELSE 0 END) as shipped,
+        SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed,
+        SUM(CASE WHEN created_at::date = CURRENT_DATE THEN 1 ELSE 0 END) as today
+        FROM orders`),
+      pool.query('SELECT COUNT(*) as total FROM users'),
+      pool.query(`SELECT COALESCE(SUM(total_paid),0) as total_revenue FROM orders WHERE status='completed'`)
+    ]);
+    res.json({ orders: oRes.rows[0], users: uRes.rows[0], revenue: rRes.rows[0] });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 订单列表
+app.get('/api/admin/orders', adminAuth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 20, q } = req.query;
+    const offset = (page - 1) * limit;
+    let where = []; const params = [];
+    if (status) { where.push(`o.status=$${params.length+1}`); params.push(status); }
+    if (q) {
+      where.push(`(o.order_no ILIKE $${params.length+1} OR u.email ILIKE $${params.length+1} OR u.name ILIKE $${params.length+1})`);
+      params.push('%'+q+'%');
+    }
+    const whereStr = where.length ? 'WHERE ' + where.join(' AND ') : '';
+    const { rows } = await pool.query(
+      `SELECT o.id, o.order_no, o.mode, o.status, o.estimate, o.quoted_price,
+              o.total_paid, o.created_at, o.updated_at,
+              COALESCE(u.name, o.guest_email) as customer_name,
+              COALESCE(u.email, o.guest_email) as customer_email
+       FROM orders o LEFT JOIN users u ON o.user_id = u.id
+       ${whereStr}
+       ORDER BY o.created_at DESC
+       LIMIT $${params.length+1} OFFSET $${params.length+2}`,
+      [...params, Number(limit), Number(offset)]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 订单详情
+app.get('/api/admin/orders/:id', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT o.*, COALESCE(u.name,'') as customer_name, COALESCE(u.email, o.guest_email) as customer_email,
+              u.whatsapp as customer_whatsapp, u.company as customer_company
+       FROM orders o LEFT JOIN users u ON o.user_id = u.id
+       WHERE o.id=$1 OR o.order_no=$1`,
+      [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 更新订单
+app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
+  try {
+    const { status, quoted_price, shipping_fee, tracking_no, admin_note } = req.body;
+    await pool.query(
+      `UPDATE orders SET
+       status=COALESCE($1,status), quoted_price=COALESCE($2,quoted_price),
+       shipping_fee=COALESCE($3,shipping_fee), tracking_no=COALESCE($4,tracking_no),
+       admin_note=COALESCE($5,admin_note), updated_at=NOW()
+       WHERE id=$6 OR order_no=$6`,
+      [status, quoted_price, shipping_fee, tracking_no, admin_note, req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 发送付款链接
+app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT o.*, COALESCE(u.email, o.guest_email) as customer_email, COALESCE(u.name,'Customer') as customer_name
+       FROM orders o LEFT JOIN users u ON o.user_id = u.id
+       WHERE o.id=$1 OR o.order_no=$1`, [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+    const order = rows[0];
+    if (!order.quoted_price) return res.status(400).json({ error: 'Please set quoted_price first' });
+
+    await pool.query(`UPDATE orders SET status='quoted', updated_at=NOW() WHERE id=$1`, [order.id]);
+
+    const trackUrl = `${process.env.SITE_URL || ''}/track.html?order=${order.order_no}`;
+    await sendMail({
+      to: order.customer_email,
+      subject: `[CC PCBA] Your Quote is Ready — ${order.order_no}`,
+      html: `<h2 style="color:#00C832">Your Quote is Ready</h2>
+        <p>Hi ${order.customer_name},</p>
+        <p>Our engineer has reviewed your inquiry <b>${order.order_no}</b>.</p>
+        <table style="border-collapse:collapse;width:100%;max-width:400px">
+          <tr><td style="padding:8px;color:#666">Service</td><td style="padding:8px"><b>${order.mode.toUpperCase()}</b></td></tr>
+          <tr style="background:#f9f9f9"><td style="padding:8px;color:#666">Quoted Price</td><td style="padding:8px"><b style="color:#00C832;font-size:1.2em">USD $${order.quoted_price}</b></td></tr>
+          ${order.shipping_fee ? `<tr><td style="padding:8px;color:#666">Shipping Fee</td><td style="padding:8px"><b>USD $${order.shipping_fee}</b></td></tr>` : ''}
+        </table>
+        <br>
+        <p>To proceed with payment, please visit your order tracking page:</p>
+        <p><a href="${trackUrl}" style="background:#00C832;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">VIEW ORDER & PAY →</a></p>
+        <p style="color:#999;font-size:12px">If you have questions, reply to this email or contact us on WhatsApp.</p>`
+    });
+
+    res.json({ success: true, message: 'Payment link sent to ' + order.customer_email });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 客户列表
+app.get('/api/admin/customers', adminAuth, async (req, res) => {
+  try {
+    const { q, type, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+    let where = []; const params = [];
+    if (type) { where.push(`u.customer_type=$${params.length+1}`); params.push(type); }
+    if (q) {
+      where.push(`(u.email ILIKE $${params.length+1} OR u.name ILIKE $${params.length+1} OR u.company ILIKE $${params.length+1})`);
+      params.push('%'+q+'%');
+    }
+    const whereStr = where.length ? 'WHERE ' + where.join(' AND ') : '';
+    const { rows } = await pool.query(
+      `SELECT u.id, u.email, u.name, u.company, u.whatsapp, u.customer_type,
+              u.email_verified, u.created_at, u.last_login_at,
+              u.google_id IS NOT NULL as google_linked,
+              u.github_id IS NOT NULL as github_linked,
+              COUNT(o.id) as order_count,
+              COALESCE(SUM(o.total_paid),0) as total_spent
+       FROM users u LEFT JOIN orders o ON o.user_id = u.id
+       ${whereStr}
+       GROUP BY u.id
+       ORDER BY u.created_at DESC
+       LIMIT $${params.length+1} OFFSET $${params.length+2}`,
+      [...params, Number(limit), Number(offset)]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 客户详情 + 历史订单
+app.get('/api/admin/customers/:id', adminAuth, async (req, res) => {
+  try {
+    const [uRes, oRes] = await Promise.all([
+      pool.query('SELECT * FROM users WHERE id=$1', [req.params.id]),
+      pool.query('SELECT order_no,mode,status,estimate,quoted_price,total_paid,created_at FROM orders WHERE user_id=$1 ORDER BY created_at DESC', [req.params.id])
+    ]);
+    if (!uRes.rows.length) return res.status(404).json({ error: 'Customer not found' });
+    res.json({ ...uRes.rows[0], orders: oRes.rows });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 更新客户（类型/备注/解绑OAuth）
+app.put('/api/admin/customers/:id', adminAuth, async (req, res) => {
+  try {
+    const { customer_type, note, unbind_google, unbind_github } = req.body;
+    let sql = `UPDATE users SET customer_type=COALESCE($1,customer_type), note=COALESCE($2,note)`;
+    const params = [customer_type, note];
+    if (unbind_google) { sql += `, google_id=NULL`; }
+    if (unbind_github) { sql += `, github_id=NULL`; }
+    sql += ` WHERE id=$3`;
+    params.push(req.params.id);
+    await pool.query(sql, params);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 系统设置
+app.get('/api/admin/settings', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM settings ORDER BY key');
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admin/settings/:key', adminAuth, async (req, res) => {
+  try {
+    await pool.query('UPDATE settings SET value=$1, updated_at=NOW() WHERE key=$2', [req.body.value, req.params.key]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 管理员账号管理
+app.get('/api/admin/admins', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT id,email,name,role,created_at,last_login_at FROM admin_users ORDER BY created_at');
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/admins', adminAuth, async (req, res) => {
+  try {
+    if (req.admin.role !== 'superadmin') return res.status(403).json({ error: 'Superadmin only' });
+    const { email, password, name, role } = req.body;
+    const hash = await bcrypt.hash(password, 12);
+    await pool.query('INSERT INTO admin_users (email,password_hash,name,role) VALUES ($1,$2,$3,$4)', [email, hash, name, role||'admin']);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.put('/api/admin/admins/:id/password', adminAuth, async (req, res) => {
+  try {
+    if (req.admin.id !== req.params.id && req.admin.role !== 'superadmin')
+      return res.status(403).json({ error: 'Permission denied' });
+    const hash = await bcrypt.hash(req.body.new_password, 12);
+    await pool.query('UPDATE admin_users SET password_hash=$1 WHERE id=$2', [hash, req.params.id]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.listen(PORT, () => {
-  console.log(`CC PCBA server running on http://localhost:${PORT}`);
-  console.log(`Admin panel: http://localhost:${PORT}/admin`);
+  console.log(`✅ CC PCBA server running on http://localhost:${PORT}`);
 });
