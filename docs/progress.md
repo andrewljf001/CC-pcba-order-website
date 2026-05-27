@@ -124,6 +124,26 @@ Phase 7  上线优化 & 运营功能
 
 ---
 
+
+## 🟡 Phase 4 补充 — 架构迁移（Cloudflare D1 + R2）
+
+> 架构决策：2026-05-27
+> VPS 只跑业务逻辑，数据完全剥离到 Cloudflare
+
+| # | 任务 | 状态 | 备注 |
+|---|------|------|------|
+| 4.17 | Cloudflare D1 建库建表 | ⬜ 待开始 | 美国区域，SQLite 语法 |
+| 4.18 | Cloudflare R2 建存储桶 | ⬜ 待开始 | 美国区域 |
+| 4.19 | 代码改造：pg → D1 HTTP API | ⬜ 待开始 | database.js 重写 |
+| 4.20 | 代码改造：本地存储 → R2 | ⬜ 待开始 | multer → aws-sdk/client-s3 |
+| 4.21 | VPS 环境配置（Node.js/Nginx/PM2） | ⬜ 待开始 | |
+| 4.22 | Nginx 多站点配置 | ⬜ 待开始 | 为多网站预留 |
+| 4.23 | SSL 证书配置（Let's Encrypt） | ⬜ 待开始 | |
+| 4.24 | 域名 DNS 指向 Cloudflare | ⬜ 待开始 | |
+| 4.25 | PM2 部署 + 全流程测试 | ⬜ 待开始 | |
+
+---
+
 ## ⏳ Phase 5 — 支付接入
 
 | # | 任务 | 状态 | 备注 |
@@ -168,6 +188,12 @@ Phase 7  上线优化 & 运营功能
 - 仓库初始化，README / pricing-logic.md 完成
 - 完整业务闭环讨论定稿
 - 技术架构确认：Railway + PostgreSQL + Node.js + Express
+
+### 2026-05-27
+- 架构决策：数据库迁移至 Cloudflare D1，文件存储迁移至 Cloudflare R2
+- VPS 只跑业务逻辑，完全无状态，数据全部在 Cloudflare
+- backend-plan.md 更新至第三版
+- 新增 Phase 4 迁移任务（4.17~4.25）
 
 ### 2026-05-26
 - Phase 1 & 2 全部完成
