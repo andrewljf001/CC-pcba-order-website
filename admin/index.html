@@ -1,714 +1,890 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>运营后台 — CC PCBA</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>CC PCBA — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;
-  --border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;
-  --text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;
-  --amber:#FFB300;--red:#FF4444;--blue:#64B5F6;--purple:#CE93D8;--orange:#FF8A65;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--max:1400px}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:'DM Sans',sans-serif}
 
-/* ═══ LOGIN ════════════════════════════════════════ */
-#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-.login-box{background:var(--bg2);border:1px solid var(--border);padding:3rem;max-width:380px;width:100%;text-align:center}
-.login-logo{font-family:'Orbitron',monospace;font-size:1.3rem;color:var(--green);letter-spacing:.15em;margin-bottom:.3rem}
-.login-tagline{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.12em;margin-bottom:2.5rem}
-.login-box input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.75rem 1rem;font-size:.9rem;font-family:'Share Tech Mono',monospace;letter-spacing:.08em;outline:none;transition:border-color .2s;margin-bottom:1rem}
-.login-box input:focus{border-color:var(--green3)}
-.login-btn{width:100%;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.8rem;font-weight:700;letter-spacing:.1em;padding:.8rem;border:none;cursor:pointer;transition:opacity .2s}
+/* ── LOGIN PAGE ── */
+#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
+.login-box{width:100%;max-width:400px;padding:1rem}
+.login-logo{font-family:'Orbitron',monospace;font-size:1.4rem;color:var(--green);letter-spacing:.15em;text-align:center;margin-bottom:.3rem}
+.login-sub{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.15em;text-align:center;margin-bottom:2rem}
+.login-card{background:var(--bg2);border:1px solid var(--green3)}
+.login-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
+.login-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.login-body{padding:1.5rem}
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem}
+.fg label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em}
+.fg input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.6rem .8rem;font-size:.88rem;outline:none;transition:border-color .2s;width:100%}
+.fg input:focus{border-color:var(--green3)}
+.login-btn{width:100%;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.85rem;border:none;margin-top:.5rem;transition:opacity .2s}
 .login-btn:hover{opacity:.85}
-.login-err{color:var(--red);font-family:'Share Tech Mono',monospace;font-size:.72rem;margin-top:.8rem;display:none}
+.login-err{font-size:.75rem;color:var(--red);margin-top:.5rem;min-height:1.2rem;text-align:center}
 
-/* ═══ APP SHELL ════════════════════════════════════ */
-#app{display:none;flex-direction:column;min-height:100vh}
+/* ── MAIN LAYOUT ── */
+#app{display:none;flex:1;overflow:hidden;flex-direction:row}
 
-header{display:flex;justify-content:space-between;align-items:center;padding:0 1.5rem;height:54px;background:rgba(10,15,10,.97);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.h-logo{font-family:'Orbitron',monospace;font-size:.92rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
-.ldot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
-.h-right{display:flex;align-items:center;gap:1.5rem}
-.h-right span{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--muted);letter-spacing:.06em}
-.h-link{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted);transition:color .2s;cursor:pointer}
-.h-link:hover{color:var(--green)}
+/* SIDEBAR */
+.sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sb-logo{padding:1.2rem 1rem;border-bottom:1px solid var(--border)}
+.sb-logo-text{font-family:'Orbitron',monospace;font-size:.95rem;color:var(--green);letter-spacing:.1em;display:flex;align-items:center;gap:8px}
+.ldot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(0,255,65,0)}}
+.sb-admin{padding:.6rem 1rem;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--muted)}
+.sb-admin span{color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.7rem}
+.sb-nav{flex:1;padding:.5rem 0;overflow-y:auto}
+.sb-section{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.15em;padding:.6rem 1rem .3rem;opacity:.6}
+.nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem 1rem;font-size:.83rem;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:rgba(0,255,65,.04)}
+.nav-item.active{color:var(--green);background:rgba(0,255,65,.06);border-left-color:var(--green)}
+.nav-item .ni{font-size:1rem;width:18px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;font-family:'Share Tech Mono',monospace;padding:.1rem .4rem;border-radius:2px;min-width:18px;text-align:center}
+.sb-footer{padding:.8rem 1rem;border-top:1px solid var(--border)}
+.sb-logout{width:100%;background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;font-family:'Share Tech Mono',monospace;letter-spacing:.08em;padding:.5rem;transition:all .2s}
+.sb-logout:hover{border-color:var(--red);color:var(--red)}
 
-/* ═══ NAV TABS ══════════════════════════════════════ */
-.nav-tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border)}
-.ntab{padding:.7rem 1.8rem;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;color:var(--muted);cursor:pointer;border-right:1px solid var(--border);transition:all .2s;border-bottom:2px solid transparent;user-select:none}
-.ntab:hover{color:var(--green);background:rgba(0,255,65,.03)}
-.ntab.active{color:var(--green);border-bottom-color:var(--green);background:rgba(0,255,65,.04)}
+/* MAIN CONTENT */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tb-title{font-family:'Orbitron',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em}
+.tb-time{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted)}
+.content{padding:1.5rem;flex:1}
 
-/* ═══ PANELS ════════════════════════════════════════ */
-.panel{display:none;padding:1.2rem 1.5rem}
-.panel.active{display:block}
+/* PAGES */
+.page{display:none}.page.active{display:block}
 
-/* ═══ STATS GRID ════════════════════════════════════ */
-.stats-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:.6rem;margin-bottom:1.2rem}
-.sc{background:var(--bg2);border:1px solid var(--border);padding:.9rem .6rem;text-align:center}
-.sc-num{font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:700;line-height:1}
-.sc-lbl{font-family:'Share Tech Mono',monospace;font-size:.56rem;color:var(--muted);letter-spacing:.08em;margin-top:.35rem}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1.2rem}
+.card-hdr{background:var(--dim);padding:.7rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-ht{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--green);letter-spacing:.12em}
+.card-body{padding:1.2rem}
 
-/* ═══ FILTER TABS ══════════════════════════════════ */
-.filter-bar{display:flex;margin-bottom:.9rem;border:1px solid var(--border);overflow-x:auto}
-.ftab{padding:.45rem 1rem;font-family:'Share Tech Mono',monospace;font-size:.66rem;letter-spacing:.08em;color:var(--muted);cursor:pointer;border-right:1px solid var(--border);white-space:nowrap;transition:all .2s;user-select:none}
-.ftab:last-child{border-right:none}
-.ftab:hover{color:var(--green);background:rgba(0,255,65,.03)}
-.ftab.active{background:var(--green);color:#000;font-weight:700}
+/* STAT GRID */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--green3);padding:1.1rem}
+.stat-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.12em;margin-bottom:.4rem}
+.stat-value{font-family:'Orbitron',monospace;font-size:1.6rem;color:var(--green);font-weight:700;line-height:1}
+.stat-sub{font-size:.72rem;color:var(--muted);margin-top:.3rem}
+.stat-card.amber{border-top-color:var(--amber)}.stat-card.amber .stat-value{color:var(--amber)}
+.stat-card.red{border-top-color:var(--red)}.stat-card.red .stat-value{color:var(--red)}
+.stat-card.white{border-top-color:var(--muted)}.stat-card.white .stat-value{color:var(--white)}
 
-/* ═══ TABLE ═════════════════════════════════════════ */
-.tbl-wrap{background:var(--bg2);border:1px solid var(--border);overflow-x:auto}
-table{width:100%;border-collapse:collapse}
-th{background:var(--dim);padding:.55rem .9rem;text-align:left;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:.65rem .9rem;font-size:.82rem;border-bottom:1px solid rgba(30,58,30,.4);vertical-align:middle}
-tr:last-child td{border-bottom:none}
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+thead tr{background:var(--dim)}
+th{padding:.6rem 1rem;text-align:left;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.1em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:.6rem 1rem;border-bottom:1px solid rgba(30,58,30,.5);color:var(--text);vertical-align:middle}
 tr:hover td{background:rgba(0,255,65,.025)}
-.order-link{font-family:'Share Tech Mono',monospace;font-size:.76rem;color:var(--green);cursor:pointer;letter-spacing:.05em}
-.order-link:hover{text-decoration:underline}
-.pill{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.07em;padding:.18rem .6rem;border:1px solid;white-space:nowrap}
-.p-pending{color:var(--amber);border-color:var(--amber);background:rgba(255,179,0,.08)}
-.p-quoted{color:var(--blue);border-color:#1565C0;background:rgba(21,101,192,.1)}
-.p-paid{color:var(--green);border-color:var(--green3);background:rgba(0,255,65,.07)}
-.p-production{color:var(--orange);border-color:#BF360C;background:rgba(191,54,12,.1)}
-.p-shipped{color:var(--purple);border-color:#6A1B9A;background:rgba(106,27,154,.1)}
-.p-completed{color:var(--green);border-color:var(--green3);background:rgba(0,255,65,.07)}
-.p-cancelled{color:var(--red);border-color:var(--red);background:rgba(255,68,68,.08)}
-.tbl-empty{text-align:center;padding:3rem;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.08em}
+.mono{font-family:'Share Tech Mono',monospace;font-size:.78rem}
 
-/* ═══ PAGINATION ════════════════════════════════════ */
-.pager{display:flex;justify-content:flex-end;align-items:center;gap:.5rem;margin-top:.7rem}
-.pager button{background:var(--bg2);border:1px solid var(--border);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.66rem;padding:.33rem .7rem;cursor:pointer;transition:all .2s}
-.pager button:hover:not(:disabled){border-color:var(--green3);color:var(--green)}
-.pager button:disabled{opacity:.3;cursor:default}
-.pager span{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--muted)}
+/* STATUS BADGES */
+.badge{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.08em;padding:.2rem .5rem;border:1px solid}
+.badge-pending{color:var(--amber);border-color:rgba(255,179,0,.3);background:rgba(255,179,0,.07)}
+.badge-quoted{color:#64B5F6;border-color:rgba(100,181,246,.3);background:rgba(100,181,246,.07)}
+.badge-paid{color:var(--green);border-color:rgba(0,255,65,.3);background:rgba(0,255,65,.07)}
+.badge-production{color:#CE93D8;border-color:rgba(206,147,216,.3);background:rgba(206,147,216,.07)}
+.badge-shipped{color:#80CBC4;border-color:rgba(128,203,196,.3);background:rgba(128,203,196,.07)}
+.badge-completed{color:var(--green2);border-color:rgba(0,200,50,.3);background:rgba(0,200,50,.07)}
+.badge-cancelled{color:var(--red);border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.07)}
+.badge-normal{color:var(--text);border-color:var(--border);background:transparent}
+.badge-vip{color:var(--amber);border-color:rgba(255,179,0,.3);background:rgba(255,179,0,.07)}
+.badge-blacklist{color:var(--red);border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.07)}
 
-/* ═══ MODAL ═════════════════════════════════════════ */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;align-items:flex-start;justify-content:center;padding:1.5rem 1rem;overflow-y:auto}
-.modal-bg.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--green3);width:100%;max-width:700px;margin:auto}
-.modal-hdr{background:var(--dim);padding:.85rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.modal-title{font-family:'Orbitron',monospace;font-size:.82rem;color:var(--white);letter-spacing:.1em}
-.modal-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:0 .3rem;line-height:1;transition:color .2s}
-.modal-close:hover{color:var(--red)}
-.modal-body{padding:1.4rem}
-.ms{margin-bottom:1.4rem}
-.ms-title{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin-bottom:.75rem;padding-bottom:.35rem;border-bottom:1px solid var(--border)}
-.mg{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
-.mi .mi-lbl{font-family:'Share Tech Mono',monospace;font-size:.59rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.25rem}
-.mi .mi-val{font-size:.85rem;color:var(--white)}
-.mi .mi-val.mono{font-family:'Share Tech Mono',monospace;font-size:.78rem}
-.mfg{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.65rem}
-.mfg label{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em}
-.mfg select,.mfg input,.mfg textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.52rem .75rem;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:100%;-webkit-appearance:none}
-.mfg select:focus,.mfg input:focus,.mfg textarea:focus{border-color:var(--green3)}
-.mfg select option{background:var(--bg)}
-.mfg textarea{resize:vertical;min-height:68px}
-.mfg-row{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
-.modal-footer{padding:.85rem 1.2rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.7rem}
-.mbtn{font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;letter-spacing:.09em;padding:.55rem 1.3rem;border:none;cursor:pointer;transition:opacity .2s}
-.mbtn-save{background:var(--green);color:#000}
-.mbtn-save:hover{opacity:.85}
-.mbtn-save:disabled{opacity:.4;cursor:not-allowed}
-.mbtn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.7rem}
-.mbtn-cancel:hover{color:var(--green);border-color:var(--green3)}
-.file-links{font-family:'Share Tech Mono',monospace;font-size:.71rem;color:var(--muted);line-height:2}
-.file-links a{color:var(--green);transition:opacity .2s}
-.file-links a:hover{opacity:.7}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;padding:.4rem .9rem;border:1px solid;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:.06em;transition:all .2s}
+.btn-green{background:var(--green);color:#000;border-color:var(--green)}.btn-green:hover{opacity:.85}
+.btn-outline{background:none;color:var(--green);border-color:var(--green3)}.btn-outline:hover{background:rgba(0,255,65,.07)}
+.btn-amber{background:none;color:var(--amber);border-color:rgba(255,179,0,.4)}.btn-amber:hover{background:rgba(255,179,0,.07)}
+.btn-red{background:none;color:var(--red);border-color:rgba(255,68,68,.4)}.btn-red:hover{background:rgba(255,68,68,.07)}
+.btn-sm{font-size:.7rem;padding:.3rem .7rem}
 
-/* ═══ PRICING ══════════════════════════════════════ */
-.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
-.pg{background:var(--bg2);border:1px solid var(--border)}
-.pg-hdr{background:var(--dim);padding:.65rem 1rem;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--green);letter-spacing:.12em}
-.pg-row{display:flex;align-items:center;gap:.7rem;padding:.5rem 1rem;border-bottom:1px solid rgba(30,58,30,.35)}
-.pg-row:last-child{border-bottom:none}
-.pg-label{flex:1;font-size:.8rem;color:var(--text)}
-.pg-input{width:85px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.3rem .55rem;font-size:.82rem;font-family:'Share Tech Mono',monospace;text-align:right;outline:none;transition:border-color .2s}
-.pg-input:focus{border-color:var(--green3)}
-.pg-unit{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted);width:30px;flex-shrink:0}
+/* TOOLBAR */
+.toolbar{display:flex;gap:.8rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+.search-box{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--border);padding:.4rem .8rem;gap:.5rem;flex:1;max-width:320px}
+.search-box input{background:none;border:none;color:var(--text);font-size:.83rem;outline:none;width:100%}
+.search-box input::placeholder{color:var(--muted)}
+.filter-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.4rem .8rem;font-size:.78rem;font-family:'Share Tech Mono',monospace;outline:none;-webkit-appearance:none}
 
-/* ═══ CONFIG FORMS ══════════════════════════════════ */
-.cfg-section{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
-.cfg-hdr{background:var(--dim);padding:.65rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.cfg-title{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--green);letter-spacing:.12em}
-.cfg-body{padding:1.2rem}
-.cfg-row{display:grid;grid-template-columns:180px 1fr;gap:.75rem;align-items:center;padding:.55rem 0;border-bottom:1px solid rgba(30,58,30,.3)}
-.cfg-row:last-child{border-bottom:none}
-.cfg-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.08em;line-height:1.4}
-.cfg-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.5rem .75rem;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:100%}
-.cfg-input:focus{border-color:var(--green3)}
-.cfg-textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.5rem .75rem;font-size:.82rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:100%;resize:vertical;min-height:64px}
-.cfg-textarea:focus{border-color:var(--green3)}
-.cfg-hint{font-size:.72rem;color:var(--muted);margin-top:.3rem;font-style:italic}
-.info-box{background:rgba(0,255,65,.04);border:1px solid var(--green3);padding:.85rem 1rem;font-size:.82rem;color:var(--text);line-height:1.75;margin-bottom:1rem}
-.info-box .ib-title{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:var(--green);letter-spacing:.1em;margin-bottom:.4rem}
+/* DETAIL PANEL */
+.detail-panel{position:fixed;top:0;right:-500px;width:480px;height:100vh;background:var(--bg2);border-left:1px solid var(--green3);z-index:500;display:flex;flex-direction:column;transition:right .3s}
+.detail-panel.open{right:0}
+.dp-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.dp-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.1em}
+.dp-close{background:none;border:none;color:var(--muted);font-size:1.2rem;padding:.2rem .5rem}
+.dp-close:hover{color:var(--red)}
+.dp-body{flex:1;overflow-y:auto;padding:1.2rem}
+.dp-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:499}
+.dp-overlay.show{display:block}
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.5rem 0;border-bottom:1px solid rgba(30,58,30,.4);font-size:.82rem}
+.info-row:last-child{border-bottom:none}
+.ir-label{color:var(--muted);flex-shrink:0;margin-right:1rem}
+.ir-value{color:var(--text);text-align:right;word-break:break-all}
+.ir-value.g{color:var(--green);font-family:'Share Tech Mono',monospace}
+.section-title{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.12em;margin:1rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)}
 
-/* ═══ SHARED BUTTONS ════════════════════════════════ */
-.save-btn{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.6rem 1.6rem;border:none;cursor:pointer;transition:opacity .2s}
-.save-btn:hover{opacity:.85}
-.save-btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-row{display:flex;align-items:center;gap:1rem;margin-top:.75rem}
-.save-msg{font-family:'Share Tech Mono',monospace;font-size:.7rem;display:none}
-.save-msg.ok{color:var(--green)}
-.save-msg.err{color:var(--red)}
+/* FORM ELEMENTS */
+.form-group{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.8rem}
+.form-group label{font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--muted);letter-spacing:.1em}
+.form-group input,.form-group select,.form-group textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.5rem .75rem;font-size:.83rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:100%;-webkit-appearance:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green3)}
+.form-group select option{background:var(--bg)}
+.form-group textarea{resize:vertical;min-height:70px}
 
-/* ═══ TOAST ═════════════════════════════════════════ */
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--dim);border:1px solid var(--green3);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.76rem;letter-spacing:.06em;padding:.75rem 1.3rem;z-index:300;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
-.toast.show{opacity:1;transform:translateY(0)}
-.toast.err{border-color:var(--red);color:var(--red)}
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg2);border:1px solid var(--green3);color:var(--white);padding:.8rem 1.2rem;font-size:.82rem;z-index:1000;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--red);color:var(--red)}
 
-/* ═══ SPINNER ══════════════════════════════════════ */
-.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(0,0,0,.25);border-top-color:#000;border-radius:50%;animation:rot .65s linear infinite;vertical-align:middle;margin-right:.3rem}
-@keyframes rot{to{transform:rotate(360deg)}}
+/* PAGINATION */
+.pagination{display:flex;gap:.4rem;align-items:center;margin-top:1rem;justify-content:flex-end}
+.pg-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;font-family:'Share Tech Mono',monospace;padding:.3rem .7rem}
+.pg-btn:hover,.pg-btn.active{border-color:var(--green3);color:var(--green);background:rgba(0,255,65,.05)}
+.pg-info{font-size:.72rem;color:var(--muted);font-family:'Share Tech Mono',monospace}
 
-@media(max-width:1000px){.stats-grid{grid-template-columns:repeat(4,1fr)}.pricing-grid{grid-template-columns:1fr}}
-@media(max-width:640px){.stats-grid{grid-template-columns:repeat(2,1fr)}.mg{grid-template-columns:1fr}.mfg-row{grid-template-columns:1fr}.cfg-row{grid-template-columns:1fr;gap:.3rem}}
+/* SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,255,65,.2);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:3rem;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:.8rem;opacity:.4}
+.empty-text{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.1em}
+
+/* SETTINGS GRID */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.setting-item{background:var(--bg3);border:1px solid var(--border);padding:1rem}
+.setting-key{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.1em;margin-bottom:.3rem}
+.setting-desc{font-size:.72rem;color:var(--muted);margin-bottom:.5rem}
+.setting-input-wrap{display:flex;gap:.5rem}
+.setting-input-wrap input,.setting-input-wrap select{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.4rem .6rem;font-size:.82rem;outline:none}
+.setting-input-wrap input:focus{border-color:var(--green3)}
+
+@media(max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr)}.settings-grid{grid-template-columns:1fr}.detail-panel{width:100%}}
+@media(max-width:600px){.stat-grid{grid-template-columns:1fr}.sidebar{display:none}}
 </style>
 </head>
 <body>
 
-<!-- ───── LOGIN ───── -->
-<div id="login-screen">
+<!-- ══════════ LOGIN PAGE ══════════ -->
+<div id="login-page">
   <div class="login-box">
-    <div class="login-logo">CC PCBA</div>
-    <div class="login-tagline">// ADMIN CONTROL PANEL</div>
-    <input type="password" id="tokenInput" placeholder="输入管理员 Token" onkeydown="if(event.key==='Enter')doLogin()"/>
-    <button class="login-btn" onclick="doLogin()">进入后台</button>
-    <div class="login-err" id="loginErr">✗ Token 无效，拒绝访问</div>
+    <div class="login-logo">▶ CC PCBA</div>
+    <div class="login-sub">// ADMIN CONTROL PANEL</div>
+    <div class="login-card">
+      <div class="login-hdr"><span class="login-ht">ADMINISTRATOR LOGIN</span></div>
+      <div class="login-body">
+        <div class="fg">
+          <label>EMAIL</label>
+          <input type="email" id="login-email" placeholder="admin@ccpcba.com" autocomplete="username">
+        </div>
+        <div class="fg">
+          <label>PASSWORD</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="login-btn" id="login-btn" onclick="doLogin()">ACCESS SYSTEM →</button>
+        <div class="login-err" id="login-err"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ───── APP ───── -->
+<!-- ══════════ MAIN APP ══════════ -->
 <div id="app">
-  <header>
-    <div class="h-logo"><span class="ldot"></span>CC PCBA · 运营后台</div>
-    <div class="h-right">
-      <span id="h-time"></span>
-      <a class="h-link" href="../index.html" target="_blank">前台 ↗</a>
-      <a class="h-link" onclick="doLogout()">退出</a>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-text"><span class="ldot"></span>CC PCBA</div>
     </div>
-  </header>
-
-  <div class="nav-tabs">
-    <div class="ntab active"  onclick="showPanel('orders',this)">📋 订单管理</div>
-    <div class="ntab"         onclick="showPanel('pricing',this)">💰 报价参数</div>
-    <div class="ntab"         onclick="showPanel('content',this)">🖼 网站内容</div>
-    <div class="ntab"         onclick="showPanel('settings',this)">⚙️ 系统设置</div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════
-       模块一：订单管理
-  ══════════════════════════════════════════════ -->
-  <div class="panel active" id="panel-orders">
-
-    <div class="stats-grid">
-      <div class="sc"><div class="sc-num" id="s-today" style="color:var(--amber)">—</div><div class="sc-lbl">今日新询</div></div>
-      <div class="sc"><div class="sc-num" id="s-total">—</div><div class="sc-lbl">累计订单</div></div>
-      <div class="sc"><div class="sc-num" id="s-pending" style="color:var(--amber)">—</div><div class="sc-lbl">待处理</div></div>
-      <div class="sc"><div class="sc-num" id="s-quoted" style="color:var(--blue)">—</div><div class="sc-lbl">已报价</div></div>
-      <div class="sc"><div class="sc-num" id="s-paid" style="color:var(--green)">—</div><div class="sc-lbl">已付款</div></div>
-      <div class="sc"><div class="sc-num" id="s-production" style="color:var(--orange)">—</div><div class="sc-lbl">生产中</div></div>
-      <div class="sc"><div class="sc-num" id="s-shipped" style="color:var(--purple)">—</div><div class="sc-lbl">已发货</div></div>
-      <div class="sc"><div class="sc-num" id="s-completed">—</div><div class="sc-lbl">已完成</div></div>
-    </div>
-
-    <div class="filter-bar">
-      <div class="ftab active" onclick="setFilter('',this)">全部</div>
-      <div class="ftab" onclick="setFilter('pending',this)">待处理</div>
-      <div class="ftab" onclick="setFilter('quoted',this)">已报价</div>
-      <div class="ftab" onclick="setFilter('paid',this)">已付款</div>
-      <div class="ftab" onclick="setFilter('production',this)">生产中</div>
-      <div class="ftab" onclick="setFilter('shipped',this)">已发货</div>
-      <div class="ftab" onclick="setFilter('completed',this)">已完成</div>
-      <div class="ftab" onclick="setFilter('cancelled',this)">已取消</div>
-    </div>
-
-    <div class="tbl-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>订单号</th>
-            <th>客户姓名</th>
-            <th>邮箱</th>
-            <th>服务类型</th>
-            <th>数量</th>
-            <th>报价</th>
-            <th>状态</th>
-            <th>提交时间</th>
-          </tr>
-        </thead>
-        <tbody id="ordersTbody">
-          <tr><td colspan="8" class="tbl-empty">加载中…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="pager">
-      <button id="prevBtn" onclick="changePage(-1)" disabled>← 上一页</button>
-      <span id="pageInfo">第 1 页</span>
-      <button id="nextBtn" onclick="changePage(1)">下一页 →</button>
+    <div class="sb-admin">Logged in as<br><span id="admin-name">Admin</span></div>
+    <nav class="sb-nav">
+      <div class="sb-section">// MAIN</div>
+      <div class="nav-item active" onclick="nav('dashboard')"><span class="ni">📊</span>Dashboard</div>
+      <div class="nav-item" onclick="nav('orders')"><span class="ni">📋</span>Orders<span class="nav-badge" id="badge-pending">0</span></div>
+      <div class="sb-section">// CUSTOMERS</div>
+      <div class="nav-item" onclick="nav('customers')"><span class="ni">👥</span>Customers</div>
+      <div class="sb-section">// FINANCE</div>
+      <div class="nav-item" onclick="nav('payments')"><span class="ni">💳</span>Payments</div>
+      <div class="sb-section">// SYSTEM</div>
+      <div class="nav-item" onclick="nav('settings')"><span class="ni">⚙️</span>Settings</div>
+      <div class="nav-item" onclick="nav('admins')"><span class="ni">🔐</span>Admins</div>
+    </nav>
+    <div class="sb-footer">
+      <button class="sb-logout" onclick="logout()">[ SIGN OUT ]</button>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       模块二：报价参数
-  ══════════════════════════════════════════════ -->
-  <div class="panel" id="panel-pricing">
-    <div class="info-box">
-      <div class="ib-title">// 说明</div>
-      修改后点击「保存报价参数」即时生效，前台报价计算器将使用最新数值。单位均为 USD（美元）。
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <span class="tb-title" id="page-title">DASHBOARD</span>
+      <span class="tb-time" id="topbar-time"></span>
     </div>
-    <div class="pricing-grid" id="pricingGrid">
-      <div style="text-align:center;padding:3rem;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.75rem">加载中…</div>
-    </div>
-    <div class="btn-row">
-      <button class="save-btn" onclick="savePricing()">保存报价参数</button>
-      <span class="save-msg" id="pricingMsg"></span>
-    </div>
-  </div>
+    <div class="content">
 
-  <!-- ══════════════════════════════════════════════
-       模块三：网站内容
-  ══════════════════════════════════════════════ -->
-  <div class="panel" id="panel-content">
-    <div class="info-box">
-      <div class="ib-title">// 说明</div>
-      修改后台内容后，前台页面通过 <code style="color:var(--green)">/api/config</code> 接口读取，需要前台 JS 集成后才能动态生效。当前保存入库，可供前台调用。
-    </div>
-
-    <!-- Hero 内容 -->
-    <div class="cfg-section">
-      <div class="cfg-hdr"><span class="cfg-title">首页 HERO 内容</span></div>
-      <div class="cfg-body" id="cfg-hero">
-        <div style="color:var(--muted);font-size:.8rem">加载中…</div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="save-btn" onclick="saveConfigGroup('hero')">保存 Hero 内容</button>
-      <span class="save-msg" id="heroMsg"></span>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════
-       模块四：系统设置
-  ══════════════════════════════════════════════ -->
-  <div class="panel" id="panel-settings">
-
-    <!-- 基础信息 -->
-    <div class="cfg-section">
-      <div class="cfg-hdr"><span class="cfg-title">基础信息</span></div>
-      <div class="cfg-body" id="cfg-basic">
-        <div style="color:var(--muted);font-size:.8rem">加载中…</div>
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="save-btn" onclick="saveConfigGroup('basic')">保存基础信息</button>
-      <span class="save-msg" id="basicMsg"></span>
-    </div>
-
-    <!-- SEO 设置 -->
-    <div class="cfg-section" style="margin-top:1rem">
-      <div class="cfg-hdr"><span class="cfg-title">SEO 设置</span></div>
-      <div class="cfg-body" id="cfg-seo">
-        <div style="color:var(--muted);font-size:.8rem">加载中…</div>
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="save-btn" onclick="saveConfigGroup('seo')">保存 SEO 设置</button>
-      <span class="save-msg" id="seoMsg"></span>
-    </div>
-
-    <!-- Token 说明 -->
-    <div class="cfg-section" style="margin-top:1rem">
-      <div class="cfg-hdr"><span class="cfg-title">管理员 Token</span></div>
-      <div class="cfg-body">
-        <div class="info-box" style="margin-bottom:0">
-          <div class="ib-title">// 修改 Token</div>
-          Token 存储在服务器 <code style="color:var(--green)">.env</code> 文件中（变量名 <code style="color:var(--green)">ADMIN_TOKEN</code>）。<br>
-          修改后需重启服务器：<code style="color:var(--amber)">pkill -f "node server.js" &amp;&amp; node server.js &amp;</code><br>
-          当前 Token 不在此处显示，请直接编辑 .env 文件。
+      <!-- ── DASHBOARD ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">TOTAL ORDERS</div><div class="stat-value" id="s-total">—</div><div class="stat-sub">All time</div></div>
+          <div class="stat-card amber"><div class="stat-label">PENDING REVIEW</div><div class="stat-value" id="s-pending">—</div><div class="stat-sub">Awaiting action</div></div>
+          <div class="stat-card white"><div class="stat-label">IN PRODUCTION</div><div class="stat-value" id="s-production">—</div><div class="stat-sub">Being manufactured</div></div>
+          <div class="stat-card"><div class="stat-label">TOTAL CUSTOMERS</div><div class="stat-value" id="s-customers">—</div><div class="stat-sub">Registered accounts</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="card">
+            <div class="card-hdr"><span class="card-ht">// ORDER STATUS BREAKDOWN</span></div>
+            <div class="card-body">
+              <div id="status-breakdown">
+                <div class="empty"><div class="spinner"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><span class="card-ht">// RECENT ORDERS</span><button class="btn btn-outline btn-sm" onclick="nav('orders')">VIEW ALL →</button></div>
+            <div class="card-body" style="padding:0">
+              <div id="recent-orders-list"><div class="empty"><div class="spinner"></div></div></div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
+      <!-- ── ORDERS ── -->
+      <div class="page" id="page-orders">
+        <div class="toolbar">
+          <div class="search-box"><span style="color:var(--muted)">🔍</span><input type="text" id="order-search" placeholder="Search order no, email, name..." oninput="debounce(loadOrders,400)()"></div>
+          <select class="filter-select" id="order-status-filter" onchange="loadOrders()">
+            <option value="">ALL STATUS</option>
+            <option value="pending">PENDING</option>
+            <option value="quoted">QUOTED</option>
+            <option value="paid">PAID</option>
+            <option value="production">PRODUCTION</option>
+            <option value="shipped">SHIPPED</option>
+            <option value="completed">COMPLETED</option>
+            <option value="cancelled">CANCELLED</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadOrders()">↻ REFRESH</button>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>ORDER NO</th><th>CUSTOMER</th><th>SERVICE</th>
+                  <th>ESTIMATE</th><th>QUOTED</th><th>STATUS</th>
+                  <th>DATE</th><th>ACTION</th>
+                </tr></thead>
+                <tbody id="orders-tbody"><tr><td colspan="8" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+              </table>
+            </div>
+            <div class="pagination" id="orders-pagination"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CUSTOMERS ── -->
+      <div class="page" id="page-customers">
+        <div class="toolbar">
+          <div class="search-box"><span style="color:var(--muted)">🔍</span><input type="text" id="customer-search" placeholder="Search email, name, company..." oninput="debounce(loadCustomers,400)()"></div>
+          <select class="filter-select" id="customer-type-filter" onchange="loadCustomers()">
+            <option value="">ALL TYPES</option>
+            <option value="normal">NORMAL</option>
+            <option value="vip">VIP</option>
+            <option value="blacklist">BLACKLIST</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadCustomers()">↻ REFRESH</button>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>CUSTOMER</th><th>COMPANY</th><th>TYPE</th>
+                  <th>ORDERS</th><th>TOTAL SPENT</th><th>JOINED</th><th>ACTION</th>
+                </tr></thead>
+                <tbody id="customers-tbody"><tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+              </table>
+            </div>
+            <div class="pagination" id="customers-pagination"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAYMENTS ── -->
+      <div class="page" id="page-payments">
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><div class="stat-label">COMPLETED ORDERS</div><div class="stat-value" id="p-completed">—</div><div class="stat-sub">Revenue collected</div></div>
+          <div class="stat-card amber"><div class="stat-label">AWAITING PAYMENT</div><div class="stat-value" id="p-quoted">—</div><div class="stat-sub">Quote sent, pending pay</div></div>
+          <div class="stat-card white"><div class="stat-label">SHIPPED UNPAID</div><div class="stat-value" id="p-shipped">—</div><div class="stat-sub">Shipping fee outstanding</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-ht">// ORDERS AWAITING PAYMENT</span></div>
+          <div class="card-body" style="padding:0">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>ORDER NO</th><th>CUSTOMER</th><th>SERVICE</th><th>QUOTED</th><th>STATUS</th><th>DATE</th><th>ACTION</th></tr></thead>
+                <tbody id="payments-tbody"><tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="page" id="page-settings">
+        <div class="card">
+          <div class="card-hdr"><span class="card-ht">// SYSTEM SETTINGS</span><button class="btn btn-green btn-sm" onclick="saveAllSettings()">SAVE ALL CHANGES</button></div>
+          <div class="card-body">
+            <div class="settings-grid" id="settings-grid">
+              <div class="empty"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ADMINS ── -->
+      <div class="page" id="page-admins">
+        <div class="toolbar">
+          <button class="btn btn-green btn-sm" onclick="showAddAdmin()">+ ADD ADMIN</button>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>NAME</th><th>EMAIL</th><th>ROLE</th><th>LAST LOGIN</th><th>ACTION</th></tr></thead>
+                <tbody id="admins-tbody"><tr><td colspan="5" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
-<!-- ───── 订单详情弹窗 ───── -->
-<div class="modal-bg" id="orderModal" onclick="bgClose(event)">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="modal-title">订单详情</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
-    <div class="modal-footer">
-      <button class="mbtn mbtn-cancel" onclick="closeModal()">取消</button>
-      <button class="mbtn mbtn-save" id="modal-save-btn" onclick="saveOrder()">保存修改</button>
-    </div>
+<!-- ── ORDER DETAIL PANEL ── -->
+<div class="dp-overlay" id="dp-overlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="dp-hdr">
+    <span class="dp-ht" id="dp-title">ORDER DETAIL</span>
+    <button class="dp-close" onclick="closeDetail()">✕</button>
   </div>
+  <div class="dp-body" id="dp-body"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* ═════════════════════════════════════════════
-   STATE
-═════════════════════════════════════════════ */
-let TOKEN = '';
-let currentFilter = '';
-let currentPage   = 1;
-const PAGE_SIZE   = 20;
-let currentOrderId = null;
-let allConfig = [];
+const API = '';
+var adminToken = localStorage.getItem('cc_admin_token');
+var adminInfo  = null;
+var ordersPage = 1, customersPage = 1;
+var settingsData = [];
 
-/* ═════════════════════════════════════════════
-   AUTH
-═════════════════════════════════════════════ */
-function doLogin(){
-  const t = document.getElementById('tokenInput').value.trim();
-  if(!t) return;
-  TOKEN = t;
-  fetch('/api/admin/stats',{headers:{'x-admin-token':TOKEN}})
-    .then(r=>{ if(!r.ok) throw new Error(); return r.json(); })
-    .then(()=>{
-      sessionStorage.setItem('adm_tok', TOKEN);
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.cssText = 'display:flex;flex-direction:column';
-      initApp();
-    })
-    .catch(()=>{
-      TOKEN = '';
-      document.getElementById('loginErr').style.display = 'block';
-    });
-}
-
-function doLogout(){
-  TOKEN = '';
-  sessionStorage.removeItem('adm_tok');
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('tokenInput').value = '';
-  document.getElementById('loginErr').style.display = 'none';
-}
-
-const savedTok = sessionStorage.getItem('adm_tok');
-if(savedTok){ document.getElementById('tokenInput').value = savedTok; doLogin(); }
-
-/* ═════════════════════════════════════════════
-   INIT
-═════════════════════════════════════════════ */
-function initApp(){
-  loadStats();
-  loadOrders();
-  updateClock();
-  setInterval(updateClock, 30000);
-}
-
-function updateClock(){
-  document.getElementById('h-time').textContent = new Date().toLocaleString('zh-CN',{hour12:false,hour:'2-digit',minute:'2-digit',month:'2-digit',day:'2-digit'});
-}
-
-/* ═════════════════════════════════════════════
-   PANELS
-═════════════════════════════════════════════ */
-function showPanel(id, el){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  el.classList.add('active');
-  if(id==='pricing') loadPricing();
-  if(id==='content') loadConfig('content');
-  if(id==='settings') loadConfig('settings');
-}
-
-/* ═════════════════════════════════════════════
-   MODULE 1 — ORDERS
-═════════════════════════════════════════════ */
-function loadStats(){
-  fetch('/api/admin/stats',{headers:{'x-admin-token':TOKEN}})
-    .then(r=>r.json())
-    .then(d=>{
-      ['today','total','pending','quoted','paid','production','shipped','completed']
-        .forEach(k=>{ const el=document.getElementById('s-'+k); if(el) el.textContent = d[k]??'0'; });
-    });
-}
-
-function setFilter(f, el){
-  currentFilter = f; currentPage = 1;
-  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  loadOrders();
-}
-
-function changePage(dir){ currentPage += dir; loadOrders(); }
-
-const STATUS_ZH = {pending:'待处理',quoted:'已报价',paid:'已付款',production:'生产中',shipped:'已发货',completed:'已完成',cancelled:'已取消'};
-
-function loadOrders(){
-  const tbody = document.getElementById('ordersTbody');
-  tbody.innerHTML = '<tr><td colspan="8" class="tbl-empty">加载中…</td></tr>';
-  let url = `/api/admin/inquiries?page=${currentPage}&limit=${PAGE_SIZE}`;
-  if(currentFilter) url += `&status=${currentFilter}`;
-  fetch(url,{headers:{'x-admin-token':TOKEN}})
-    .then(r=>r.json())
-    .then(rows=>{
-      document.getElementById('prevBtn').disabled = currentPage <= 1;
-      document.getElementById('nextBtn').disabled = rows.length < PAGE_SIZE;
-      document.getElementById('pageInfo').textContent = `第 ${currentPage} 页`;
-      if(!rows.length){
-        tbody.innerHTML = '<tr><td colspan="8" class="tbl-empty">暂无订单</td></tr>';
-        return;
-      }
-      tbody.innerHTML = rows.map(r=>`
-        <tr>
-          <td><span class="order-link" onclick="openOrder(${r.id})">${esc(r.order_no)}</span></td>
-          <td>${esc(r.name)}</td>
-          <td style="font-size:.76rem;color:var(--muted)">${esc(r.email)}</td>
-          <td style="font-size:.78rem">${esc(r.service_type)}</td>
-          <td>${r.quantity||'—'}</td>
-          <td style="font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--green)">${r.quote_amount?'$'+Number(r.quote_amount).toFixed(2):'—'}</td>
-          <td><span class="pill p-${r.status||'pending'}">${STATUS_ZH[r.status]||r.status}</span></td>
-          <td style="font-size:.74rem;color:var(--muted)">${fmtShort(r.created_at)}</td>
-        </tr>`).join('');
-    })
-    .catch(()=>{ tbody.innerHTML='<tr><td colspan="8" class="tbl-empty">加载失败，请刷新重试</td></tr>'; });
-}
-
-function openOrder(id){
-  currentOrderId = id;
-  document.getElementById('orderModal').classList.add('open');
-  document.getElementById('modal-body').innerHTML = `<div style="text-align:center;padding:2.5rem;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.75rem">加载中…</div>`;
-  fetch(`/api/admin/inquiries/${id}`,{headers:{'x-admin-token':TOKEN}})
-    .then(r=>r.json())
-    .then(d=>renderModal(d));
-}
-
-function renderModal(d){
-  document.getElementById('modal-title').textContent = '订单详情 — ' + d.order_no;
-  const filesHtml = d.files
-    ? d.files.split(',').filter(f=>f.trim()).map(f=>`<a href="/${f.trim()}" target="_blank">📄 ${f.trim().split('/').pop()}</a>`).join('<br>')
-    : '<span style="color:var(--muted)">无上传文件</span>';
-
-  document.getElementById('modal-body').innerHTML = `
-    <!-- 客户信息 -->
-    <div class="ms">
-      <div class="ms-title">客户信息</div>
-      <div class="mg">
-        <div class="mi"><div class="mi-lbl">姓名</div><div class="mi-val">${esc(d.name)}</div></div>
-        <div class="mi"><div class="mi-lbl">邮箱</div><div class="mi-val" style="font-size:.8rem">${esc(d.email)}</div></div>
-        <div class="mi"><div class="mi-lbl">WhatsApp</div><div class="mi-val">${esc(d.whatsapp)||'—'}</div></div>
-        <div class="mi"><div class="mi-lbl">提交时间</div><div class="mi-val" style="font-size:.8rem">${fmtFull(d.created_at)}</div></div>
-      </div>
-    </div>
-    <!-- 需求参数 -->
-    <div class="ms">
-      <div class="ms-title">需求参数</div>
-      <div class="mg">
-        <div class="mi"><div class="mi-lbl">服务类型</div><div class="mi-val">${esc(d.service_type)}</div></div>
-        <div class="mi"><div class="mi-lbl">数量</div><div class="mi-val">${d.quantity||'—'} pcs</div></div>
-        <div class="mi"><div class="mi-lbl">客户估价</div><div class="mi-val">${esc(d.quote_estimate)||'—'}</div></div>
-        <div class="mi"><div class="mi-lbl">当前状态</div><div class="mi-val"><span class="pill p-${d.status||'pending'}">${STATUS_ZH[d.status]||d.status}</span></div></div>
-      </div>
-      ${d.notes?`<div style="margin-top:.7rem"><div class="mi-lbl" style="margin-bottom:.3rem">客户备注</div><div style="font-size:.82rem;background:var(--bg3);border:1px solid var(--border);padding:.7rem;line-height:1.7">${esc(d.notes)}</div></div>`:''}
-      <div style="margin-top:.7rem"><div class="mi-lbl" style="margin-bottom:.3rem">上传文件</div><div class="file-links">${filesHtml}</div></div>
-    </div>
-    <!-- 更新订单 -->
-    <div class="ms">
-      <div class="ms-title">更新订单</div>
-      <div class="mfg-row">
-        <div class="mfg">
-          <label>状态</label>
-          <select id="m-status">
-            ${Object.entries(STATUS_ZH).map(([v,l])=>`<option value="${v}"${d.status===v?' selected':''}>${l}</option>`).join('')}
-          </select>
-        </div>
-        <div class="mfg">
-          <label>正式报价金额（USD）</label>
-          <input type="number" id="m-quote" step="0.01" min="0" value="${d.quote_amount||''}" placeholder="0.00"/>
-        </div>
-      </div>
-      <div class="mfg-row">
-        <div class="mfg">
-          <label>供应商名称</label>
-          <input type="text" id="m-supplier" value="${esc(d.supplier||'')}" placeholder="如 JLCPCB"/>
-        </div>
-        <div class="mfg">
-          <label>供应商订单号</label>
-          <input type="text" id="m-supplier-no" value="${esc(d.supplier_order_no||'')}" placeholder="供应商平台单号"/>
-        </div>
-      </div>
-      <div class="mfg">
-        <label>物流单号</label>
-        <input type="text" id="m-tracking" value="${esc(d.tracking_no||'')}" placeholder="DHL / FedEx / EMS 单号"/>
-      </div>
-      <div class="mfg">
-        <label>给客户的备注（客户在追踪页可见）</label>
-        <textarea id="m-notes">${esc(d.admin_notes||'')}</textarea>
-      </div>
-    </div>`;
-}
-
-function saveOrder(){
-  if(!currentOrderId) return;
-  const btn = document.getElementById('modal-save-btn');
-  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>保存中';
-  fetch(`/api/admin/inquiries/${currentOrderId}`,{
-    method:'PATCH',
-    headers:{'x-admin-token':TOKEN,'Content-Type':'application/json'},
-    body: JSON.stringify({
-      status:           document.getElementById('m-status').value,
-      quote_amount:     document.getElementById('m-quote').value||null,
-      admin_notes:      document.getElementById('m-notes').value||null,
-      supplier:         document.getElementById('m-supplier').value||null,
-      supplier_order_no:document.getElementById('m-supplier-no').value||null,
-      tracking_no:      document.getElementById('m-tracking').value||null,
-    })
-  })
-  .then(r=>r.json())
-  .then(d=>{
-    btn.disabled=false; btn.textContent='保存修改';
-    if(d.success){ closeModal(); loadOrders(); loadStats(); toast('订单已更新'); }
-    else toast(d.error||'保存失败', true);
-  })
-  .catch(()=>{ btn.disabled=false; btn.textContent='保存修改'; toast('网络错误', true); });
-}
-
-function closeModal(){ document.getElementById('orderModal').classList.remove('open'); currentOrderId=null; }
-function bgClose(e){ if(e.target===document.getElementById('orderModal')) closeModal(); }
-
-/* ═════════════════════════════════════════════
-   MODULE 2 — PRICING
-═════════════════════════════════════════════ */
-const CAT_ZH = {pcb:'PCB 制板',smt:'SMT 贴片',dip:'DIP 插件',ship:'运费'};
-
-function loadPricing(){
-  fetch('/api/admin/pricing',{headers:{'x-admin-token':TOKEN}})
-    .then(r=>r.json())
-    .then(rows=>{
-      const groups = {};
-      rows.forEach(r=>{ if(!groups[r.category]) groups[r.category]=[]; groups[r.category].push(r); });
-      document.getElementById('pricingGrid').innerHTML = Object.entries(groups).map(([cat,items])=>`
-        <div class="pg">
-          <div class="pg-hdr">${CAT_ZH[cat]||cat.toUpperCase()}</div>
-          ${items.map(it=>`
-            <div class="pg-row">
-              <div class="pg-label">${esc(it.label)}</div>
-              <input class="pg-input" type="number" step="0.01" min="0" data-id="${it.id}" value="${it.value}"/>
-              <div class="pg-unit">${esc(it.unit||'')}</div>
-            </div>`).join('')}
-        </div>`).join('');
-    });
-}
-
-function savePricing(){
-  const inputs = document.querySelectorAll('.pg-input');
-  const msg = document.getElementById('pricingMsg');
-  msg.style.display='none';
-  Promise.all(Array.from(inputs).map(inp=>
-    fetch(`/api/admin/pricing/${inp.dataset.id}`,{
-      method:'PATCH',
-      headers:{'x-admin-token':TOKEN,'Content-Type':'application/json'},
-      body:JSON.stringify({value:inp.value})
-    })
-  )).then(()=>{ toast('报价参数已保存'); showMsg('pricingMsg','✓ 已保存','ok'); })
-   .catch(()=>{ toast('保存失败', true); showMsg('pricingMsg','✗ 保存失败','err'); });
-}
-
-/* ═════════════════════════════════════════════
-   MODULE 3 & 4 — CONFIG
-═════════════════════════════════════════════ */
-function loadConfig(panel){
-  if(allConfig.length) { renderConfig(panel); return; }
-  fetch('/api/admin/config',{headers:{'x-admin-token':TOKEN}})
-    .then(r=>r.json())
-    .then(rows=>{ allConfig=rows; renderConfig(panel); })
-    .catch(()=>toast('配置加载失败',true));
-}
-
-function renderConfig(panel){
-  if(panel==='content'){
-    const hero = allConfig.filter(r=>r.key.startsWith('hero_'));
-    document.getElementById('cfg-hero').innerHTML = hero.map(r=>cfgRow(r)).join('') || '<div style="color:var(--muted);font-size:.8rem">暂无 Hero 配置项</div>';
-  }
-  if(panel==='settings'){
-    const basic = allConfig.filter(r=>['company_name','whatsapp_number','contact_email'].includes(r.key));
-    const seo   = allConfig.filter(r=>r.key.startsWith('seo_'));
-    document.getElementById('cfg-basic').innerHTML = basic.map(r=>cfgRow(r)).join('') || '<div style="color:var(--muted);font-size:.8rem">暂无基础配置</div>';
-    document.getElementById('cfg-seo').innerHTML   = seo.map(r=>cfgRow(r)).join('')   || '<div style="color:var(--muted);font-size:.8rem">暂无 SEO 配置</div>';
+// ── AUTH ────────────────────────────────────────────
+async function doLogin() {
+  const email    = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const errEl    = document.getElementById('login-err');
+  const btn      = document.getElementById('login-btn');
+  if (!email || !password) { errEl.textContent = 'Please enter email and password'; return; }
+  btn.textContent = 'AUTHENTICATING...'; btn.disabled = true;
+  try {
+    const r = await apiFetch('/api/admin/login', { method:'POST', body: JSON.stringify({ email, password }) }, false);
+    adminToken = r.token;
+    adminInfo  = r.admin;
+    localStorage.setItem('cc_admin_token', adminToken);
+    showApp();
+  } catch(e) {
+    errEl.textContent = e.message || 'Invalid credentials';
+    btn.textContent = 'ACCESS SYSTEM →'; btn.disabled = false;
   }
 }
 
-function cfgRow(r){
-  const isLong = r.key.includes('desc') || (r.value && r.value.length > 80);
-  const input  = isLong
-    ? `<textarea class="cfg-textarea" data-key="${r.key}">${esc(r.value||'')}</textarea>`
-    : `<input class="cfg-input" type="text" data-key="${r.key}" value="${esc(r.value||'')}"/>`;
-  return `<div class="cfg-row"><div class="cfg-label">${esc(r.label||r.key)}</div><div>${input}</div></div>`;
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function showApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('admin-name').textContent = adminInfo?.name || 'Admin';
+  loadDashboard();
+  startClock();
 }
 
-function saveConfigGroup(group){
-  const msgId = {hero:'heroMsg', basic:'basicMsg', seo:'seoMsg'}[group];
-  const selectors = {
-    hero:  '[data-key^="hero_"]',
-    basic: '[data-key="company_name"],[data-key="whatsapp_number"],[data-key="contact_email"]',
-    seo:   '[data-key^="seo_"]',
-  };
-  const els = document.querySelectorAll(selectors[group]);
-  if(!els.length){ toast('没有找到配置项', true); return; }
-  Promise.all(Array.from(els).map(el=>
-    fetch(`/api/admin/config/${encodeURIComponent(el.dataset.key)}`,{
-      method:'PATCH',
-      headers:{'x-admin-token':TOKEN,'Content-Type':'application/json'},
-      body:JSON.stringify({value:el.value})
-    })
-  )).then(()=>{
-    allConfig = [];  // 清缓存，下次重新拉取
-    toast('配置已保存');
-    showMsg(msgId,'✓ 已保存','ok');
-  }).catch(()=>{ toast('保存失败',true); showMsg(msgId,'✗ 保存失败','err'); });
+function logout() {
+  adminToken = null;
+  localStorage.removeItem('cc_admin_token');
+  location.reload();
 }
 
-/* ═════════════════════════════════════════════
-   HELPERS
-═════════════════════════════════════════════ */
-function esc(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function fmtFull(s){
-  if(!s) return '—';
-  try{ return new Date(s.includes('T')?s:s+' UTC').toLocaleString('zh-CN',{hour12:false}); }
-  catch{ return s; }
-}
-function fmtShort(s){
-  if(!s) return '—';
-  try{ return new Date(s.includes('T')?s:s+' UTC').toLocaleString('zh-CN',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }
-  catch{ return s; }
+// ── API HELPER ───────────────────────────────────────
+async function apiFetch(url, opts={}, auth=true) {
+  const headers = { 'Content-Type':'application/json', ...(opts.headers||{}) };
+  if (auth) headers['Authorization'] = 'Bearer ' + adminToken;
+  const r = await fetch(API + url, { ...opts, headers });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Request failed');
+  return d;
 }
 
-let _toastTimer;
-function toast(msg, isErr=false){
+// ── NAVIGATION ───────────────────────────────────────
+const pageTitles = { dashboard:'DASHBOARD', orders:'ORDER MANAGEMENT', customers:'CUSTOMER MANAGEMENT', payments:'PAYMENT TRACKING', settings:'SYSTEM SETTINGS', admins:'ADMIN ACCOUNTS' };
+
+function nav(page) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  event.currentTarget?.classList.add('active');
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[page] || page.toUpperCase();
+  const loaders = { orders: loadOrders, customers: loadCustomers, payments: loadPayments, settings: loadSettings, admins: loadAdmins };
+  if (loaders[page]) loaders[page]();
+}
+
+// ── CLOCK ────────────────────────────────────────────
+function startClock() {
+  function tick() {
+    document.getElementById('topbar-time').textContent =
+      '// ' + new Date().toLocaleString('en-US',{hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+  tick(); setInterval(tick, 1000);
+}
+
+// ── TOAST ────────────────────────────────────────────
+function toast(msg, type='') {
   const el = document.getElementById('toast');
-  el.textContent = isErr ? '✗ '+msg : '✓ '+msg;
-  el.className = 'toast' + (isErr?' err':'');
-  requestAnimationFrame(()=>el.classList.add('show'));
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(()=>el.classList.remove('show'), 3000);
+  el.textContent = msg; el.className = 'toast' + (type ? ' '+type : '') + ' show';
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-function showMsg(id, text, cls){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.textContent = text;
-  el.className = 'save-msg '+cls;
-  el.style.display = 'inline';
-  setTimeout(()=>{ el.style.display='none'; }, 4000);
+// ── DEBOUNCE ─────────────────────────────────────────
+function debounce(fn, ms) {
+  let t; return function(...args){ clearTimeout(t); t=setTimeout(()=>fn(...args),ms); };
+}
+
+// ── HELPERS ─────────────────────────────────────────
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'; }
+function fmtMoney(v) { return v ? '$' + parseFloat(v).toFixed(2) : '—'; }
+function badge(status) { return `<span class="badge badge-${status}">${status.toUpperCase()}</span>`; }
+function modeBadge(m) { const map={pcb:'PCB',smt:'SMT',turnkey:'TURNKEY'}; return map[m]||m; }
+
+// ── DASHBOARD ───────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const [stats, cust] = await Promise.all([
+      apiFetch('/api/admin/stats'),
+      apiFetch('/api/admin/customers?limit=1')
+    ]);
+    const o = stats.orders;
+    document.getElementById('s-total').textContent       = o.total;
+    document.getElementById('s-pending').textContent     = o.pending;
+    document.getElementById('s-production').textContent  = o.production;
+    document.getElementById('s-customers').textContent   = stats.users.total;
+    document.getElementById('badge-pending').textContent = o.pending;
+
+    // Status breakdown
+    const statuses = ['pending','quoted','paid','production','shipped','completed','cancelled'];
+    document.getElementById('status-breakdown').innerHTML = statuses.map(s =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid rgba(30,58,30,.4)">
+        <span>${badge(s)}</span>
+        <span style="font-family:'Orbitron',monospace;font-size:1rem;color:var(--green)">${o[s]||0}</span>
+      </div>`
+    ).join('');
+
+    // Recent orders
+    const recent = await apiFetch('/api/admin/orders?limit=8');
+    document.getElementById('recent-orders-list').innerHTML = recent.length ? recent.map(r =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.2rem;border-bottom:1px solid rgba(30,58,30,.4);cursor:pointer" onclick="openOrder('${r.id}')">
+        <div>
+          <div class="mono" style="color:var(--white);font-size:.75rem">${r.order_no}</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${r.customer_email||'—'}</div>
+        </div>
+        <div style="text-align:right">
+          ${badge(r.status)}
+          <div style="font-size:.7rem;color:var(--muted);margin-top:.15rem">${fmtDate(r.created_at)}</div>
+        </div>
+      </div>`
+    ).join('') : `<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">NO ORDERS YET</div></div>`;
+  } catch(e) { toast('Dashboard load error: ' + e.message, 'error'); }
+}
+
+// ── ORDERS ──────────────────────────────────────────
+async function loadOrders() {
+  const q      = document.getElementById('order-search').value;
+  const status = document.getElementById('order-status-filter').value;
+  const tbody  = document.getElementById('orders-tbody');
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>`;
+  try {
+    const data = await apiFetch(`/api/admin/orders?page=${ordersPage}&limit=20${status?'&status='+status:''}${q?'&q='+encodeURIComponent(q):''}`);
+    if (!data.length) { tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--muted)">No orders found</td></tr>`; return; }
+    tbody.innerHTML = data.map(r => `
+      <tr>
+        <td class="mono" style="color:var(--white)">${r.order_no}</td>
+        <td><div style="font-size:.82rem">${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
+        <td><span style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${modeBadge(r.mode)}</span></td>
+        <td class="mono">${fmtMoney(r.estimate)}</td>
+        <td class="mono" style="color:var(--green)">${fmtMoney(r.quoted_price)}</td>
+        <td>${badge(r.status)}</td>
+        <td style="color:var(--muted);font-size:.78rem">${fmtDate(r.created_at)}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="openOrder('${r.id}')">VIEW →</button></td>
+      </tr>`).join('');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ── ORDER DETAIL ─────────────────────────────────────
+async function openOrder(id) {
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('dp-overlay').classList.add('show');
+  document.getElementById('dp-title').textContent = 'ORDER DETAIL';
+  document.getElementById('dp-body').innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+  try {
+    const o = await apiFetch(`/api/admin/orders/${id}`);
+    document.getElementById('dp-title').textContent = o.order_no;
+    const params = o.params || {};
+    document.getElementById('dp-body').innerHTML = `
+      <div class="section-title">// CUSTOMER</div>
+      <div class="info-row"><span class="ir-label">Name</span><span class="ir-value">${o.customer_name||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">Email</span><span class="ir-value">${o.customer_email||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">WhatsApp</span><span class="ir-value">${o.customer_whatsapp||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">Company</span><span class="ir-value">${o.customer_company||'—'}</span></div>
+
+      <div class="section-title">// ORDER</div>
+      <div class="info-row"><span class="ir-label">Order No</span><span class="ir-value g">${o.order_no}</span></div>
+      <div class="info-row"><span class="ir-label">Service</span><span class="ir-value">${modeBadge(o.mode)}</span></div>
+      <div class="info-row"><span class="ir-label">Status</span><span class="ir-value">${badge(o.status)}</span></div>
+      <div class="info-row"><span class="ir-label">Estimate</span><span class="ir-value">${fmtMoney(o.estimate)}</span></div>
+      <div class="info-row"><span class="ir-label">Created</span><span class="ir-value">${fmtDate(o.created_at)}</span></div>
+      <div class="info-row"><span class="ir-label">Notes</span><span class="ir-value">${o.notes||'—'}</span></div>
+
+      <div class="section-title">// PARAMETERS</div>
+      ${Object.entries(params).map(([k,v]) =>
+        `<div class="info-row"><span class="ir-label">${k}</span><span class="ir-value">${v||'—'}</span></div>`
+      ).join('')}
+
+      <div class="section-title">// QUOTE & UPDATE</div>
+      <div class="form-group">
+        <label>QUOTED PRICE (USD)</label>
+        <input type="number" id="dp-quoted" value="${o.quoted_price||''}" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>SHIPPING FEE (USD)</label>
+        <input type="number" id="dp-shipping" value="${o.shipping_fee||''}" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>TRACKING NUMBER</label>
+        <input type="text" id="dp-tracking" value="${o.tracking_no||''}" placeholder="DHL / FedEx tracking no">
+      </div>
+      <div class="form-group">
+        <label>STATUS</label>
+        <select id="dp-status">
+          ${['pending','quoted','paid','production','shipped','completed','cancelled'].map(s =>
+            `<option value="${s}"${s===o.status?' selected':''}>${s.toUpperCase()}</option>`
+          ).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ADMIN NOTE</label>
+        <textarea id="dp-note" placeholder="Internal notes...">${o.admin_note||''}</textarea>
+      </div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn btn-green" onclick="saveOrder('${o.id}')">💾 SAVE CHANGES</button>
+        ${o.status==='pending'||o.status==='quoted' ? `<button class="btn btn-amber" onclick="sendPayment('${o.id}','${o.order_no}')">📧 SEND PAYMENT LINK</button>` : ''}
+      </div>
+    `;
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function saveOrder(id) {
+  try {
+    await apiFetch(`/api/admin/orders/${id}`, {
+      method:'PUT',
+      body: JSON.stringify({
+        status:       document.getElementById('dp-status').value,
+        quoted_price: document.getElementById('dp-quoted').value || null,
+        shipping_fee: document.getElementById('dp-shipping').value || null,
+        tracking_no:  document.getElementById('dp-tracking').value || null,
+        admin_note:   document.getElementById('dp-note').value || null
+      })
+    });
+    toast('✅ Order updated');
+    loadOrders();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function sendPayment(id, order_no) {
+  const quoted = document.getElementById('dp-quoted').value;
+  if (!quoted) { toast('Please set quoted price first', 'error'); return; }
+  await saveOrder(id);
+  try {
+    const r = await apiFetch(`/api/admin/orders/${id}/send-payment`, { method:'POST' });
+    toast('📧 Payment link sent!');
+    setTimeout(() => { closeDetail(); loadOrders(); }, 1000);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('dp-overlay').classList.remove('show');
+}
+
+// ── CUSTOMERS ────────────────────────────────────────
+async function loadCustomers() {
+  const q    = document.getElementById('customer-search').value;
+  const type = document.getElementById('customer-type-filter').value;
+  const tbody = document.getElementById('customers-tbody');
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>`;
+  try {
+    const data = await apiFetch(`/api/admin/customers?page=${customersPage}&limit=20${type?'&type='+type:''}${q?'&q='+encodeURIComponent(q):''}`);
+    if (!data.length) { tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">No customers found</td></tr>`; return; }
+    tbody.innerHTML = data.map(c => `
+      <tr>
+        <td>
+          <div style="font-size:.83rem;color:var(--white)">${c.name||'—'}</div>
+          <div style="font-size:.72rem;color:var(--muted)">${c.email}</div>
+          <div style="font-size:.68rem;margin-top:.2rem">
+            ${c.google_linked?'<span style="color:#4285F4;font-size:.65rem">G</span>':''}
+            ${c.github_linked?'<span style="color:var(--text);font-size:.65rem">GH</span>':''}
+          </div>
+        </td>
+        <td style="color:var(--muted);font-size:.8rem">${c.company||'—'}</td>
+        <td>${badge(c.customer_type==='normal'?'normal':c.customer_type==='vip'?'vip':'blacklist')}</td>
+        <td class="mono" style="text-align:center">${c.order_count||0}</td>
+        <td class="mono" style="color:var(--green)">${fmtMoney(c.total_spent)}</td>
+        <td style="color:var(--muted);font-size:.78rem">${fmtDate(c.created_at)}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="openCustomer('${c.id}')">VIEW →</button></td>
+      </tr>`).join('');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function openCustomer(id) {
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('dp-overlay').classList.add('show');
+  document.getElementById('dp-title').textContent = 'CUSTOMER DETAIL';
+  document.getElementById('dp-body').innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+  try {
+    const c = await apiFetch(`/api/admin/customers/${id}`);
+    document.getElementById('dp-body').innerHTML = `
+      <div class="section-title">// PROFILE</div>
+      <div class="info-row"><span class="ir-label">Name</span><span class="ir-value">${c.name||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">Email</span><span class="ir-value">${c.email}</span></div>
+      <div class="info-row"><span class="ir-label">Company</span><span class="ir-value">${c.company||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">WhatsApp</span><span class="ir-value">${c.whatsapp||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">Verified</span><span class="ir-value" style="color:${c.email_verified?'var(--green)':'var(--red)'}">${c.email_verified?'YES':'NO'}</span></div>
+      <div class="info-row"><span class="ir-label">Google</span><span class="ir-value">${c.google_id?'Linked':'—'}</span></div>
+      <div class="info-row"><span class="ir-label">GitHub</span><span class="ir-value">${c.github_id?'Linked':'—'}</span></div>
+      <div class="info-row"><span class="ir-label">Joined</span><span class="ir-value">${fmtDate(c.created_at)}</span></div>
+      <div class="info-row"><span class="ir-label">Last Login</span><span class="ir-value">${fmtDate(c.last_login_at)}</span></div>
+
+      <div class="section-title">// MANAGE</div>
+      <div class="form-group">
+        <label>CUSTOMER TYPE</label>
+        <select id="c-type">
+          <option value="normal"${c.customer_type==='normal'?' selected':''}>NORMAL</option>
+          <option value="vip"${c.customer_type==='vip'?' selected':''}>VIP</option>
+          <option value="blacklist"${c.customer_type==='blacklist'?' selected':''}>BLACKLIST</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>INTERNAL NOTE</label>
+        <textarea id="c-note" placeholder="Internal notes (not visible to customer)">${c.note||''}</textarea>
+      </div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="btn btn-green btn-sm" onclick="saveCustomer('${c.id}')">💾 SAVE</button>
+        ${c.google_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth('${c.id}','google')">Unbind Google</button>`:''}
+        ${c.github_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth('${c.id}','github')">Unbind GitHub</button>`:''}
+      </div>
+
+      <div class="section-title">// ORDER HISTORY (${c.orders?.length||0})</div>
+      ${c.orders?.length ? c.orders.map(o =>
+        `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(30,58,30,.4);cursor:pointer" onclick="openOrder('${o.order_no}')">
+          <div><div class="mono" style="font-size:.75rem;color:var(--white)">${o.order_no}</div><div style="font-size:.7rem;color:var(--muted)">${modeBadge(o.mode)} · ${fmtDate(o.created_at)}</div></div>
+          <div style="text-align:right">${badge(o.status)}<div style="font-size:.75rem;color:var(--green);margin-top:.2rem">${fmtMoney(o.quoted_price||o.estimate)}</div></div>
+        </div>`
+      ).join('') : '<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">No orders yet</div>'}
+    `;
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function saveCustomer(id) {
+  try {
+    await apiFetch(`/api/admin/customers/${id}`, {
+      method:'PUT',
+      body: JSON.stringify({ customer_type: document.getElementById('c-type').value, note: document.getElementById('c-note').value })
+    });
+    toast('✅ Customer updated');
+    loadCustomers();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function unbindOAuth(id, provider) {
+  if (!confirm(`Unbind ${provider} from this customer?`)) return;
+  try {
+    await apiFetch(`/api/admin/customers/${id}`, {
+      method:'PUT',
+      body: JSON.stringify({ [`unbind_${provider}`]: true })
+    });
+    toast(`✅ ${provider} unbound`);
+    openCustomer(id);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ── PAYMENTS ─────────────────────────────────────────
+async function loadPayments() {
+  try {
+    const [stats, quoted, shipped] = await Promise.all([
+      apiFetch('/api/admin/stats'),
+      apiFetch('/api/admin/orders?status=quoted&limit=50'),
+      apiFetch('/api/admin/orders?status=shipped&limit=50')
+    ]);
+    const o = stats.orders;
+    document.getElementById('p-completed').textContent = o.completed;
+    document.getElementById('p-quoted').textContent    = o.quoted;
+    document.getElementById('p-shipped').textContent   = o.shipped;
+
+    const all = [...quoted, ...shipped];
+    const tbody = document.getElementById('payments-tbody');
+    tbody.innerHTML = all.length ? all.map(r => `
+      <tr>
+        <td class="mono" style="color:var(--white)">${r.order_no}</td>
+        <td><div style="font-size:.82rem">${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
+        <td><span style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${modeBadge(r.mode)}</span></td>
+        <td class="mono" style="color:var(--green)">${fmtMoney(r.quoted_price)}</td>
+        <td>${badge(r.status)}</td>
+        <td style="color:var(--muted);font-size:.78rem">${fmtDate(r.created_at)}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="openOrder('${r.id}')">VIEW →</button></td>
+      </tr>`).join('')
+    : `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">No pending payments</td></tr>`;
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ── SETTINGS ─────────────────────────────────────────
+async function loadSettings() {
+  try {
+    settingsData = await apiFetch('/api/admin/settings');
+    const LABELS = {
+      whatsapp_number:'WhatsApp Number', shipping_address:'Shipping Address',
+      contact_email:'Contact Email', company_name:'Company Name',
+      google_oauth_enabled:'Google OAuth', github_oauth_enabled:'GitHub OAuth',
+      pcb_tier1_price:'PCB Tier 1 Price ($)', pcb_tier2_price:'PCB Tier 2 Price ($)',
+      pcb_tier3_price:'PCB Tier 3 Price ($)', smt_single_price:'SMT Single Side ($)',
+      smt_double_price:'SMT Double Side ($)', smt_max_parts:'SMT Max Components',
+      smt_max_ic:'SMT Max Complex ICs', smt_max_dip:'SMT Max DIP Pins'
+    };
+    const BOOL_KEYS = ['google_oauth_enabled','github_oauth_enabled'];
+    document.getElementById('settings-grid').innerHTML = settingsData.map(s =>
+      `<div class="setting-item">
+        <div class="setting-key">${s.key}</div>
+        <div class="setting-desc">${LABELS[s.key]||s.description||''}</div>
+        <div class="setting-input-wrap">
+          ${BOOL_KEYS.includes(s.key)
+            ? `<select id="setting-${s.key}"><option value="true"${s.value==='true'?' selected':''}>ENABLED</option><option value="false"${s.value!=='true'?' selected':''}>DISABLED</option></select>`
+            : `<input type="text" id="setting-${s.key}" value="${s.value||''}" placeholder="—">`
+          }
+          <button class="btn btn-outline btn-sm" onclick="saveSetting('${s.key}')">SAVE</button>
+        </div>
+      </div>`
+    ).join('');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function saveSetting(key) {
+  try {
+    const val = document.getElementById('setting-' + key).value;
+    await apiFetch(`/api/admin/settings/${key}`, { method:'PUT', body: JSON.stringify({ value: val }) });
+    toast('✅ Setting saved: ' + key);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function saveAllSettings() {
+  for (const s of settingsData) {
+    const el = document.getElementById('setting-' + s.key);
+    if (el) {
+      try {
+        await apiFetch(`/api/admin/settings/${s.key}`, { method:'PUT', body: JSON.stringify({ value: el.value }) });
+      } catch(e) {}
+    }
+  }
+  toast('✅ All settings saved');
+}
+
+// ── ADMINS ───────────────────────────────────────────
+async function loadAdmins() {
+  const tbody = document.getElementById('admins-tbody');
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>`;
+  try {
+    const data = await apiFetch('/api/admin/admins');
+    tbody.innerHTML = data.map(a => `
+      <tr>
+        <td style="color:var(--white)">${a.name}</td>
+        <td class="mono" style="font-size:.78rem">${a.email}</td>
+        <td><span style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:${a.role==='superadmin'?'var(--green)':'var(--muted)'}">${a.role.toUpperCase()}</span></td>
+        <td style="color:var(--muted);font-size:.78rem">${fmtDate(a.last_login_at)}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="changeAdminPwd('${a.id}')">CHANGE PWD</button></td>
+      </tr>`).join('');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function showAddAdmin() {
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('dp-overlay').classList.add('show');
+  document.getElementById('dp-title').textContent = 'ADD ADMIN';
+  document.getElementById('dp-body').innerHTML = `
+    <div class="section-title">// NEW ADMIN ACCOUNT</div>
+    <div class="form-group"><label>NAME</label><input type="text" id="na-name" placeholder="Admin Name"></div>
+    <div class="form-group"><label>EMAIL</label><input type="email" id="na-email" placeholder="admin@ccpcba.com"></div>
+    <div class="form-group"><label>PASSWORD</label><input type="password" id="na-pwd" placeholder="Min 8 chars"></div>
+    <div class="form-group"><label>ROLE</label><select id="na-role"><option value="admin">ADMIN</option><option value="superadmin">SUPERADMIN</option></select></div>
+    <button class="btn btn-green" onclick="createAdmin()">CREATE ACCOUNT →</button>
+  `;
+}
+
+async function createAdmin() {
+  try {
+    await apiFetch('/api/admin/admins', {
+      method:'POST',
+      body: JSON.stringify({
+        name:     document.getElementById('na-name').value,
+        email:    document.getElementById('na-email').value,
+        password: document.getElementById('na-pwd').value,
+        role:     document.getElementById('na-role').value
+      })
+    });
+    toast('✅ Admin account created');
+    closeDetail(); loadAdmins();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function changeAdminPwd(id) {
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('dp-overlay').classList.add('show');
+  document.getElementById('dp-title').textContent = 'CHANGE PASSWORD';
+  document.getElementById('dp-body').innerHTML = `
+    <div class="section-title">// CHANGE ADMIN PASSWORD</div>
+    <div class="form-group"><label>NEW PASSWORD</label><input type="password" id="new-pwd" placeholder="Min 8 chars"></div>
+    <button class="btn btn-green" onclick="doChangePwd('${id}')">UPDATE PASSWORD →</button>
+  `;
+}
+
+async function doChangePwd(id) {
+  try {
+    await apiFetch(`/api/admin/admins/${id}/password`, { method:'PUT', body: JSON.stringify({ new_password: document.getElementById('new-pwd').value }) });
+    toast('✅ Password updated');
+    closeDetail();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ── INIT ────────────────────────────────────────────
+if (adminToken) {
+  adminInfo = { name: 'Admin' };
+  showApp();
 }
 </script>
 </body>
