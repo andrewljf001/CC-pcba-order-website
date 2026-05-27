@@ -144,6 +144,10 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
       <div class="search-row">
         <input type="text" id="orderInput" placeholder="CC1234567890000" maxlength="30"
                onkeydown="if(event.key==='Enter')doTrack()"/>
+      </div>
+      <div class="search-row" style="margin-top:.7rem">
+        <input type="email" id="emailInput" placeholder="Your email address (for verification)"
+               onkeydown="if(event.key==='Enter')doTrack()"/>
         <button class="search-btn" onclick="doTrack()" id="trackBtn">TRACK</button>
       </div>
       <div class="search-hint">» Order number was emailed to you after submission (format: CC + timestamp)</div>
@@ -174,13 +178,19 @@ function fmtDate(s){
 }
 
 function doTrack(){
-  const no = document.getElementById('orderInput').value.trim().toUpperCase();
+  const no    = document.getElementById('orderInput').value.trim().toUpperCase();
+  const email = document.getElementById('emailInput') ? document.getElementById('emailInput').value.trim() : '';
   if(!no){alert('Please enter your order number.');return;}
+  if(!email){alert('Please enter your email address.');return;}
   const btn = document.getElementById('trackBtn');
   btn.disabled=true;
   btn.innerHTML='<span class="spinner"></span>SEARCHING';
 
-  fetch('/api/track/'+encodeURIComponent(no))
+  fetch('/api/order/lookup',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({order_no:no, email:email})
+  })
     .then(r=>r.json())
     .then(d=>{
       btn.disabled=false; btn.textContent='TRACK';
@@ -238,8 +248,8 @@ function renderResult(d){
 
   // Extra notes
   let extras='';
-  if(d.admin_notes){
-    extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM CC PCBA TEAM</span></div><div class="note-body">${esc(d.admin_notes)}</div></div>`;
+  if(d.admin_note){
+    extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM CC PCBA TEAM</span></div><div class="note-body">${esc(d.admin_note)}</div></div>`;
   }
   if(d.tracking_no){
     extras+=`<div class="note-card" style="border-color:#1565C0"><div class="note-hdr" style="background:rgba(21,101,192,.15)"><span class="note-ht" style="color:#64B5F6">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
@@ -253,10 +263,10 @@ function renderResult(d){
       </div>
       <div class="order-top-body">
         <div class="info-grid">
-          <div class="ig-item"><div class="ig-label">CUSTOMER</div><div class="ig-val">${esc(d.name)}</div></div>
-          <div class="ig-item"><div class="ig-label">SERVICE</div><div class="ig-val">${esc(d.service_type)}</div></div>
-          <div class="ig-item"><div class="ig-label">QUANTITY</div><div class="ig-val">${d.quantity?d.quantity+' pcs':'—'}</div></div>
-          <div class="ig-item"><div class="ig-label">QUOTED AMOUNT</div><div class="ig-val">${d.quote_amount?'$'+Number(d.quote_amount).toFixed(2):'Pending'}</div></div>
+          <div class="ig-item"><div class="ig-label">CUSTOMER</div><div class="ig-val">${esc(d.customer_name||'—')}</div></div>
+          <div class="ig-item"><div class="ig-label">SERVICE</div><div class="ig-val">${(d.mode||'—').toUpperCase()}</div></div>
+          <div class="ig-item"><div class="ig-label">ESTIMATE</div><div class="ig-val">${d.estimate?'$'+Number(d.estimate).toFixed(2):'—'}</div></div>
+          <div class="ig-item"><div class="ig-label">QUOTED AMOUNT</div><div class="ig-val">${d.quoted_price?'<span style="color:var(--green)">'+'$'+Number(d.quoted_price).toFixed(2)+'</span>':'Pending review'}</div></div>
           <div class="ig-item"><div class="ig-label">SUBMITTED</div><div class="ig-val">${fmtDate(d.created_at)}</div></div>
           <div class="ig-item"><div class="ig-label">LAST UPDATED</div><div class="ig-val">${fmtDate(d.updated_at)}</div></div>
         </div>
@@ -270,6 +280,19 @@ function renderResult(d){
 
     ${extras}
 
+    ${d.status==='quoted' && d.quoted_price ? `
+    <div class="note-card" style="border-color:var(--green3)">
+      <div class="note-hdr" style="background:rgba(0,255,65,.06)">
+        <span class="note-ht" style="color:var(--green)">// PAYMENT REQUIRED</span>
+      </div>
+      <div class="note-body" style="text-align:center;padding:1rem">
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem">Your quoted amount:</div>
+        <div style="font-family:'Orbitron',monospace;font-size:2rem;color:var(--green);margin-bottom:1rem">$${Number(d.quoted_price).toFixed(2)}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:1.2rem">Please contact us via WhatsApp or email to complete payment.</div>
+        <a href="https://wa.me/" id="pay-wa-btn" class="act-btn primary" style="display:inline-block">💬 CONTACT TO PAY</a>
+      </div>
+    </div>` : ''}
+
     <div class="actions">
       <a href="quote.html" class="act-btn primary">Submit New Inquiry</a>
       <a href="index.html" class="act-btn">← Back to Home</a>
@@ -277,6 +300,16 @@ function renderResult(d){
   `;
   document.getElementById('result').className='result show';
 }
+
+// 动态读取 WhatsApp 号码
+fetch('/api/settings/public').then(r=>r.json()).then(cfg=>{
+  const wa = cfg.whatsapp_number || '';
+  const waBtn = document.getElementById('pay-wa-btn');
+  if(waBtn && wa) waBtn.href = 'https://wa.me/' + wa.replace(/[^0-9]/g,'');
+  // 更新 WA 浮动按钮
+  const waf = document.querySelector('.waf');
+  if(waf && wa) waf.href = 'https://wa.me/' + wa.replace(/[^0-9]/g,'');
+}).catch(()=>{});
 
 // Auto-track from URL ?order=CC…
 const p = new URLSearchParams(location.search);
