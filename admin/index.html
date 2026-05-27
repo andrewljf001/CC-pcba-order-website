@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCBAForge — Admin</title>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--max:1400px}
@@ -204,6 +205,7 @@ tr:hover td{background:rgba(0,255,65,.025)}
           <label>PASSWORD</label>
           <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
         </div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="dark" style="margin-bottom:.8rem"></div>
         <button class="login-btn" id="login-btn" onclick="doLogin()">ACCESS SYSTEM →</button>
         <div class="login-err" id="login-err"></div>
       </div>
@@ -541,7 +543,7 @@ async function doLogin() {
   if (!email || !password) { errEl.textContent = 'Please enter email and password'; return; }
   btn.textContent = 'AUTHENTICATING...'; btn.disabled = true;
   try {
-    const r = await apiFetch('/api/admin/login', { method:'POST', body: JSON.stringify({ email, password }) }, false);
+    const r = await apiFetch('/api/admin/login', { method:'POST', body: JSON.stringify({ email, password, cf_turnstile: turnstile.getResponse() }) }, false);
     adminToken = r.token;
     adminInfo  = r.admin;
     localStorage.setItem('cc_admin_token', adminToken);

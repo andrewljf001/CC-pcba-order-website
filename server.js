@@ -48,6 +48,21 @@ if (!JWT_SECRET || !JWT_ADMIN_SECRET) {
   process.exit(1);
 }
 
+
+// ── Turnstile 人机验证 ────────────────────────────────
+async function verifyTurnstile(token) {
+  if (!token) return false;
+  const secret = process.env.TURNSTILE_SECRET;
+  if (!secret) return true; // 未配置则跳过
+  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret, response: token })
+  });
+  const data = await res.json();
+  return data.success === true;
+}
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -264,7 +279,8 @@ app.post('/api/order/lookup', async (req, res) => {
 // 注册
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, cf_turnstile } = req.body;
+    if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
     if (!email || !password || !name) return res.status(400).json({ error: 'email, password, name required' });
     if (password.length < 8) return res.status(400).json({ error: 'Password min 8 characters' });
 
@@ -308,7 +324,8 @@ app.get('/api/auth/verify', async (req, res) => {
 // 登录
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, cf_turnstile } = req.body;
+    if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
     const { rows } = await pool.query('SELECT * FROM users WHERE email=$1', [email?.toLowerCase()]);
     if (!rows.length) return res.status(401).json({ error: 'Invalid email or password' });
 
@@ -509,7 +526,8 @@ app.delete('/api/me/addresses/:id', userAuth, async (req, res) => {
 // 管理员登录
 app.post('/api/admin/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, cf_turnstile } = req.body;
+    if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
     const { rows } = await pool.query('SELECT * FROM admin_users WHERE email=$1', [email?.toLowerCase()]);
     if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
     const ok = await bcrypt.compare(password, rows[0].password_hash);
