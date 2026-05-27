@@ -98,6 +98,8 @@ tr:hover td{background:rgba(0,255,65,.025)}
 .badge-normal{color:var(--text);border-color:var(--border);background:transparent}
 .badge-vip{color:var(--amber);border-color:rgba(255,179,0,.3);background:rgba(255,179,0,.07)}
 .badge-blacklist{color:var(--red);border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.07)}
+.badge-published{color:var(--green);border-color:rgba(0,255,65,.3);background:rgba(0,255,65,.07)}
+.badge-draft{color:var(--muted);border-color:var(--border);background:transparent}
 
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;padding:.4rem .9rem;border:1px solid;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:.06em;transition:all .2s}
@@ -138,6 +140,18 @@ tr:hover td{background:rgba(0,255,65,.025)}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green3)}
 .form-group select option{background:var(--bg)}
 .form-group textarea{resize:vertical;min-height:70px}
+
+/* BLOG EDITOR */
+.blog-editor{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.75rem;font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;width:100%;min-height:300px;resize:vertical;line-height:1.7}
+.blog-editor:focus{border-color:var(--green3)}
+.editor-toolbar{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem;padding:.5rem;background:var(--dim);border:1px solid var(--border);border-bottom:none}
+.editor-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:.25rem .6rem;font-family:'Share Tech Mono',monospace;transition:all .2s}
+.editor-btn:hover{color:var(--green);border-color:var(--green3)}
+.tags-input{display:flex;flex-wrap:wrap;gap:.4rem;background:var(--bg3);border:1px solid var(--border);padding:.4rem .6rem;min-height:38px;align-items:center}
+.tags-input input{background:none;border:none;color:var(--text);font-size:.83rem;outline:none;min-width:80px;flex:1}
+.tag-chip{background:rgba(0,255,65,.08);border:1px solid var(--green3);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:.15rem .5rem;display:flex;align-items:center;gap:.3rem}
+.tag-chip button{background:none;border:none;color:var(--muted);font-size:.8rem;padding:0;line-height:1}
+.tag-chip button:hover{color:var(--red)}
 
 /* TOAST */
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg2);border:1px solid var(--green3);color:var(--white);padding:.8rem 1.2rem;font-size:.82rem;z-index:1000;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
@@ -184,7 +198,7 @@ tr:hover td{background:rgba(0,255,65,.025)}
       <div class="login-body">
         <div class="fg">
           <label>EMAIL</label>
-          <input type="email" id="login-email" placeholder="admin@ccpcba.com" autocomplete="username">
+          <input type="email" id="login-email" placeholder="admin@pcbaforge.com" autocomplete="username">
         </div>
         <div class="fg">
           <label>PASSWORD</label>
@@ -208,15 +222,17 @@ tr:hover td{background:rgba(0,255,65,.025)}
     <div class="sb-admin">Logged in as<br><span id="admin-name">Admin</span></div>
     <nav class="sb-nav">
       <div class="sb-section">// MAIN</div>
-      <div class="nav-item active" onclick="nav('dashboard')"><span class="ni">📊</span>Dashboard</div>
-      <div class="nav-item" onclick="nav('orders')"><span class="ni">📋</span>Orders<span class="nav-badge" id="badge-pending">0</span></div>
+      <div class="nav-item active" onclick="nav('dashboard',this)"><span class="ni">📊</span>Dashboard</div>
+      <div class="nav-item" onclick="nav('orders',this)"><span class="ni">📋</span>Orders<span class="nav-badge" id="badge-pending">0</span></div>
       <div class="sb-section">// CUSTOMERS</div>
-      <div class="nav-item" onclick="nav('customers')"><span class="ni">👥</span>Customers</div>
+      <div class="nav-item" onclick="nav('customers',this)"><span class="ni">👥</span>Customers</div>
+      <div class="sb-section">// CONTENT</div>
+      <div class="nav-item" onclick="nav('blog',this)"><span class="ni">✍️</span>Blog Posts</div>
       <div class="sb-section">// FINANCE</div>
-      <div class="nav-item" onclick="nav('payments')"><span class="ni">💳</span>Payments</div>
+      <div class="nav-item" onclick="nav('payments',this)"><span class="ni">💳</span>Payments</div>
       <div class="sb-section">// SYSTEM</div>
-      <div class="nav-item" onclick="nav('settings')"><span class="ni">⚙️</span>Settings</div>
-      <div class="nav-item" onclick="nav('admins')"><span class="ni">🔐</span>Admins</div>
+      <div class="nav-item" onclick="nav('settings',this)"><span class="ni">⚙️</span>Settings</div>
+      <div class="nav-item" onclick="nav('admins',this)"><span class="ni">🔐</span>Admins</div>
     </nav>
     <div class="sb-footer">
       <button class="sb-logout" onclick="logout()">[ SIGN OUT ]</button>
@@ -242,17 +258,11 @@ tr:hover td{background:rgba(0,255,65,.025)}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
           <div class="card">
             <div class="card-hdr"><span class="card-ht">// ORDER STATUS BREAKDOWN</span></div>
-            <div class="card-body">
-              <div id="status-breakdown">
-                <div class="empty"><div class="spinner"></div></div>
-              </div>
-            </div>
+            <div class="card-body"><div id="status-breakdown"><div class="empty"><div class="spinner"></div></div></div></div>
           </div>
           <div class="card">
             <div class="card-hdr"><span class="card-ht">// RECENT ORDERS</span><button class="btn btn-outline btn-sm" onclick="nav('orders')">VIEW ALL →</button></div>
-            <div class="card-body" style="padding:0">
-              <div id="recent-orders-list"><div class="empty"><div class="spinner"></div></div></div>
-            </div>
+            <div class="card-body" style="padding:0"><div id="recent-orders-list"><div class="empty"><div class="spinner"></div></div></div></div>
           </div>
         </div>
       </div>
@@ -277,11 +287,7 @@ tr:hover td{background:rgba(0,255,65,.025)}
           <div class="card-body" style="padding:0">
             <div class="tbl-wrap">
               <table>
-                <thead><tr>
-                  <th>ORDER NO</th><th>CUSTOMER</th><th>SERVICE</th>
-                  <th>ESTIMATE</th><th>QUOTED</th><th>STATUS</th>
-                  <th>DATE</th><th>ACTION</th>
-                </tr></thead>
+                <thead><tr><th>ORDER NO</th><th>CUSTOMER</th><th>SERVICE</th><th>ESTIMATE</th><th>QUOTED</th><th>STATUS</th><th>DATE</th><th>ACTION</th></tr></thead>
                 <tbody id="orders-tbody"><tr><td colspan="8" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
               </table>
             </div>
@@ -306,14 +312,34 @@ tr:hover td{background:rgba(0,255,65,.025)}
           <div class="card-body" style="padding:0">
             <div class="tbl-wrap">
               <table>
-                <thead><tr>
-                  <th>CUSTOMER</th><th>COMPANY</th><th>TYPE</th>
-                  <th>ORDERS</th><th>TOTAL SPENT</th><th>JOINED</th><th>ACTION</th>
-                </tr></thead>
+                <thead><tr><th>CUSTOMER</th><th>COMPANY</th><th>TYPE</th><th>ORDERS</th><th>TOTAL SPENT</th><th>JOINED</th><th>ACTION</th></tr></thead>
                 <tbody id="customers-tbody"><tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
               </table>
             </div>
             <div class="pagination" id="customers-pagination"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BLOG ── -->
+      <div class="page" id="page-blog">
+        <div class="toolbar">
+          <select class="filter-select" id="blog-status-filter" onchange="loadPosts()">
+            <option value="">ALL POSTS</option>
+            <option value="published">PUBLISHED</option>
+            <option value="draft">DRAFT</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="loadPosts()">↻ REFRESH</button>
+          <button class="btn btn-green btn-sm" onclick="openPostEditor()">+ NEW POST</button>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>TITLE</th><th>SLUG</th><th>TAGS</th><th>STATUS</th><th>VIEWS</th><th>PUBLISHED</th><th>ACTION</th></tr></thead>
+                <tbody id="blog-tbody"><tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -343,15 +369,9 @@ tr:hover td{background:rgba(0,255,65,.025)}
         <div class="card">
           <div class="card-hdr"><span class="card-ht">// SYSTEM SETTINGS</span><button class="btn btn-green btn-sm" onclick="saveAllSettings()">SAVE ALL CHANGES</button></div>
           <div class="card-body">
-            <div class="settings-grid" id="settings-grid">
-              <div class="empty"><div class="spinner"></div></div>
-            </div>
+            <div class="settings-grid" id="settings-grid"><div class="empty"><div class="spinner"></div></div></div>
           </div>
         </div>
-      </div>
-
-
-        <!-- 邮件服务配置 -->
         <div class="card">
           <div class="card-hdr">
             <span class="card-ht">// MAIL SERVER CONFIGURATION</span>
@@ -359,7 +379,7 @@ tr:hover td{background:rgba(0,255,65,.025)}
           </div>
           <div class="card-body">
             <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;line-height:1.7">
-              Configure your mail server. Passwords are <strong style="color:var(--green)">AES-256-GCM encrypted</strong> before storage — never stored in plaintext. Switch between SMTP and Resend at any time.
+              Configure your mail server. Passwords are <strong style="color:var(--green)">AES-256-GCM encrypted</strong> before storage.
             </div>
             <div class="settings-grid">
               <div class="setting-item">
@@ -367,95 +387,43 @@ tr:hover td{background:rgba(0,255,65,.025)}
                 <div class="setting-desc">Mail driver</div>
                 <div class="setting-input-wrap">
                   <select id="setting-mail_driver" onchange="toggleMailFields()">
-                    <option value="smtp">SMTP (Gmail / Outlook / self-hosted)</option>
+                    <option value="smtp">SMTP</option>
                     <option value="resend">Resend API</option>
                   </select>
                   <button class="btn btn-outline btn-sm" onclick="saveSetting('mail_driver')">SAVE</button>
                 </div>
               </div>
               <div class="setting-item">
-                <div class="setting-key">mail_from</div>
-                <div class="setting-desc">Sender email address</div>
-                <div class="setting-input-wrap">
-                  <input type="text" id="setting-mail_from" placeholder="noreply@yourdomain.com">
-                  <button class="btn btn-outline btn-sm" onclick="saveSetting('mail_from')">SAVE</button>
-                </div>
+                <div class="setting-key">mail_from</div><div class="setting-desc">Sender email</div>
+                <div class="setting-input-wrap"><input type="text" id="setting-mail_from" placeholder="noreply@pcbaforge.com"><button class="btn btn-outline btn-sm" onclick="saveSetting('mail_from')">SAVE</button></div>
               </div>
               <div class="setting-item">
-                <div class="setting-key">mail_from_name</div>
-                <div class="setting-desc">Sender display name</div>
-                <div class="setting-input-wrap">
-                  <input type="text" id="setting-mail_from_name" placeholder="PCBAForge">
-                  <button class="btn btn-outline btn-sm" onclick="saveSetting('mail_from_name')">SAVE</button>
-                </div>
+                <div class="setting-key">mail_from_name</div><div class="setting-desc">Sender display name</div>
+                <div class="setting-input-wrap"><input type="text" id="setting-mail_from_name" placeholder="PCBAForge"><button class="btn btn-outline btn-sm" onclick="saveSetting('mail_from_name')">SAVE</button></div>
               </div>
             </div>
-
             <div id="smtp-fields">
               <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin:1rem 0 .5rem;padding-top:.8rem;border-top:1px solid var(--border)">// SMTP SETTINGS</div>
               <div class="settings-grid">
-                <div class="setting-item">
-                  <div class="setting-key">smtp_host</div>
-                  <div class="setting-desc">SMTP server (e.g. smtp.gmail.com)</div>
-                  <div class="setting-input-wrap">
-                    <input type="text" id="setting-smtp_host" placeholder="smtp.gmail.com">
-                    <button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_host')">SAVE</button>
-                  </div>
-                </div>
-                <div class="setting-item">
-                  <div class="setting-key">smtp_port</div>
-                  <div class="setting-desc">Port (587=TLS, 465=SSL)</div>
-                  <div class="setting-input-wrap">
-                    <input type="text" id="setting-smtp_port" placeholder="587">
-                    <button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_port')">SAVE</button>
-                  </div>
-                </div>
-                <div class="setting-item">
-                  <div class="setting-key">smtp_secure</div>
-                  <div class="setting-desc">Use SSL (true for port 465)</div>
-                  <div class="setting-input-wrap">
-                    <select id="setting-smtp_secure">
-                      <option value="false">false (TLS/STARTTLS)</option>
-                      <option value="true">true (SSL)</option>
-                    </select>
-                    <button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_secure')">SAVE</button>
-                  </div>
-                </div>
-                <div class="setting-item">
-                  <div class="setting-key">smtp_user</div>
-                  <div class="setting-desc">SMTP username</div>
-                  <div class="setting-input-wrap">
-                    <input type="text" id="setting-smtp_user" placeholder="your@email.com">
-                    <button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_user')">SAVE</button>
-                  </div>
-                </div>
+                <div class="setting-item"><div class="setting-key">smtp_host</div><div class="setting-desc">SMTP server</div><div class="setting-input-wrap"><input type="text" id="setting-smtp_host" placeholder="smtp.gmail.com"><button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_host')">SAVE</button></div></div>
+                <div class="setting-item"><div class="setting-key">smtp_port</div><div class="setting-desc">Port (587=TLS)</div><div class="setting-input-wrap"><input type="text" id="setting-smtp_port" placeholder="587"><button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_port')">SAVE</button></div></div>
+                <div class="setting-item"><div class="setting-key">smtp_secure</div><div class="setting-desc">Use SSL</div><div class="setting-input-wrap"><select id="setting-smtp_secure"><option value="false">false (TLS)</option><option value="true">true (SSL)</option></select><button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_secure')">SAVE</button></div></div>
+                <div class="setting-item"><div class="setting-key">smtp_user</div><div class="setting-desc">SMTP username</div><div class="setting-input-wrap"><input type="text" id="setting-smtp_user" placeholder="your@email.com"><button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_user')">SAVE</button></div></div>
                 <div class="setting-item" style="grid-column:1/-1">
-                  <div class="setting-key">smtp_pass_enc</div>
-                  <div class="setting-desc">SMTP password — <span style="color:var(--green)">AES-256-GCM encrypted</span></div>
-                  <div class="setting-input-wrap">
-                    <input type="password" id="smtp-pass-input" placeholder="Enter new password to update">
-                    <button class="btn btn-amber btn-sm" onclick="saveEncrypted('smtp_pass_enc','smtp-pass-input')">ENCRYPT & SAVE</button>
-                  </div>
-                  <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem">Enter a new password to update. Current value is stored encrypted.</div>
+                  <div class="setting-key">smtp_pass_enc</div><div class="setting-desc">SMTP password — <span style="color:var(--green)">AES-256-GCM encrypted</span></div>
+                  <div class="setting-input-wrap"><input type="password" id="smtp-pass-input" placeholder="Enter new password to update"><button class="btn btn-amber btn-sm" onclick="saveEncrypted('smtp_pass_enc','smtp-pass-input')">ENCRYPT & SAVE</button></div>
                 </div>
               </div>
             </div>
-
             <div id="resend-fields" style="display:none">
               <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin:1rem 0 .5rem;padding-top:.8rem;border-top:1px solid var(--border)">// RESEND API SETTINGS</div>
               <div class="settings-grid">
                 <div class="setting-item" style="grid-column:1/-1">
-                  <div class="setting-key">resend_api_key_enc</div>
-                  <div class="setting-desc">Resend API Key — <span style="color:var(--green)">AES-256-GCM encrypted</span>. Get key from <a href="https://resend.com" target="_blank" style="color:var(--green)">resend.com</a></div>
-                  <div class="setting-input-wrap">
-                    <input type="password" id="resend-key-input" placeholder="re_xxxxxxxxxxxxxxxx">
-                    <button class="btn btn-amber btn-sm" onclick="saveEncrypted('resend_api_key_enc','resend-key-input')">ENCRYPT & SAVE</button>
-                  </div>
-                  <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem">Enter a new API key to update. Current value is stored encrypted.</div>
+                  <div class="setting-key">resend_api_key_enc</div><div class="setting-desc">Resend API Key — <span style="color:var(--green)">encrypted</span></div>
+                  <div class="setting-input-wrap"><input type="password" id="resend-key-input" placeholder="re_xxxxxxxxxxxxxxxx"><button class="btn btn-amber btn-sm" onclick="saveEncrypted('resend_api_key_enc','resend-key-input')">ENCRYPT & SAVE</button></div>
                 </div>
               </div>
             </div>
-
             <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;gap:.8rem;align-items:center;flex-wrap:wrap">
               <input type="email" id="test-mail-to" placeholder="Send test email to..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.45rem .75rem;font-size:.82rem;outline:none;flex:1;min-width:200px">
               <button class="btn btn-outline btn-sm" onclick="testMail()">SEND TEST</button>
@@ -463,11 +431,11 @@ tr:hover td{background:rgba(0,255,65,.025)}
             </div>
           </div>
         </div>
+      </div>
+
       <!-- ── ADMINS ── -->
       <div class="page" id="page-admins">
-        <div class="toolbar">
-          <button class="btn btn-green btn-sm" onclick="showAddAdmin()">+ ADD ADMIN</button>
-        </div>
+        <div class="toolbar"><button class="btn btn-green btn-sm" onclick="showAddAdmin()">+ ADD ADMIN</button></div>
         <div class="card">
           <div class="card-body" style="padding:0">
             <div class="tbl-wrap">
@@ -484,14 +452,73 @@ tr:hover td{background:rgba(0,255,65,.025)}
   </div>
 </div>
 
-<!-- ── ORDER DETAIL PANEL ── -->
+<!-- ── ORDER/CUSTOMER DETAIL PANEL ── -->
 <div class="dp-overlay" id="dp-overlay" onclick="closeDetail()"></div>
 <div class="detail-panel" id="detail-panel">
   <div class="dp-hdr">
-    <span class="dp-ht" id="dp-title">ORDER DETAIL</span>
+    <span class="dp-ht" id="dp-title">DETAIL</span>
     <button class="dp-close" onclick="closeDetail()">✕</button>
   </div>
   <div class="dp-body" id="dp-body"></div>
+</div>
+
+<!-- ── BLOG EDITOR MODAL ── -->
+<div class="dp-overlay" id="blog-overlay" onclick="closeBlogEditor()"></div>
+<div class="detail-panel" id="blog-panel" style="width:680px">
+  <div class="dp-hdr">
+    <span class="dp-ht" id="blog-panel-title">NEW POST</span>
+    <div style="display:flex;gap:.5rem;align-items:center">
+      <button class="btn btn-outline btn-sm" onclick="savePost('draft')">SAVE DRAFT</button>
+      <button class="btn btn-green btn-sm" onclick="savePost('published')">PUBLISH →</button>
+      <button class="dp-close" onclick="closeBlogEditor()">✕</button>
+    </div>
+  </div>
+  <div class="dp-body">
+    <input type="hidden" id="post-id">
+    <div class="form-group">
+      <label>TITLE *</label>
+      <input type="text" id="post-title" placeholder="Article title..." oninput="autoSlug()">
+    </div>
+    <div class="form-group">
+      <label>SLUG * <span style="color:var(--muted);font-size:.6rem">(URL-friendly, auto-generated)</span></label>
+      <input type="text" id="post-slug" placeholder="article-slug-here">
+    </div>
+    <div class="form-group">
+      <label>EXCERPT <span style="color:var(--muted);font-size:.6rem">(shown in blog list)</span></label>
+      <textarea id="post-excerpt" style="min-height:60px" placeholder="Brief description of the article..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>COVER IMAGE URL <span style="color:var(--muted);font-size:.6rem">(optional)</span></label>
+      <input type="text" id="post-cover" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label>TAGS <span style="color:var(--muted);font-size:.6rem">(press Enter or comma to add)</span></label>
+      <div class="tags-input" id="tags-container" onclick="document.getElementById('tag-input').focus()">
+        <input type="text" id="tag-input" placeholder="Add tag..." onkeydown="handleTagInput(event)">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>AUTHOR</label>
+      <input type="text" id="post-author" value="PCBAForge Team" placeholder="Author name">
+    </div>
+    <div class="form-group">
+      <label>CONTENT * <span style="color:var(--muted);font-size:.6rem">(HTML supported)</span></label>
+      <div class="editor-toolbar">
+        <button class="editor-btn" onclick="insertTag('h2')">H2</button>
+        <button class="editor-btn" onclick="insertTag('h3')">H3</button>
+        <button class="editor-btn" onclick="insertTag('p')">P</button>
+        <button class="editor-btn" onclick="insertTag('strong')"><b>B</b></button>
+        <button class="editor-btn" onclick="insertTag('em')"><i>I</i></button>
+        <button class="editor-btn" onclick="insertTag('code')">code</button>
+        <button class="editor-btn" onclick="insertTag('pre')">pre</button>
+        <button class="editor-btn" onclick="insertUl()">UL</button>
+        <button class="editor-btn" onclick="insertTag('blockquote')">❝</button>
+        <button class="editor-btn" onclick="insertImg()">IMG</button>
+        <button class="editor-btn" onclick="insertHr()">HR</button>
+      </div>
+      <textarea class="blog-editor" id="post-content" placeholder="Write your article in HTML...&#10;&#10;Example:&#10;&lt;h2&gt;Section Title&lt;/h2&gt;&#10;&lt;p&gt;Your content here...&lt;/p&gt;"></textarea>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -502,13 +529,15 @@ var adminToken = localStorage.getItem('cc_admin_token');
 var adminInfo  = null;
 var ordersPage = 1, customersPage = 1;
 var settingsData = [];
+var currentTags = [];
+var editingPostId = null;
 
 // ── AUTH ────────────────────────────────────────────
 async function doLogin() {
-  const email    = document.getElementById('login-email').value;
+  const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
-  const errEl    = document.getElementById('login-err');
-  const btn      = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-err');
+  const btn = document.getElementById('login-btn');
   if (!email || !password) { errEl.textContent = 'Please enter email and password'; return; }
   btn.textContent = 'AUTHENTICATING...'; btn.disabled = true;
   try {
@@ -550,15 +579,15 @@ async function apiFetch(url, opts={}, auth=true) {
 }
 
 // ── NAVIGATION ───────────────────────────────────────
-const pageTitles = { dashboard:'DASHBOARD', orders:'ORDER MANAGEMENT', customers:'CUSTOMER MANAGEMENT', payments:'PAYMENT TRACKING', settings:'SYSTEM SETTINGS', admins:'ADMIN ACCOUNTS' };
+const pageTitles = { dashboard:'DASHBOARD', orders:'ORDER MANAGEMENT', customers:'CUSTOMER MANAGEMENT', blog:'BLOG POSTS', payments:'PAYMENT TRACKING', settings:'SYSTEM SETTINGS', admins:'ADMIN ACCOUNTS' };
 
-function nav(page) {
+function nav(page, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  event.currentTarget?.classList.add('active');
+  if (el) el.classList.add('active');
   document.getElementById('page-' + page).classList.add('active');
   document.getElementById('page-title').textContent = pageTitles[page] || page.toUpperCase();
-  const loaders = { orders: loadOrders, customers: loadCustomers, payments: loadPayments, settings: loadSettings, admins: loadAdmins };
+  const loaders = { orders: loadOrders, customers: loadCustomers, blog: loadPosts, payments: loadPayments, settings: loadSettings, admins: loadAdmins };
   if (loaders[page]) loaders[page]();
 }
 
@@ -588,22 +617,19 @@ function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-GB',{day:'2-
 function fmtMoney(v) { return v ? '$' + parseFloat(v).toFixed(2) : '—'; }
 function badge(status) { return `<span class="badge badge-${status}">${status.toUpperCase()}</span>`; }
 function modeBadge(m) { const map={pcb:'PCB',smt:'SMT',turnkey:'TURNKEY'}; return map[m]||m; }
+function esc(s) { if(!s) return ''; const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
 
 // ── DASHBOARD ───────────────────────────────────────
 async function loadDashboard() {
   try {
-    const [stats, cust] = await Promise.all([
-      apiFetch('/api/admin/stats'),
-      apiFetch('/api/admin/customers?limit=1')
-    ]);
+    const stats = await apiFetch('/api/admin/stats');
     const o = stats.orders;
-    document.getElementById('s-total').textContent       = o.total;
-    document.getElementById('s-pending').textContent     = o.pending;
-    document.getElementById('s-production').textContent  = o.production;
-    document.getElementById('s-customers').textContent   = stats.users.total;
+    document.getElementById('s-total').textContent      = o.total;
+    document.getElementById('s-pending').textContent    = o.pending;
+    document.getElementById('s-production').textContent = o.production;
+    document.getElementById('s-customers').textContent  = stats.users.total;
     document.getElementById('badge-pending').textContent = o.pending;
 
-    // Status breakdown
     const statuses = ['pending','quoted','paid','production','shipped','completed','cancelled'];
     document.getElementById('status-breakdown').innerHTML = statuses.map(s =>
       `<div style="display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid rgba(30,58,30,.4)">
@@ -612,7 +638,6 @@ async function loadDashboard() {
       </div>`
     ).join('');
 
-    // Recent orders
     const recent = await apiFetch('/api/admin/orders?limit=8');
     document.getElementById('recent-orders-list').innerHTML = recent.length ? recent.map(r =>
       `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.2rem;border-bottom:1px solid rgba(30,58,30,.4);cursor:pointer" onclick="openOrder('${r.id}')">
@@ -626,14 +651,14 @@ async function loadDashboard() {
         </div>
       </div>`
     ).join('') : `<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">NO ORDERS YET</div></div>`;
-  } catch(e) { toast('Dashboard load error: ' + e.message, 'error'); }
+  } catch(e) { toast('Dashboard error: ' + e.message, 'error'); }
 }
 
 // ── ORDERS ──────────────────────────────────────────
 async function loadOrders() {
-  const q      = document.getElementById('order-search').value;
+  const q = document.getElementById('order-search').value;
   const status = document.getElementById('order-status-filter').value;
-  const tbody  = document.getElementById('orders-tbody');
+  const tbody = document.getElementById('orders-tbody');
   tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>`;
   try {
     const data = await apiFetch(`/api/admin/orders?page=${ordersPage}&limit=20${status?'&status='+status:''}${q?'&q='+encodeURIComponent(q):''}`);
@@ -641,7 +666,7 @@ async function loadOrders() {
     tbody.innerHTML = data.map(r => `
       <tr>
         <td class="mono" style="color:var(--white)">${r.order_no}</td>
-        <td><div style="font-size:.82rem">${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
+        <td><div>${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
         <td><span style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${modeBadge(r.mode)}</span></td>
         <td class="mono">${fmtMoney(r.estimate)}</td>
         <td class="mono" style="color:var(--green)">${fmtMoney(r.quoted_price)}</td>
@@ -652,7 +677,6 @@ async function loadOrders() {
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
-// ── ORDER DETAIL ─────────────────────────────────────
 async function openOrder(id) {
   document.getElementById('detail-panel').classList.add('open');
   document.getElementById('dp-overlay').classList.add('show');
@@ -668,7 +692,6 @@ async function openOrder(id) {
       <div class="info-row"><span class="ir-label">Email</span><span class="ir-value">${o.customer_email||'—'}</span></div>
       <div class="info-row"><span class="ir-label">WhatsApp</span><span class="ir-value">${o.customer_whatsapp||'—'}</span></div>
       <div class="info-row"><span class="ir-label">Company</span><span class="ir-value">${o.customer_company||'—'}</span></div>
-
       <div class="section-title">// ORDER</div>
       <div class="info-row"><span class="ir-label">Order No</span><span class="ir-value g">${o.order_no}</span></div>
       <div class="info-row"><span class="ir-label">Service</span><span class="ir-value">${modeBadge(o.mode)}</span></div>
@@ -676,42 +699,24 @@ async function openOrder(id) {
       <div class="info-row"><span class="ir-label">Estimate</span><span class="ir-value">${fmtMoney(o.estimate)}</span></div>
       <div class="info-row"><span class="ir-label">Created</span><span class="ir-value">${fmtDate(o.created_at)}</span></div>
       <div class="info-row"><span class="ir-label">Notes</span><span class="ir-value">${o.notes||'—'}</span></div>
-
       <div class="section-title">// PARAMETERS</div>
-      ${Object.entries(params).map(([k,v]) =>
-        `<div class="info-row"><span class="ir-label">${k}</span><span class="ir-value">${v||'—'}</span></div>`
-      ).join('')}
-
+      ${Object.entries(params).map(([k,v]) => `<div class="info-row"><span class="ir-label">${k}</span><span class="ir-value">${v||'—'}</span></div>`).join('')}
       <div class="section-title">// QUOTE & UPDATE</div>
-      <div class="form-group">
-        <label>QUOTED PRICE (USD)</label>
-        <input type="number" id="dp-quoted" value="${o.quoted_price||''}" placeholder="0.00" step="0.01">
-      </div>
-      <div class="form-group">
-        <label>SHIPPING FEE (USD)</label>
-        <input type="number" id="dp-shipping" value="${o.shipping_fee||''}" placeholder="0.00" step="0.01">
-      </div>
-      <div class="form-group">
-        <label>TRACKING NUMBER</label>
-        <input type="text" id="dp-tracking" value="${o.tracking_no||''}" placeholder="DHL / FedEx tracking no">
-      </div>
-      <div class="form-group">
-        <label>STATUS</label>
+      <div class="form-group"><label>QUOTED PRICE (USD)</label><input type="number" id="dp-quoted" value="${o.quoted_price||''}" placeholder="0.00" step="0.01"></div>
+      <div class="form-group"><label>SHIPPING FEE (USD)</label><input type="number" id="dp-shipping" value="${o.shipping_fee||''}" placeholder="0.00" step="0.01"></div>
+      <div class="form-group"><label>TRACKING NUMBER</label><input type="text" id="dp-tracking" value="${o.tracking_no||''}" placeholder="DHL / FedEx tracking no"></div>
+      <div class="form-group"><label>STATUS</label>
         <select id="dp-status">
           ${['pending','quoted','paid','production','shipped','completed','cancelled'].map(s =>
             `<option value="${s}"${s===o.status?' selected':''}>${s.toUpperCase()}</option>`
           ).join('')}
         </select>
       </div>
-      <div class="form-group">
-        <label>ADMIN NOTE</label>
-        <textarea id="dp-note" placeholder="Internal notes...">${o.admin_note||''}</textarea>
-      </div>
+      <div class="form-group"><label>ADMIN NOTE</label><textarea id="dp-note" placeholder="Internal notes...">${o.admin_note||''}</textarea></div>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap">
         <button class="btn btn-green" onclick="saveOrder('${o.id}')">💾 SAVE CHANGES</button>
         ${o.status==='pending'||o.status==='quoted' ? `<button class="btn btn-amber" onclick="sendPayment('${o.id}','${o.order_no}')">📧 SEND PAYMENT LINK</button>` : ''}
-      </div>
-    `;
+      </div>`;
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -720,15 +725,14 @@ async function saveOrder(id) {
     await apiFetch(`/api/admin/orders/${id}`, {
       method:'PUT',
       body: JSON.stringify({
-        status:       document.getElementById('dp-status').value,
+        status: document.getElementById('dp-status').value,
         quoted_price: document.getElementById('dp-quoted').value || null,
         shipping_fee: document.getElementById('dp-shipping').value || null,
-        tracking_no:  document.getElementById('dp-tracking').value || null,
-        admin_note:   document.getElementById('dp-note').value || null
+        tracking_no: document.getElementById('dp-tracking').value || null,
+        admin_note: document.getElementById('dp-note').value || null
       })
     });
-    toast('✅ Order updated');
-    loadOrders();
+    toast('✅ Order updated'); loadOrders();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -737,7 +741,7 @@ async function sendPayment(id, order_no) {
   if (!quoted) { toast('Please set quoted price first', 'error'); return; }
   await saveOrder(id);
   try {
-    const r = await apiFetch(`/api/admin/orders/${id}/send-payment`, { method:'POST' });
+    await apiFetch(`/api/admin/orders/${id}/send-payment`, { method:'POST' });
     toast('📧 Payment link sent!');
     setTimeout(() => { closeDetail(); loadOrders(); }, 1000);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
@@ -750,7 +754,7 @@ function closeDetail() {
 
 // ── CUSTOMERS ────────────────────────────────────────
 async function loadCustomers() {
-  const q    = document.getElementById('customer-search').value;
+  const q = document.getElementById('customer-search').value;
   const type = document.getElementById('customer-type-filter').value;
   const tbody = document.getElementById('customers-tbody');
   tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>`;
@@ -759,14 +763,7 @@ async function loadCustomers() {
     if (!data.length) { tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">No customers found</td></tr>`; return; }
     tbody.innerHTML = data.map(c => `
       <tr>
-        <td>
-          <div style="font-size:.83rem;color:var(--white)">${c.name||'—'}</div>
-          <div style="font-size:.72rem;color:var(--muted)">${c.email}</div>
-          <div style="font-size:.68rem;margin-top:.2rem">
-            ${c.google_linked?'<span style="color:#4285F4;font-size:.65rem">G</span>':''}
-            ${c.github_linked?'<span style="color:var(--text);font-size:.65rem">GH</span>':''}
-          </div>
-        </td>
+        <td><div style="color:var(--white)">${c.name||'—'}</div><div style="font-size:.72rem;color:var(--muted)">${c.email}</div></td>
         <td style="color:var(--muted);font-size:.8rem">${c.company||'—'}</td>
         <td>${badge(c.customer_type==='normal'?'normal':c.customer_type==='vip'?'vip':'blacklist')}</td>
         <td class="mono" style="text-align:center">${c.order_count||0}</td>
@@ -791,62 +788,213 @@ async function openCustomer(id) {
       <div class="info-row"><span class="ir-label">Company</span><span class="ir-value">${c.company||'—'}</span></div>
       <div class="info-row"><span class="ir-label">WhatsApp</span><span class="ir-value">${c.whatsapp||'—'}</span></div>
       <div class="info-row"><span class="ir-label">Verified</span><span class="ir-value" style="color:${c.email_verified?'var(--green)':'var(--red)'}">${c.email_verified?'YES':'NO'}</span></div>
-      <div class="info-row"><span class="ir-label">Google</span><span class="ir-value">${c.google_id?'Linked':'—'}</span></div>
-      <div class="info-row"><span class="ir-label">GitHub</span><span class="ir-value">${c.github_id?'Linked':'—'}</span></div>
       <div class="info-row"><span class="ir-label">Joined</span><span class="ir-value">${fmtDate(c.created_at)}</span></div>
-      <div class="info-row"><span class="ir-label">Last Login</span><span class="ir-value">${fmtDate(c.last_login_at)}</span></div>
-
       <div class="section-title">// MANAGE</div>
-      <div class="form-group">
-        <label>CUSTOMER TYPE</label>
+      <div class="form-group"><label>CUSTOMER TYPE</label>
         <select id="c-type">
           <option value="normal"${c.customer_type==='normal'?' selected':''}>NORMAL</option>
           <option value="vip"${c.customer_type==='vip'?' selected':''}>VIP</option>
           <option value="blacklist"${c.customer_type==='blacklist'?' selected':''}>BLACKLIST</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>INTERNAL NOTE</label>
-        <textarea id="c-note" placeholder="Internal notes (not visible to customer)">${c.note||''}</textarea>
-      </div>
+      <div class="form-group"><label>INTERNAL NOTE</label><textarea id="c-note" placeholder="Internal notes...">${c.note||''}</textarea></div>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem">
         <button class="btn btn-green btn-sm" onclick="saveCustomer('${c.id}')">💾 SAVE</button>
         ${c.google_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth('${c.id}','google')">Unbind Google</button>`:''}
         ${c.github_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth('${c.id}','github')">Unbind GitHub</button>`:''}
       </div>
-
       <div class="section-title">// ORDER HISTORY (${c.orders?.length||0})</div>
       ${c.orders?.length ? c.orders.map(o =>
         `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(30,58,30,.4);cursor:pointer" onclick="openOrder('${o.order_no}')">
           <div><div class="mono" style="font-size:.75rem;color:var(--white)">${o.order_no}</div><div style="font-size:.7rem;color:var(--muted)">${modeBadge(o.mode)} · ${fmtDate(o.created_at)}</div></div>
           <div style="text-align:right">${badge(o.status)}<div style="font-size:.75rem;color:var(--green);margin-top:.2rem">${fmtMoney(o.quoted_price||o.estimate)}</div></div>
         </div>`
-      ).join('') : '<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">No orders yet</div>'}
-    `;
+      ).join('') : '<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">No orders yet</div>'}`;
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 async function saveCustomer(id) {
   try {
-    await apiFetch(`/api/admin/customers/${id}`, {
-      method:'PUT',
-      body: JSON.stringify({ customer_type: document.getElementById('c-type').value, note: document.getElementById('c-note').value })
-    });
-    toast('✅ Customer updated');
-    loadCustomers();
+    await apiFetch(`/api/admin/customers/${id}`, { method:'PUT', body: JSON.stringify({ customer_type: document.getElementById('c-type').value, note: document.getElementById('c-note').value }) });
+    toast('✅ Customer updated'); loadCustomers();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 async function unbindOAuth(id, provider) {
-  if (!confirm(`Unbind ${provider} from this customer?`)) return;
+  if (!confirm(`Unbind ${provider}?`)) return;
   try {
-    await apiFetch(`/api/admin/customers/${id}`, {
-      method:'PUT',
-      body: JSON.stringify({ [`unbind_${provider}`]: true })
-    });
-    toast(`✅ ${provider} unbound`);
-    openCustomer(id);
+    await apiFetch(`/api/admin/customers/${id}`, { method:'PUT', body: JSON.stringify({ [`unbind_${provider}`]: true }) });
+    toast(`✅ ${provider} unbound`); openCustomer(id);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ── BLOG ─────────────────────────────────────────────
+async function loadPosts() {
+  const status = document.getElementById('blog-status-filter').value;
+  const tbody = document.getElementById('blog-tbody');
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem"><div class="spinner"></div></td></tr>`;
+  try {
+    const data = await apiFetch(`/api/admin/posts?limit=50${status?'&status='+status:''}`);
+    const posts = data.posts || [];
+    if (!posts.length) { tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">No posts yet. Click <strong>+ NEW POST</strong> to get started.</td></tr>`; return; }
+    tbody.innerHTML = posts.map(p => {
+      var tags = [];
+      try { tags = JSON.parse(p.tags || '[]'); } catch(e) {}
+      return `<tr>
+        <td style="color:var(--white);max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</div></td>
+        <td class="mono" style="font-size:.72rem;color:var(--muted)">${esc(p.slug)}</td>
+        <td style="max-width:150px"><div style="display:flex;gap:.3rem;flex-wrap:wrap">${tags.map(t=>`<span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--green);border:1px solid var(--green3);padding:.1rem .4rem">${esc(t)}</span>`).join('')}</div></td>
+        <td>${badge(p.status)}</td>
+        <td class="mono" style="text-align:center">${p.views||0}</td>
+        <td style="color:var(--muted);font-size:.78rem">${fmtDate(p.published_at)}</td>
+        <td style="white-space:nowrap">
+          <button class="btn btn-outline btn-sm" onclick="editPost('${p.id}')">EDIT</button>
+          <button class="btn btn-red btn-sm" style="margin-left:.4rem" onclick="deletePost('${p.id}','${esc(p.title)}')">DEL</button>
+          <a href="/blog-post.html?slug=${p.slug}" target="_blank" class="btn btn-outline btn-sm" style="margin-left:.4rem">VIEW</a>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function openPostEditor(post) {
+  editingPostId = post ? post.id : null;
+  currentTags = post ? (()=>{ try{return JSON.parse(post.tags||'[]');}catch(e){return [];} })() : [];
+  document.getElementById('blog-panel-title').textContent = post ? 'EDIT POST' : 'NEW POST';
+  document.getElementById('post-id').value = post ? post.id : '';
+  document.getElementById('post-title').value = post ? post.title : '';
+  document.getElementById('post-slug').value = post ? post.slug : '';
+  document.getElementById('post-excerpt').value = post ? (post.excerpt||'') : '';
+  document.getElementById('post-cover').value = post ? (post.cover_url||'') : '';
+  document.getElementById('post-author').value = post ? (post.author||'PCBAForge Team') : 'PCBAForge Team';
+  document.getElementById('post-content').value = post ? (post.content||'') : '';
+  renderTags();
+  document.getElementById('blog-panel').classList.add('open');
+  document.getElementById('blog-overlay').classList.add('show');
+}
+
+async function editPost(id) {
+  try {
+    const post = await apiFetch(`/api/admin/posts/${id}`);
+    openPostEditor(post);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function savePost(status) {
+  const title = document.getElementById('post-title').value.trim();
+  const slug  = document.getElementById('post-slug').value.trim();
+  if (!title || !slug) { toast('Title and slug are required', 'error'); return; }
+  const payload = {
+    title, slug,
+    excerpt:   document.getElementById('post-excerpt').value.trim(),
+    cover_url: document.getElementById('post-cover').value.trim(),
+    content:   document.getElementById('post-content').value,
+    author:    document.getElementById('post-author').value.trim() || 'PCBAForge Team',
+    tags:      currentTags,
+    status
+  };
+  try {
+    if (editingPostId) {
+      await apiFetch(`/api/admin/posts/${editingPostId}`, { method:'PUT', body: JSON.stringify(payload) });
+      toast('✅ Post updated');
+    } else {
+      await apiFetch('/api/admin/posts', { method:'POST', body: JSON.stringify(payload) });
+      toast('✅ Post ' + (status==='published' ? 'published!' : 'saved as draft'));
+    }
+    closeBlogEditor();
+    loadPosts();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function deletePost(id, title) {
+  if (!confirm(`Delete post: "${title}"?\nThis cannot be undone.`)) return;
+  try {
+    await apiFetch(`/api/admin/posts/${id}`, { method:'DELETE' });
+    toast('✅ Post deleted'); loadPosts();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function closeBlogEditor() {
+  document.getElementById('blog-panel').classList.remove('open');
+  document.getElementById('blog-overlay').classList.remove('show');
+}
+
+// ── SLUG AUTO-GENERATE ───────────────────────────────
+function autoSlug() {
+  if (editingPostId) return; // don't overwrite when editing
+  const title = document.getElementById('post-title').value;
+  const slug = title.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  document.getElementById('post-slug').value = slug;
+}
+
+// ── TAGS ─────────────────────────────────────────────
+function renderTags() {
+  const container = document.getElementById('tags-container');
+  const input = document.getElementById('tag-input');
+  container.innerHTML = '';
+  currentTags.forEach(function(t, i) {
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = esc(t) + `<button onclick="removeTag(${i})">×</button>`;
+    container.appendChild(chip);
+  });
+  container.appendChild(input);
+}
+
+function handleTagInput(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.replace(',','').trim();
+    if (val && !currentTags.includes(val)) {
+      currentTags.push(val);
+      renderTags();
+    }
+    e.target.value = '';
+  }
+}
+
+function removeTag(i) {
+  currentTags.splice(i, 1);
+  renderTags();
+}
+
+// ── EDITOR HELPERS ───────────────────────────────────
+function insertTag(tag) {
+  const ta = document.getElementById('post-content');
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const sel = ta.value.substring(start, end) || 'text here';
+  const insert = `<${tag}>${sel}</${tag}>`;
+  ta.value = ta.value.substring(0, start) + insert + ta.value.substring(end);
+  ta.focus();
+}
+
+function insertUl() {
+  const ta = document.getElementById('post-content');
+  const pos = ta.selectionStart;
+  const insert = `<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n</ul>`;
+  ta.value = ta.value.substring(0, pos) + insert + ta.value.substring(pos);
+  ta.focus();
+}
+
+function insertImg() {
+  const url = prompt('Image URL:');
+  if (!url) return;
+  const ta = document.getElementById('post-content');
+  const pos = ta.selectionStart;
+  const insert = `<img src="${url}" alt="" style="max-width:100%">`;
+  ta.value = ta.value.substring(0, pos) + insert + ta.value.substring(pos);
+  ta.focus();
+}
+
+function insertHr() {
+  const ta = document.getElementById('post-content');
+  const pos = ta.selectionStart;
+  ta.value = ta.value.substring(0, pos) + '\n<hr>\n' + ta.value.substring(pos);
+  ta.focus();
 }
 
 // ── PAYMENTS ─────────────────────────────────────────
@@ -861,13 +1009,12 @@ async function loadPayments() {
     document.getElementById('p-completed').textContent = o.completed;
     document.getElementById('p-quoted').textContent    = o.quoted;
     document.getElementById('p-shipped').textContent   = o.shipped;
-
     const all = [...quoted, ...shipped];
     const tbody = document.getElementById('payments-tbody');
     tbody.innerHTML = all.length ? all.map(r => `
       <tr>
         <td class="mono" style="color:var(--white)">${r.order_no}</td>
-        <td><div style="font-size:.82rem">${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
+        <td><div>${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
         <td><span style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${modeBadge(r.mode)}</span></td>
         <td class="mono" style="color:var(--green)">${fmtMoney(r.quoted_price)}</td>
         <td>${badge(r.status)}</td>
@@ -892,20 +1039,21 @@ async function loadSettings() {
       smt_max_ic:'SMT Max Complex ICs', smt_max_dip:'SMT Max DIP Pins'
     };
     const BOOL_KEYS = ['google_oauth_enabled','github_oauth_enabled'];
-    // 初始化邮件字段
+    const MAIL_KEYS = ['mail_driver','mail_from','mail_from_name','smtp_host','smtp_port','smtp_secure','smtp_user','smtp_pass_enc','resend_api_key_enc'];
     settingsData.forEach(s => {
       const el = document.getElementById('setting-' + s.key);
       if (el) el.value = s.value || '';
     });
     toggleMailFields();
-    document.getElementById('settings-grid').innerHTML = settingsData.map(s =>
+    const displaySettings = settingsData.filter(s => !MAIL_KEYS.includes(s.key));
+    document.getElementById('settings-grid').innerHTML = displaySettings.map(s =>
       `<div class="setting-item">
         <div class="setting-key">${s.key}</div>
         <div class="setting-desc">${LABELS[s.key]||s.description||''}</div>
         <div class="setting-input-wrap">
           ${BOOL_KEYS.includes(s.key)
             ? `<select id="setting-${s.key}"><option value="true"${s.value==='true'?' selected':''}>ENABLED</option><option value="false"${s.value!=='true'?' selected':''}>DISABLED</option></select>`
-            : `<input type="text" id="setting-${s.key}" value="${s.value||''}" placeholder="—">`
+            : `<input type="text" id="setting-${s.key}" value="${esc(s.value||'')}" placeholder="—">`
           }
           <button class="btn btn-outline btn-sm" onclick="saveSetting('${s.key}')">SAVE</button>
         </div>
@@ -918,16 +1066,16 @@ async function saveSetting(key) {
   try {
     const val = document.getElementById('setting-' + key).value;
     await apiFetch(`/api/admin/settings/${key}`, { method:'PUT', body: JSON.stringify({ value: val }) });
-    toast('✅ Setting saved: ' + key);
+    toast('✅ Saved: ' + key);
     if (key === 'mail_driver') toggleMailFields();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 function toggleMailFields() {
   const driver = document.getElementById('setting-mail_driver')?.value || 'smtp';
-  const smtpEl   = document.getElementById('smtp-fields');
+  const smtpEl = document.getElementById('smtp-fields');
   const resendEl = document.getElementById('resend-fields');
-  if (smtpEl)   smtpEl.style.display   = driver === 'smtp'   ? 'block' : 'none';
+  if (smtpEl) smtpEl.style.display = driver === 'smtp' ? 'block' : 'none';
   if (resendEl) resendEl.style.display = driver === 'resend' ? 'block' : 'none';
 }
 
@@ -942,7 +1090,7 @@ async function saveEncrypted(key, inputId) {
 }
 
 async function testMail() {
-  const to    = document.getElementById('test-mail-to').value;
+  const to = document.getElementById('test-mail-to').value;
   const resEl = document.getElementById('test-mail-result');
   if (!to) { toast('Please enter a recipient email', 'error'); return; }
   resEl.textContent = 'Sending...'; resEl.style.color = 'var(--muted)';
@@ -959,11 +1107,7 @@ async function testMail() {
 async function saveAllSettings() {
   for (const s of settingsData) {
     const el = document.getElementById('setting-' + s.key);
-    if (el) {
-      try {
-        await apiFetch(`/api/admin/settings/${s.key}`, { method:'PUT', body: JSON.stringify({ value: el.value }) });
-      } catch(e) {}
-    }
+    if (el) { try { await apiFetch(`/api/admin/settings/${s.key}`, { method:'PUT', body: JSON.stringify({ value: el.value }) }); } catch(e) {} }
   }
   toast('✅ All settings saved');
 }
@@ -992,26 +1136,16 @@ function showAddAdmin() {
   document.getElementById('dp-body').innerHTML = `
     <div class="section-title">// NEW ADMIN ACCOUNT</div>
     <div class="form-group"><label>NAME</label><input type="text" id="na-name" placeholder="Admin Name"></div>
-    <div class="form-group"><label>EMAIL</label><input type="email" id="na-email" placeholder="admin@ccpcba.com"></div>
+    <div class="form-group"><label>EMAIL</label><input type="email" id="na-email" placeholder="admin@pcbaforge.com"></div>
     <div class="form-group"><label>PASSWORD</label><input type="password" id="na-pwd" placeholder="Min 8 chars"></div>
     <div class="form-group"><label>ROLE</label><select id="na-role"><option value="admin">ADMIN</option><option value="superadmin">SUPERADMIN</option></select></div>
-    <button class="btn btn-green" onclick="createAdmin()">CREATE ACCOUNT →</button>
-  `;
+    <button class="btn btn-green" onclick="createAdmin()">CREATE ACCOUNT →</button>`;
 }
 
 async function createAdmin() {
   try {
-    await apiFetch('/api/admin/admins', {
-      method:'POST',
-      body: JSON.stringify({
-        name:     document.getElementById('na-name').value,
-        email:    document.getElementById('na-email').value,
-        password: document.getElementById('na-pwd').value,
-        role:     document.getElementById('na-role').value
-      })
-    });
-    toast('✅ Admin account created');
-    closeDetail(); loadAdmins();
+    await apiFetch('/api/admin/admins', { method:'POST', body: JSON.stringify({ name: document.getElementById('na-name').value, email: document.getElementById('na-email').value, password: document.getElementById('na-pwd').value, role: document.getElementById('na-role').value }) });
+    toast('✅ Admin account created'); closeDetail(); loadAdmins();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -1022,23 +1156,18 @@ function changeAdminPwd(id) {
   document.getElementById('dp-body').innerHTML = `
     <div class="section-title">// CHANGE ADMIN PASSWORD</div>
     <div class="form-group"><label>NEW PASSWORD</label><input type="password" id="new-pwd" placeholder="Min 8 chars"></div>
-    <button class="btn btn-green" onclick="doChangePwd('${id}')">UPDATE PASSWORD →</button>
-  `;
+    <button class="btn btn-green" onclick="doChangePwd('${id}')">UPDATE PASSWORD →</button>`;
 }
 
 async function doChangePwd(id) {
   try {
     await apiFetch(`/api/admin/admins/${id}/password`, { method:'PUT', body: JSON.stringify({ new_password: document.getElementById('new-pwd').value }) });
-    toast('✅ Password updated');
-    closeDetail();
+    toast('✅ Password updated'); closeDetail();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 // ── INIT ────────────────────────────────────────────
-if (adminToken) {
-  adminInfo = { name: 'Admin' };
-  showApp();
-}
+if (adminToken) { adminInfo = { name: 'Admin' }; showApp(); }
 </script>
 </body>
 </html>
