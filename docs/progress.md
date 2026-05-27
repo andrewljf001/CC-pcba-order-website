@@ -132,6 +132,7 @@ Phase 7  上线优化 & 运营功能
 
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
+| 4.16 | 域名 pcbaforge.com 购买并接入 Cloudflare | ⬜ 待开始 | 建议在 Cloudflare Registrar 购买，成本价无溢价 |
 | 4.17 | Cloudflare D1 建库建表 | ⬜ 待开始 | 美国区域，SQLite 语法 |
 | 4.18 | Cloudflare R2 建存储桶 | ⬜ 待开始 | 美国区域 |
 | 4.19 | 代码改造：pg → D1 HTTP API | ⬜ 待开始 | database.js 重写 |
