@@ -133,8 +133,11 @@ Phase 7  上线优化 & 运营功能
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
 | 4.16 | 域名 pcbaforge.com 购买并接入 Cloudflare | ⬜ 待开始 | 建议在 Cloudflare Registrar 购买，成本价无溢价 |
+| 4.16b | VPS 从 Apache 迁移到 Nginx | ⬜ 待开始 | 备份Apache配置→安装Nginx+PHP-FPM→迁移WordPress→验证原站点→再接入CC PCBA |
 | 4.17 | Cloudflare D1 建库建表 | ⬜ 待开始 | 美国区域，SQLite 语法 |
 | 4.18 | Cloudflare R2 建存储桶 | ⬜ 待开始 | 美国区域 |
+| 4.18b | 后台公司信息配置完善 | ⬜ 待开始 | 新增：营业地址、公司电话、公司简介、Logo URL、税号/注册号、社交媒体链接 |
+| 4.18c | 前台动态读取公司信息 | ⬜ 待开始 | footer/联系页/隐私政策等页面从 settings 动态读取，不再硬编码 |
 | 4.19 | 代码改造：pg → D1 HTTP API | ⬜ 待开始 | database.js 重写 |
 | 4.20 | 代码改造：本地存储 → R2 | ⬜ 待开始 | multer → aws-sdk/client-s3 |
 | 4.21 | VPS 环境配置（Node.js/Nginx/PM2） | ⬜ 待开始 | |
@@ -202,6 +205,14 @@ Phase 7  上线优化 & 运营功能
 - 仓库初始化，README / pricing-logic.md 完成
 - 完整业务闭环讨论定稿
 - 技术架构确认：Railway + PostgreSQL + Node.js + Express
+
+### 2026-05-27
+- 购买域名 pcbaforge.com（Cloudflare Registrar，$10.46/年）
+- 创建 Cloudflare D1 数据库：pcbaforge-db（Eastern North America）
+- 创建 Cloudflare R2 存储桶：pcbaforge-files（Eastern North America）
+- 新增任务：VPS Apache→Nginx 迁移（4.16b）
+- 新增任务：后台公司信息配置完善（4.18b/4.18c）
+- 记录 Issue #2：密码框中文输入法兼容问题
 
 ### 2026-05-27
 - 架构决策：数据库迁移至 Cloudflare D1，文件存储迁移至 Cloudflare R2
