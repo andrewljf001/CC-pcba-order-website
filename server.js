@@ -7,6 +7,36 @@ const multer   = require('multer');
 const jwt      = require('jsonwebtoken');
 const bcrypt   = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
+
+// ── AES-256-GCM 加解密（用于敏感配置）──────────────────
+const ENC_KEY_RAW = process.env.SETTINGS_ENCRYPT_KEY || '';
+const ENC_KEY = ENC_KEY_RAW
+  ? crypto.createHash('sha256').update(ENC_KEY_RAW).digest()  // 32 bytes
+  : null;
+
+function encrypt(text) {
+  if (!ENC_KEY || !text) return text || '';
+  const iv  = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', ENC_KEY, iv);
+  const enc = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return iv.toString('hex') + ':' + tag.toString('hex') + ':' + enc.toString('hex');
+}
+
+function decrypt(ciphertext) {
+  if (!ENC_KEY || !ciphertext) return ciphertext || '';
+  try {
+    const [ivHex, tagHex, encHex] = ciphertext.split(':');
+    if (!ivHex || !tagHex || !encHex) return ''; // 未加密的旧值
+    const iv      = Buffer.from(ivHex,  'hex');
+    const tag     = Buffer.from(tagHex, 'hex');
+    const enc     = Buffer.from(encHex, 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', ENC_KEY, iv);
+    decipher.setAuthTag(tag);
+    return decipher.update(enc, null, 'utf8') + decipher.final('utf8');
+  } catch { return ''; }
+}
 const pool     = require('./database');
 
 const app  = express();
@@ -44,18 +74,58 @@ const upload = multer({
   }
 });
 
-// ── 邮件工具 ────────────────────────────────────────────
+// ── 邮件工具（动态读取后台配置）────────────────────────────
+async function getMailConfig() {
+  const keys = ['mail_driver','mail_from','mail_from_name',
+                 'smtp_host','smtp_port','smtp_secure',
+                 'smtp_user','smtp_pass_enc','resend_api_key_enc'];
+  const { rows } = await pool.query(
+    `SELECT key, value FROM settings WHERE key = ANY($1)`, [keys]
+  );
+  const cfg = {};
+  rows.forEach(r => { cfg[r.key] = r.value; });
+  return cfg;
+}
+
 async function sendMail({ to, subject, html }) {
-  if (!process.env.RESEND_API_KEY) {
-    console.log('[MAIL SKIP] No RESEND_API_KEY. To:', to, 'Subject:', subject);
-    return;
+  try {
+    const cfg = await getMailConfig();
+    const driver   = cfg.mail_driver || 'smtp';
+    const fromAddr = cfg.mail_from      || process.env.MAIL_FROM || 'noreply@ccpcba.com';
+    const fromName = cfg.mail_from_name || 'CC PCBA';
+    const from     = `${fromName} <${fromAddr}>`;
+
+    if (driver === 'resend') {
+      const apiKey = decrypt(cfg.resend_api_key_enc) || process.env.RESEND_API_KEY || '';
+      if (!apiKey) { console.warn('[MAIL] resend_api_key not set'); return; }
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from, to, subject, html })
+      });
+      if (!res.ok) console.error('[MAIL RESEND ERROR]', await res.text());
+      else console.log('[MAIL] Resend sent to', to);
+
+    } else {
+      // SMTP via nodemailer
+      const nodemailer = require('nodemailer');
+      const smtpPass   = decrypt(cfg.smtp_pass_enc) || process.env.SMTP_PASS || '';
+      const smtpUser   = cfg.smtp_user || process.env.SMTP_USER || '';
+      const host       = cfg.smtp_host || process.env.SMTP_HOST || '';
+      const port       = parseInt(cfg.smtp_port || '587');
+      const secure     = cfg.smtp_secure === 'true';
+
+      if (!host || !smtpUser || !smtpPass) {
+        console.warn('[MAIL] SMTP not configured. Skipping email to', to);
+        return;
+      }
+      const transporter = nodemailer.createTransport({ host, port, secure, auth: { user: smtpUser, pass: smtpPass } });
+      await transporter.sendMail({ from, to, subject, html });
+      console.log('[MAIL] SMTP sent to', to);
+    }
+  } catch (err) {
+    console.error('[MAIL ERROR]', err.message);
   }
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: process.env.MAIL_FROM || 'noreply@ccpcba.com', to, subject, html })
-  });
-  if (!res.ok) console.error('[MAIL ERROR]', await res.text());
 }
 
 // ── 生成订单号 ────────────────────────────────────────────
@@ -667,6 +737,38 @@ app.put('/api/admin/admins/:id/password', adminAuth, async (req, res) => {
 });
 
 
+
+
+// ── 后台：加密保存敏感设置 ────────────────────────────────
+app.put('/api/admin/settings/encrypted/:key', adminAuth, async (req, res) => {
+  try {
+    const { key } = req.params;
+    const { value } = req.body;
+    const ENCRYPTED_KEYS = ['smtp_pass_enc', 'resend_api_key_enc'];
+    if (!ENCRYPTED_KEYS.includes(key)) return res.status(400).json({ error: 'Key is not an encrypted field' });
+    if (!ENC_KEY) return res.status(500).json({ error: 'SETTINGS_ENCRYPT_KEY environment variable not set' });
+    const encrypted = encrypt(value);
+    await pool.query('UPDATE settings SET value=$1, updated_at=NOW() WHERE key=$2', [encrypted, key]);
+    res.json({ success: true, message: 'Value encrypted and saved' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── 后台：测试发送邮件 ────────────────────────────────────
+app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
+  try {
+    const { to } = req.body;
+    if (!to) return res.status(400).json({ error: 'to email required' });
+    await sendMail({
+      to,
+      subject: '[CC PCBA] Mail Configuration Test',
+      html: `<h2 style="color:#00C832">✅ Mail Configuration Working</h2>
+        <p>This is a test email from your CC PCBA mail server.</p>
+        <p>If you received this, your mail configuration is correct.</p>
+        <p style="color:#999;font-size:12px">Sent at ${new Date().toISOString()}</p>`
+    });
+    res.json({ success: true, message: 'Test email sent to ' + to });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
 
 
 app.listen(PORT, () => {
