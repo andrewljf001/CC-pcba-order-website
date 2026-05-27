@@ -526,13 +526,13 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
     const [oRes, uRes, rRes] = await Promise.all([
       pool.query(`SELECT
         COUNT(*) as total,
-        SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END) as pending,
-        SUM(CASE WHEN status='quoted'  THEN 1 ELSE 0 END) as quoted,
-        SUM(CASE WHEN status='paid'    THEN 1 ELSE 0 END) as paid,
-        SUM(CASE WHEN status='production' THEN 1 ELSE 0 END) as production,
-        SUM(CASE WHEN status='shipped' THEN 1 ELSE 0 END) as shipped,
-        SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed,
-        SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END) as today
+        COALESCE(SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END),0) as pending,
+        COALESCE(SUM(CASE WHEN status='quoted'  THEN 1 ELSE 0 END),0) as quoted,
+        COALESCE(SUM(CASE WHEN status='paid'    THEN 1 ELSE 0 END),0) as paid,
+        COALESCE(SUM(CASE WHEN status='production' THEN 1 ELSE 0 END),0) as production,
+        COALESCE(SUM(CASE WHEN status='shipped' THEN 1 ELSE 0 END),0) as shipped,
+        COALESCE(SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END),0) as completed,
+        COALESCE(SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END),0) as today
         FROM orders`),
       pool.query('SELECT COUNT(*) as total FROM users'),
       pool.query(`SELECT COALESCE(SUM(total_paid),0) as total_revenue FROM orders WHERE status='completed'`)
