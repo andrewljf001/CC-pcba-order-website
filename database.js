@@ -99,6 +99,16 @@ async function init() {
     ['smt_max_parts',       '200',                'SMT 标准单最大元件数'],
     ['smt_max_ic',          '10',                 'SMT 标准单最大复杂IC数'],
     ['smt_max_dip',         '100',                'SMT 标准单最大插件脚数'],
+    // 邮件服务配置
+    ['mail_driver',         'smtp',               '邮件驱动：smtp 或 resend'],
+    ['mail_from',           '',                   '发件人邮箱地址'],
+    ['mail_from_name',      'CC PCBA',            '发件人显示名称'],
+    ['smtp_host',           '',                   'SMTP 服务器地址（如 smtp.gmail.com）'],
+    ['smtp_port',           '587',                'SMTP 端口（587=TLS / 465=SSL）'],
+    ['smtp_secure',         'false',              'SMTP 是否使用 SSL（465端口填true）'],
+    ['smtp_user',           '',                   'SMTP 登录用户名（通常是邮箱地址）'],
+    ['smtp_pass_enc',       '',                   'SMTP 密码（AES-256-GCM 加密存储）'],
+    ['resend_api_key_enc',  '',                   'Resend API Key（AES-256-GCM 加密存储）'],
   ];
   for (const [key, value, description] of defaults) {
     await pool.query(
