@@ -92,7 +92,7 @@ async function sendMail({ to, subject, html }) {
     const cfg = await getMailConfig();
     const driver   = cfg.mail_driver || 'smtp';
     const fromAddr = cfg.mail_from      || process.env.MAIL_FROM || 'noreply@ccpcba.com';
-    const fromName = cfg.mail_from_name || 'CC PCBA';
+    const fromName = cfg.mail_from_name || 'PCBAForge';
     const from     = `${fromName} <${fromAddr}>`;
 
     if (driver === 'resend') {
@@ -222,7 +222,7 @@ app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
     if (adminEmail) {
       await sendMail({
         to: adminEmail,
-        subject: `[CC PCBA] New Inquiry ${order_no} — ${mode.toUpperCase()}`,
+        subject: `[PCBAForge] New Inquiry ${order_no} — ${mode.toUpperCase()}`,
         html: `<h2>New Inquiry Received</h2>
           <p><b>Order:</b> ${order_no}</p>
           <p><b>Customer:</b> ${name} &lt;${email}&gt;</p>
@@ -281,8 +281,8 @@ app.post('/api/auth/register', async (req, res) => {
     const verifyUrl = `${process.env.SITE_URL || ''}/api/auth/verify?token=${verify_token}`;
     await sendMail({
       to: email,
-      subject: 'Verify your CC PCBA account',
-      html: `<h2>Welcome to CC PCBA</h2>
+      subject: 'Verify your PCBAForge account',
+      html: `<h2>Welcome to PCBAForge</h2>
         <p>Hi ${name}, please verify your email:</p>
         <p><a href="${verifyUrl}" style="background:#00FF41;color:#000;padding:10px 20px;text-decoration:none;font-weight:bold">VERIFY EMAIL</a></p>
         <p>Link expires in 24 hours.</p>`
@@ -617,7 +617,7 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
     const trackUrl = `${process.env.SITE_URL || ''}/track.html?order=${order.order_no}`;
     await sendMail({
       to: order.customer_email,
-      subject: `[CC PCBA] Your Quote is Ready — ${order.order_no}`,
+      subject: `[PCBAForge] Your Quote is Ready — ${order.order_no}`,
       html: `<h2 style="color:#00C832">Your Quote is Ready</h2>
         <p>Hi ${order.customer_name},</p>
         <p>Our engineer has reviewed your inquiry <b>${order.order_no}</b>.</p>
@@ -760,9 +760,9 @@ app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
     if (!to) return res.status(400).json({ error: 'to email required' });
     await sendMail({
       to,
-      subject: '[CC PCBA] Mail Configuration Test',
+      subject: '[PCBAForge] Mail Configuration Test',
       html: `<h2 style="color:#00C832">✅ Mail Configuration Working</h2>
-        <p>This is a test email from your CC PCBA mail server.</p>
+        <p>This is a test email from your PCBAForge mail server.</p>
         <p>If you received this, your mail configuration is correct.</p>
         <p style="color:#999;font-size:12px">Sent at ${new Date().toISOString()}</p>`
     });
@@ -773,5 +773,5 @@ app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
 
 
 app.listen(PORT, () => {
-  console.log(`✅ CC PCBA server running on http://localhost:${PORT}`);
+  console.log(`✅ PCBAForge server running on http://localhost:${PORT}`);
 });
