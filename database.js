@@ -19,7 +19,6 @@ const D1_URL      = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}
  * 本函数自动把 $1/$2 转成 ?
  */
 async function query(sql, params = []) {
-  // 把 PostgreSQL 风格占位符 $1,$2 转成 SQLite 的 ?
   const d1sql = sql.replace(/\$(\d+)/g, '?');
 
   const res = await fetch(D1_URL, {
@@ -38,7 +37,6 @@ async function query(sql, params = []) {
     throw new Error(errMsg);
   }
 
-  // D1 返回 results[0].results 数组
   const rows = data.result?.[0]?.results ?? [];
   return { rows };
 }
@@ -123,6 +121,23 @@ async function init() {
     last_login_at TEXT
   )`);
 
+  // ── posts（博客文章）──────────────────────────────────
+  await query(`CREATE TABLE IF NOT EXISTS posts (
+    id           TEXT PRIMARY KEY,
+    slug         TEXT UNIQUE NOT NULL,
+    title        TEXT NOT NULL,
+    excerpt      TEXT,
+    content      TEXT NOT NULL DEFAULT '',
+    cover_url    TEXT,
+    tags         TEXT NOT NULL DEFAULT '[]',
+    status       TEXT NOT NULL DEFAULT 'draft',
+    author       TEXT NOT NULL DEFAULT 'PCBAForge Team',
+    views        INTEGER NOT NULL DEFAULT 0,
+    published_at TEXT,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+
   // ── seed default settings ──────────────────────────────
   const defaults = [
     ['whatsapp_number',     '',                   'WhatsApp 联系号码（含国码，如 +85212345678）'],
@@ -179,5 +194,4 @@ init().catch(err => {
   console.error('DB init error:', err.message);
 });
 
-// 导出 query 函数，兼容原有 pool.query 调用方式
 module.exports = { query };
