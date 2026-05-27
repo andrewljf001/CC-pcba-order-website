@@ -11,8 +11,12 @@ const pool     = require('./database');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET       = process.env.JWT_SECRET       || 'cc_pcba_jwt_secret_change_me';
-const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET || 'cc_pcba_admin_secret_change_me';
+const JWT_SECRET       = process.env.JWT_SECRET;
+const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET;
+if (!JWT_SECRET || !JWT_ADMIN_SECRET) {
+  console.error('❌ JWT_SECRET and JWT_ADMIN_SECRET environment variables must be set');
+  process.exit(1);
+}
 
 app.use(cors());
 app.use(express.json());
