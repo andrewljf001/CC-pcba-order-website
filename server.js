@@ -771,26 +771,6 @@ app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
 });
 
 
-// ── 临时调试接口 ──────────────────────────────────────
-app.get('/api/debug/enc', adminAuth, async (req, res) => {
-  try {
-    const raw = process.env.SETTINGS_ENCRYPT_KEY || '';
-    const hasKey = !!ENC_KEY;
-    const testEnc = hasKey ? encrypt('hello') : 'NO KEY';
-    const testDec = hasKey ? decrypt(testEnc) : 'NO KEY';
-    res.json({
-      has_env_var: !!raw,
-      env_var_length: raw.length,
-      has_enc_key: hasKey,
-      test_encrypt: testEnc.substring(0, 30) + '...',
-      test_decrypt: testDec,
-      decrypt_ok: testDec === 'hello'
-    });
-  } catch(err) {
-    res.status(500).json({ error: err.message, stack: err.stack });
-  }
-});
-
 
 app.listen(PORT, () => {
   console.log(`✅ CC PCBA server running on http://localhost:${PORT}`);
