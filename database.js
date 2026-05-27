@@ -1,15 +1,55 @@
-const { Pool } = require('pg');
+/**
+ * database.js — Cloudflare D1 HTTP API 封装
+ * 替代原有的 pg (PostgreSQL) 连接池
+ * D1 使用 SQLite 语法
+ */
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('railway')
-    ? { rejectUnauthorized: false } : false
-});
+require('dotenv').config();
 
+const ACCOUNT_ID  = process.env.CLOUDFLARE_ACCOUNT_ID;
+const DATABASE_ID = process.env.CLOUDFLARE_D1_DATABASE_ID;
+const API_TOKEN   = process.env.CLOUDFLARE_API_TOKEN;
+const D1_URL      = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/d1/database/${DATABASE_ID}/query`;
+
+/**
+ * 执行 D1 SQL 查询
+ * 兼容 pg 的 pool.query(sql, params) 接口：
+ *   返回 { rows: [...] }
+ * D1 用 ? 占位符（SQLite 风格），pg 用 $1/$2
+ * 本函数自动把 $1/$2 转成 ?
+ */
+async function query(sql, params = []) {
+  // 把 PostgreSQL 风格占位符 $1,$2 转成 SQLite 的 ?
+  const d1sql = sql.replace(/\$(\d+)/g, '?');
+
+  const res = await fetch(D1_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API_TOKEN}`,
+      'Content-Type':  'application/json',
+    },
+    body: JSON.stringify({ sql: d1sql, params }),
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    const errMsg = data.errors?.map(e => e.message).join(', ') || 'D1 query failed';
+    throw new Error(errMsg);
+  }
+
+  // D1 返回 results[0].results 数组
+  const rows = data.result?.[0]?.results ?? [];
+  return { rows };
+}
+
+/**
+ * 初始化数据库表（SQLite 语法）
+ */
 async function init() {
   // ── users ──────────────────────────────────────────────
-  await pool.query(`CREATE TABLE IF NOT EXISTS users (
-    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  await query(`CREATE TABLE IF NOT EXISTS users (
+    id               TEXT PRIMARY KEY,
     email            TEXT UNIQUE NOT NULL,
     password_hash    TEXT,
     name             TEXT NOT NULL DEFAULT '',
@@ -19,68 +59,68 @@ async function init() {
     note             TEXT,
     google_id        TEXT UNIQUE,
     github_id        TEXT UNIQUE,
-    email_verified   BOOLEAN NOT NULL DEFAULT FALSE,
+    email_verified   INTEGER NOT NULL DEFAULT 0,
     verify_token     TEXT,
     reset_token      TEXT,
-    reset_expires    TIMESTAMPTZ,
-    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    last_login_at    TIMESTAMPTZ
+    reset_expires    TEXT,
+    created_at       TEXT NOT NULL DEFAULT (datetime('now')),
+    last_login_at    TEXT
   )`);
 
   // ── addresses ──────────────────────────────────────────
-  await pool.query(`CREATE TABLE IF NOT EXISTS addresses (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  await query(`CREATE TABLE IF NOT EXISTS addresses (
+    id           TEXT PRIMARY KEY,
+    user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     label        TEXT NOT NULL DEFAULT 'Home',
     recipient    TEXT NOT NULL,
     phone        TEXT,
     address_line TEXT NOT NULL,
     city         TEXT NOT NULL,
     country      TEXT NOT NULL DEFAULT 'US',
-    is_default   BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    is_default   INTEGER NOT NULL DEFAULT 0,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
 
   // ── orders ─────────────────────────────────────────────
-  await pool.query(`CREATE TABLE IF NOT EXISTS orders (
-    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  await query(`CREATE TABLE IF NOT EXISTS orders (
+    id             TEXT PRIMARY KEY,
     order_no       TEXT UNIQUE NOT NULL,
-    user_id        UUID REFERENCES users(id) ON DELETE SET NULL,
+    user_id        TEXT REFERENCES users(id) ON DELETE SET NULL,
     guest_email    TEXT,
     mode           TEXT NOT NULL,
     status         TEXT NOT NULL DEFAULT 'pending',
-    params         JSONB NOT NULL DEFAULT '{}',
-    estimate       NUMERIC(10,2),
-    quoted_price   NUMERIC(10,2),
-    shipping_fee   NUMERIC(10,2),
-    total_paid     NUMERIC(10,2),
+    params         TEXT NOT NULL DEFAULT '{}',
+    estimate       REAL,
+    quoted_price   REAL,
+    shipping_fee   REAL,
+    total_paid     REAL,
     payment_method TEXT,
     payment_ref    TEXT,
     tracking_no    TEXT,
     notes          TEXT,
     admin_note     TEXT,
-    files          JSONB NOT NULL DEFAULT '[]',
-    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    files          TEXT NOT NULL DEFAULT '[]',
+    created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
 
   // ── settings ───────────────────────────────────────────
-  await pool.query(`CREATE TABLE IF NOT EXISTS settings (
+  await query(`CREATE TABLE IF NOT EXISTS settings (
     key         TEXT PRIMARY KEY,
     value       TEXT NOT NULL DEFAULT '',
     description TEXT,
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
   )`);
 
   // ── admin_users ────────────────────────────────────────
-  await pool.query(`CREATE TABLE IF NOT EXISTS admin_users (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  await query(`CREATE TABLE IF NOT EXISTS admin_users (
+    id            TEXT PRIMARY KEY,
     email         TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     name          TEXT NOT NULL DEFAULT 'Admin',
     role          TEXT NOT NULL DEFAULT 'admin',
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    last_login_at TIMESTAMPTZ
+    created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+    last_login_at TEXT
   )`);
 
   // ── seed default settings ──────────────────────────────
@@ -99,7 +139,6 @@ async function init() {
     ['smt_max_parts',       '200',                'SMT 标准单最大元件数'],
     ['smt_max_ic',          '10',                 'SMT 标准单最大复杂IC数'],
     ['smt_max_dip',         '100',                'SMT 标准单最大插件脚数'],
-    // 邮件服务配置
     ['mail_driver',         'smtp',               '邮件驱动：smtp 或 resend'],
     ['mail_from',           '',                   '发件人邮箱地址'],
     ['mail_from_name',      'CC PCBA',            '发件人显示名称'],
@@ -110,34 +149,35 @@ async function init() {
     ['smtp_pass_enc',       '',                   'SMTP 密码（AES-256-GCM 加密存储）'],
     ['resend_api_key_enc',  '',                   'Resend API Key（AES-256-GCM 加密存储）'],
   ];
+
   for (const [key, value, description] of defaults) {
-    await pool.query(
-      `INSERT INTO settings (key, value, description, updated_at)
-       VALUES ($1,$2,$3,NOW())
-       ON CONFLICT (key) DO NOTHING`,
+    await query(
+      `INSERT OR IGNORE INTO settings (key, value, description, updated_at)
+       VALUES (?, ?, ?, datetime('now'))`,
       [key, value, description]
     );
   }
 
-  // ── seed default admin（首次部署用，建议上线后修改密码）──
+  // ── seed default admin ─────────────────────────────────
   const bcrypt = require('bcryptjs');
-  const { rows: admins } = await pool.query('SELECT COUNT(*) AS cnt FROM admin_users');
-  if (parseInt(admins[0].cnt) === 0) {
+  const { v4: uuidv4 } = require('uuid');
+  const { rows: admins } = await query('SELECT COUNT(*) AS cnt FROM admin_users');
+  if (parseInt(admins[0]?.cnt ?? 0) === 0) {
     const hash = await bcrypt.hash(process.env.ADMIN_DEFAULT_PASSWORD || 'ccpcba2026', 12);
-    await pool.query(
-      `INSERT INTO admin_users (email, password_hash, name, role)
-       VALUES ($1,$2,'Super Admin','superadmin')`,
-      [process.env.ADMIN_EMAIL || 'admin@ccpcba.com', hash]
+    await query(
+      `INSERT INTO admin_users (id, email, password_hash, name, role)
+       VALUES (?, ?, ?, 'Super Admin', 'superadmin')`,
+      [uuidv4(), process.env.ADMIN_EMAIL || 'admin@ccpcba.com', hash]
     );
-    console.log('Default admin seeded. PLEASE CHANGE PASSWORD after first login.');
+    console.log('✅ Default admin seeded. PLEASE CHANGE PASSWORD after first login.');
   }
 
-  console.log('✅ Database ready.');
+  console.log('✅ D1 Database ready.');
 }
 
 init().catch(err => {
   console.error('DB init error:', err.message);
-  process.exit(1);
 });
 
-module.exports = pool;
+// 导出 query 函数，兼容原有 pool.query 调用方式
+module.exports = { query };
