@@ -854,6 +854,27 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
+// ── 动态读取公开配置 ────────────────────────────────
+fetch('/api/settings/public').then(r=>r.json()).then(cfg=>{
+  const wa = cfg.whatsapp_number || '';
+  if(wa){
+    const waNum = wa.replace(/[^0-9]/g,'');
+    // 更新所有 WA 链接
+    document.querySelectorAll('a[href*="wa.me/YOUR_NUMBER"], a.waf').forEach(el=>{
+      el.href = el.href.replace('YOUR_NUMBER', waNum).replace('wa.me/', 'wa.me/' + waNum).replace(/wa\.me\/[^?]+/, 'wa.me/' + waNum);
+    });
+    document.querySelectorAll('[href*="wa.me"]').forEach(el=>{
+      if(el.href.includes('YOUR_NUMBER')) el.href = el.href.replace('YOUR_NUMBER', waNum);
+    });
+  }
+  // 更新收件地址
+  if(cfg.shipping_address){
+    document.querySelectorAll('[data-shipping-address]').forEach(el=>{ el.textContent = cfg.shipping_address; });
+    // 也更新硬编码的地址文字
+    document.querySelectorAll('.shipping-addr').forEach(el=>{ el.textContent = cfg.shipping_address; });
+  }
+}).catch(()=>{});
+
 // ── INIT ────────────────────────────────────────────
 setMode(currentMode);
 prefillFromParams();
