@@ -1,14 +1,14 @@
-# CC PCBA 订单网站 — 项目进度管理
+# PCBAForge 订单网站 — 项目进度管理
 
 > 仓库：`andrewljf001/CC-pcba-order-website`  
 > 业务定位：小批量 PCB · SMT · 插件 · 功能验证 一条龙服务  
-> 技术栈：前端 HTML/CSS/JS · 后端 Node.js + Express · 数据库 PostgreSQL · 存储 Cloudflare R2
+> 技术栈：前端 HTML/CSS/JS · 后端 Node.js + Express · 数据库 Cloudflare D1 · 存储 Cloudflare R2
 
 ---
 
 ## 📌 当前阶段
 
-🟡 **Phase 4 — Cloudflare 配置完成，等待 VPS 额度恢复后继续**
+🟡 **Phase 4 — VPS 部署完成，网站上线运行中**
 
 ---
 
@@ -18,7 +18,7 @@
 Phase 1  业务架构定稿 & 首页 DEMO              ✅ 完成
 Phase 2  报价计算器（三模式 + 前端模块建设）    ✅ 完成
 Phase 3  后端基础 & 用户体系 & 询价下单        ✅ 完成
-Phase 4  运营后台（极客绿黑风）                🟡 进行中
+Phase 4  运营后台 + 架构迁移 + VPS 部署        🟡 进行中
 Phase 5  支付接入
 Phase 6  本地同步工具（Mac）
 Phase 7  上线优化 & 运营功能
@@ -70,7 +70,7 @@ Phase 7  上线优化 & 运营功能
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
 | 3A.1 | Node.js + Express 初始化 | ✅ 完成 | |
-| 3A.2 | PostgreSQL 数据库建表 | ✅ 完成 | 5张表自动建立 |
+| 3A.2 | 数据库建表 | ✅ 完成 | 5张表自动建立 |
 | 3A.3 | /api/settings/public 接口 | ✅ 完成 | |
 | 3A.4 | 前台动态读取 settings | ✅ 完成 | WA号码、收件地址 |
 | 3A.5 | JWT 认证（客户 + 管理员） | ✅ 完成 | 强制环境变量 |
@@ -101,7 +101,9 @@ Phase 7  上线优化 & 运营功能
 
 ---
 
-## 🟡 Phase 4 — 运营后台（极客绿黑风）
+## 🟡 Phase 4 — 运营后台 + 架构迁移 + VPS 部署
+
+### 4A · 运营后台
 
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
@@ -120,32 +122,26 @@ Phase 7  上线优化 & 运营功能
 | 4.13 | 邮件服务后台配置 | ✅ 完成 | SMTP/Resend切换 |
 | 4.14 | 敏感配置 AES-256-GCM 加密存储 | ✅ 完成 | 密码/API Key加密 |
 | 4.15 | 测试发信功能 | ✅ 完成 | 后台一键测试 |
-| 4.16 | account.html 加入 nav 链接 | ⬜ 待开始 | 需业主批准修改首页 |
+| 4.16 | account.html 加入 nav 链接 | ⬜ 待开始 | |
 
----
-
-
-## 🟡 Phase 4 补充 — 架构迁移（Cloudflare D1 + R2）
-
-> 架构决策：2026-05-27
-> VPS 只跑业务逻辑，数据完全剥离到 Cloudflare
+### 4B · 架构迁移（Cloudflare D1 + R2）
 
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
-| 4.16 | 域名 pcbaforge.com 购买并接入 Cloudflare | ✅ 完成 | $10.46/年，Cloudflare Registrar，自动续订 |
-| 4.16b | VPS 从 Apache 迁移到 Nginx | ⬜ 待开始 | 备份Apache配置→安装Nginx+PHP-FPM→迁移WordPress→验证原站点→再接入CC PCBA |
-| 4.17 | Cloudflare D1 建库建表 | ✅ 完成 | 数据库名：pcbaforge-db，Eastern North America |
-| 4.18 | Cloudflare R2 建存储桶 | ✅ 完成 | 存储桶名：pcbaforge-files，Eastern North America |
-| 4.18b | 后台公司信息配置完善 | ⬜ 待开始 | 新增：营业地址、公司电话、公司简介、Logo URL、税号/注册号、社交媒体链接 |
-| 4.18c | 前台动态读取公司信息 | ⬜ 待开始 | footer/联系页/隐私政策等页面从 settings 动态读取，不再硬编码 |
+| 4.16 | 域名 pcbaforge.com 购买并接入 Cloudflare | ✅ 完成 | $10.46/年 |
+| 4.16b | VPS Apache → Nginx 彻底迁移 | ✅ 完成 | Nginx 直接对接 PHP-FPM，去掉 Apache |
+| 4.17 | Cloudflare D1 建库建表 | ✅ 完成 | pcbaforge-db，Eastern North America |
+| 4.18 | Cloudflare R2 建存储桶 | ✅ 完成 | pcbaforge-files，Eastern North America |
 | 4.18a | Cloudflare API Token 生成 | ✅ 完成 | 权限：D1 Edit + Workers R2 Storage Edit |
-| 4.19 | 代码改造：pg → D1 HTTP API | ⬜ 待开始 | database.js 重写，等额度恢复后进行 |
+| 4.18b | 后台公司信息配置完善 | ⬜ 待开始 | 新增：营业地址、公司电话、Logo URL 等 |
+| 4.18c | 前台动态读取公司信息 | ⬜ 待开始 | footer/联系页从 settings 动态读取 |
+| 4.19 | 代码改造：pg → D1 HTTP API | ✅ 完成 | database.js 全面重写，SQLite 语法适配 |
 | 4.20 | 代码改造：本地存储 → R2 | ⬜ 待开始 | multer → aws-sdk/client-s3 |
-| 4.21 | VPS 环境配置（Node.js/Nginx/PM2） | ⬜ 待开始 | |
-| 4.22 | Nginx 多站点配置 | ⬜ 待开始 | 为多网站预留 |
-| 4.23 | SSL 证书配置（Let's Encrypt） | ⬜ 待开始 | |
-| 4.24 | 域名 DNS 指向 Cloudflare | ⬜ 待开始 | |
-| 4.25 | PM2 部署 + 全流程测试 | ⬜ 待开始 | |
+| 4.21 | VPS 环境配置（Node.js/Nginx/PM2） | ✅ 完成 | Node.js v20 + PM2 v7 |
+| 4.22 | Nginx 多站点配置 | ✅ 完成 | mrocioa.com + diyinai.com + pcbaforge.com |
+| 4.23 | SSL 证书配置（Let's Encrypt） | ✅ 完成 | pcbaforge.com 证书已申请 |
+| 4.24 | 域名 DNS 指向 VPS + Cloudflare 橙云 | ✅ 完成 | CDN 加速已开启 |
+| 4.25 | PM2 部署 + 全流程测试 | ✅ 完成 | 后台登录正常，D1 数据库正常 |
 
 ---
 
@@ -179,24 +175,24 @@ Phase 7  上线优化 & 运营功能
 
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
-| 7.1 | 正式域名绑定 & HTTPS | ⬜ 待开始 | |
+| 7.1 | 正式域名绑定 & HTTPS | ✅ 完成 | pcbaforge.com 已上线 |
 | 7.2 | SEO 优化 | ⬜ 待开始 | |
 | 7.3 | 多语言支持 | ⬜ 待开始 | |
 | 7.4 | 访客统计 | ⬜ 待开始 | |
 | 7.5 | 图片全部迁移到自有存储 | ⬜ 待开始 | 见 Issue #1 |
-| 7.6 | 隐私政策页面（Privacy Policy） | ⬜ 待开始 | 说明数据收集、存储、用途 |
+| 7.6 | 隐私政策页面（Privacy Policy） | ⬜ 待开始 | |
 | 7.7 | 服务条款页面（Terms of Service） | ⬜ 待开始 | |
-| 7.8 | Cookie 同意横幅（GDPR） | ⬜ 待开始 | 欧盟客户必须，首次访问弹出 |
-| 7.9 | GDPR 数据删除请求处理流程 | ⬜ 待开始 | 客户可申请删除账号和数据 |
-| 7.10 | 隐私政策页面（privacy.html） | ⬜ 待开始 | 数据收集、存储、用途说明 |
-| 7.11 | 货运政策页面（shipping.html） | ⬜ 待开始 | 运费说明、发货时间、物流方式、追踪方式 |
-| 7.12 | Cloudflare WAF 防火墙规则配置 | ⬜ 待开始 | 拦截恶意请求、SQL注入、XSS攻击 |
-| 7.13 | Cloudflare Bot Fight Mode 开启 | ⬜ 待开始 | 防爬虫、防暴力破解 |
-| 7.14 | Cloudflare SSL/TLS 模式设为 Full Strict | ⬜ 待开始 | 端到端加密 |
-| 7.15 | Cloudflare Rate Limiting 限流规则 | ⬜ 待开始 | 防止 API 被刷 |
-| 7.16 | Cloudflare Turnstile 人机验证 | ⬜ 待开始 | 注册/登录/询价表单加防机器人验证 |
-| 7.17 | VPS SSH 安全加固 | ⬜ 待开始 | 禁用密码登录、只允许密钥、改非标端口 |
-| 7.18 | 定期 MySQL 备份到 R2 | ⬜ 待开始 | 每日自动备份，保留30天 |
+| 7.8 | Cookie 同意横幅（GDPR） | ⬜ 待开始 | |
+| 7.9 | GDPR 数据删除请求处理流程 | ⬜ 待开始 | |
+| 7.10 | 隐私政策页面（privacy.html） | ⬜ 待开始 | |
+| 7.11 | 货运政策页面（shipping.html） | ⬜ 待开始 | |
+| 7.12 | Cloudflare WAF 防火墙规则配置 | ⬜ 待开始 | |
+| 7.13 | Cloudflare Bot Fight Mode 开启 | ⬜ 待开始 | |
+| 7.14 | Cloudflare SSL/TLS 模式设为 Full Strict | ⬜ 待开始 | |
+| 7.15 | Cloudflare Rate Limiting 限流规则 | ⬜ 待开始 | |
+| 7.16 | Cloudflare Turnstile 人机验证 | ⬜ 待开始 | |
+| 7.17 | VPS SSH 安全加固 | ⬜ 待开始 | |
+| 7.18 | D1 数据定期备份到 R2 | ⬜ 待开始 | |
 
 ---
 
@@ -207,28 +203,29 @@ Phase 7  上线优化 & 运营功能
 - 完整业务闭环讨论定稿
 - 技术架构确认：Railway + PostgreSQL + Node.js + Express
 
-### 2026-05-27
-- 购买域名 pcbaforge.com（Cloudflare Registrar，$10.46/年）
-- 创建 Cloudflare D1 数据库：pcbaforge-db（Eastern North America）
-- 创建 Cloudflare R2 存储桶：pcbaforge-files（Eastern North America）
-- 新增任务：VPS Apache→Nginx 迁移（4.16b）
-- 新增任务：后台公司信息配置完善（4.18b/4.18c）
-- 记录 Issue #2：密码框中文输入法兼容问题
-
-### 2026-05-27
-- 架构决策：数据库迁移至 Cloudflare D1，文件存储迁移至 Cloudflare R2
-- VPS 只跑业务逻辑，完全无状态，数据全部在 Cloudflare
-- backend-plan.md 更新至第三版
-- 新增 Phase 4 迁移任务（4.17~4.25）
-
 ### 2026-05-26
 - Phase 1 & 2 全部完成
 - Phase 3 全部完成：后端 API、用户体系、OAuth、询价下单
 - Phase 4 全部完成：后台登录、Dashboard、订单/客户管理、系统设置
 - 邮件服务后台化：SMTP/Resend 可切换，密码 AES-256-GCM 加密存储
 - account.html 客户中心完成
-- 全面自动化检查通过（0 严重问题）
-- 当前进入 Phase 5 支付接入准备阶段
+
+### 2026-05-27（上午）
+- 购买域名 pcbaforge.com（Cloudflare Registrar，$10.46/年）
+- 创建 Cloudflare D1 数据库：pcbaforge-db
+- 创建 Cloudflare R2 存储桶：pcbaforge-files
+- 架构决策：数据库迁移至 D1，文件存储迁移至 R2，VPS 只跑业务逻辑
+
+### 2026-05-27（下午）
+- VPS Apache 彻底迁移到 Nginx + PHP-FPM（去掉 Apache 中间层）
+- 安装 Node.js v20 + PM2 v7
+- Nginx 多站点配置：mrocioa.com + diyinai.com + pcbaforge.com
+- SSL 证书申请（pcbaforge.com Let's Encrypt）
+- 品牌名全站替换：CC PCBA → PCBAForge
+- database.js 全面重写：pg → Cloudflare D1 HTTP API（SQLite 语法）
+- server.js 全面适配：NOW() → datetime('now')，BOOLEAN → INTEGER，UUID 手动生成
+- pcbaforge.com 正式上线，后台登录测试通过
+- Cloudflare 橙云开启，CDN 加速生效
 
 ---
 
