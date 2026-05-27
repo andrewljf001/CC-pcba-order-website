@@ -186,6 +186,13 @@ Phase 7  上线优化 & 运营功能
 | 7.9 | GDPR 数据删除请求处理流程 | ⬜ 待开始 | 客户可申请删除账号和数据 |
 | 7.10 | 隐私政策页面（privacy.html） | ⬜ 待开始 | 数据收集、存储、用途说明 |
 | 7.11 | 货运政策页面（shipping.html） | ⬜ 待开始 | 运费说明、发货时间、物流方式、追踪方式 |
+| 7.12 | Cloudflare WAF 防火墙规则配置 | ⬜ 待开始 | 拦截恶意请求、SQL注入、XSS攻击 |
+| 7.13 | Cloudflare Bot Fight Mode 开启 | ⬜ 待开始 | 防爬虫、防暴力破解 |
+| 7.14 | Cloudflare SSL/TLS 模式设为 Full Strict | ⬜ 待开始 | 端到端加密 |
+| 7.15 | Cloudflare Rate Limiting 限流规则 | ⬜ 待开始 | 防止 API 被刷 |
+| 7.16 | Cloudflare Turnstile 人机验证 | ⬜ 待开始 | 注册/登录/询价表单加防机器人验证 |
+| 7.17 | VPS SSH 安全加固 | ⬜ 待开始 | 禁用密码登录、只允许密钥、改非标端口 |
+| 7.18 | 定期 MySQL 备份到 R2 | ⬜ 待开始 | 每日自动备份，保留30天 |
 
 ---
 
