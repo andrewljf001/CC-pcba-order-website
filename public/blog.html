@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCBAForge Blog — PCBA Engineering Insights & Guides</title>
+<meta name="description" content="Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:1200px}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
+.nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
+.ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
+.nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--green)}
+.nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
+.sec{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:4rem 5%}
+.slabel{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
+.stitle{font-family:'Orbitron',monospace;font-size:clamp(1.2rem,2.5vw,1.6rem);color:var(--white);margin-bottom:.75rem}
+.stitle-sub{font-size:.88rem;color:var(--muted);margin-bottom:2rem}
+.tag-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
+.tag-btn{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.08em;color:var(--muted);border:1px solid var(--border);background:transparent;padding:.3rem .8rem;cursor:pointer;transition:all .2s}
+.tag-btn:hover,.tag-btn.active{color:var(--green);border-color:var(--green);background:rgba(0,255,65,.06)}
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.post-card{background:var(--bg2);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s}
+.post-card:hover{border-color:var(--green);transform:translateY(-4px)}
+.post-cover{width:100%;height:160px;object-fit:cover;display:block;filter:brightness(.65) saturate(1.1);transition:filter .3s}
+.post-card:hover .post-cover{filter:brightness(.8) saturate(1.3)}
+.post-cover-ph{width:100%;height:160px;background:var(--dim);display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em}
+.post-body{padding:1.2rem}
+.post-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
+.post-tag{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.08em;color:var(--green);border:1px solid var(--green3);padding:.15rem .5rem}
+.post-title{font-size:.95rem;color:var(--white);font-weight:600;line-height:1.4;margin-bottom:.5rem}
+.post-excerpt{font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.post-meta{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted)}
+.empty-state{text-align:center;padding:4rem 0;grid-column:1/-1}
+.empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.3}
+.empty-t{font-family:'Orbitron',monospace;font-size:1rem;color:var(--muted);margin-bottom:.5rem}
+.empty-s{font-size:.83rem;color:var(--muted)}
+.loading{text-align:center;padding:4rem 0;grid-column:1/-1}
+.ldot2{display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;margin:0 3px;animation:blink 1.2s infinite}
+.ldot2:nth-child(2){animation-delay:.2s}.ldot2:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
+.pagination{display:flex;justify-content:center;gap:.5rem;margin-top:3rem}
+.page-btn{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--muted);border:1px solid var(--border);background:transparent;padding:.4rem .9rem;cursor:pointer;transition:all .2s}
+.page-btn:hover,.page-btn.active{color:var(--green);border-color:var(--green);background:rgba(0,255,65,.06)}
+.page-btn:disabled{opacity:.3;cursor:not-allowed}
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
+.fi{max-width:var(--max);margin:0 auto;text-align:center}
+.flogo{font-family:'Orbitron',monospace;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
+.flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
+.fcopy{font-size:.75rem;color:var(--muted)}
+.waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
+@media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.nav-links{display:none}.blog-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
+  <ul class="nav-links">
+    <li><a href="index.html#quote">Quote</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="index.html#capabilities">Capabilities</a></li>
+    <li><a href="blog.html" class="active">Blog</a></li>
+    <li><a href="track.html">Track Order</a></li>
+  </ul>
+  <a href="quote.html" class="nav-cta">GET QUOTE</a>
+</nav>
+
+<section class="sec">
+  <div class="slabel">// PCBAFORGE BLOG</div>
+  <div class="stitle">Engineering Insights & Guides</div>
+  <div class="stitle-sub">Technical articles on PCB fabrication, SMT assembly, DFM, testing and PCBA best practices.</div>
+  <div class="tag-bar" id="tag-bar">
+    <button class="tag-btn active" data-tag="">ALL</button>
+  </div>
+  <div class="blog-grid" id="blog-grid">
+    <div class="loading"><span class="ldot2"></span><span class="ldot2"></span><span class="ldot2"></span></div>
+  </div>
+  <div class="pagination" id="pagination"></div>
+</section>
+
+<footer>
+  <div class="fi">
+    <div class="flogo">▶ PCBAForge</div>
+    <div class="flinks">
+      <a href="index.html#services">Services</a><a href="index.html#quote">Get Quote</a>
+      <a href="blog.html">Blog</a><a href="quote.html">Submit Inquiry</a><a href="track.html">Track Order</a>
+    </div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+  </div>
+</footer>
+
+<a href="https://wa.me/YOUR_NUMBER" class="waf" target="_blank" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
+</a>
+
+<script>
+var currentTag='', currentPage=1, totalPosts=0, limit=12;
+
+function fmtDate(d){ return d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : ''; }
+
+function renderCards(posts){
+  var grid=document.getElementById('blog-grid');
+  if(!posts.length){
+    grid.innerHTML='<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-t">NO ARTICLES YET</div><div class="empty-s">Check back soon — new PCBA engineering content coming.</div></div>';
+    return;
+  }
+  grid.innerHTML=posts.map(function(p){
+    var tags=[];try{tags=JSON.parse(p.tags||'[]');}catch(e){}
+    var tagsHtml=tags.map(function(t){return '<span class="post-tag">'+t+'</span>';}).join('');
+    var cover=p.cover_url
+      ?'<img class="post-cover" src="'+p.cover_url+'" alt="'+p.title+'" loading="lazy">'
+      :'<div class="post-cover-ph">// NO COVER</div>';
+    return '<div class="post-card" onclick="location.href=\'blog-post.html?slug='+p.slug+'\'">'+
+      cover+'<div class="post-body">'+
+      (tagsHtml?'<div class="post-tags">'+tagsHtml+'</div>':'')+
+      '<div class="post-title">'+p.title+'</div>'+
+      (p.excerpt?'<div class="post-excerpt">'+p.excerpt+'</div>':'')+
+      '<div class="post-meta"><span>'+fmtDate(p.published_at)+'</span><span>👁 '+(p.views||0)+'</span></div>'+
+      '</div></div>';
+  }).join('');
+}
+
+function renderPagination(){
+  var pages=Math.ceil(totalPosts/limit);
+  var pg=document.getElementById('pagination');
+  if(pages<=1){pg.innerHTML='';return;}
+  var html='<button class="page-btn" onclick="goPage('+(currentPage-1)+')"'+(currentPage===1?' disabled':'')+'>← PREV</button>';
+  for(var i=1;i<=pages;i++) html+='<button class="page-btn'+(i===currentPage?' active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+  html+='<button class="page-btn" onclick="goPage('+(currentPage+1)+')"'+(currentPage===pages?' disabled':'')+'>NEXT →</button>';
+  pg.innerHTML=html;
+}
+
+function goPage(p){currentPage=p;loadPosts();}
+
+async function loadPosts(){
+  document.getElementById('blog-grid').innerHTML='<div class="loading"><span class="ldot2"></span><span class="ldot2"></span><span class="ldot2"></span></div>';
+  try{
+    var url='/api/posts?page='+currentPage+'&limit='+limit+(currentTag?'&tag='+encodeURIComponent(currentTag):'');
+    var res=await fetch(url);
+    var data=await res.json();
+    totalPosts=data.total||0;
+
+    // 收集所有标签
+    (data.posts||[]).forEach(function(p){
+      try{JSON.parse(p.tags||'[]').forEach(function(t){allTags.add(t);});}catch(e){}
+    });
+    renderTagBar();
+    renderCards(data.posts||[]);
+    renderPagination();
+  }catch(e){
+    document.getElementById('blog-grid').innerHTML='<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-t">LOAD ERROR</div><div class="empty-s">'+e.message+'</div></div>';
+  }
+}
+
+var allTags=new Set();
+function renderTagBar(){
+  var bar=document.getElementById('tag-bar');
+  var tagArr=Array.from(allTags);
+  var html='<button class="tag-btn'+(currentTag===''?' active':'')+'" onclick="filterTag(\'\')">ALL</button>';
+  tagArr.forEach(function(t){
+    html+='<button class="tag-btn'+(currentTag===t?' active':'')+'" onclick="filterTag(\''+t+'\')">'+t+'</button>';
+  });
+  bar.innerHTML=html;
+}
+
+function filterTag(tag){currentTag=tag;currentPage=1;loadPosts();}
+
+loadPosts();
+</script>
+</body>
+</html>
