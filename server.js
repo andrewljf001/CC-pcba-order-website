@@ -766,6 +766,135 @@ app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+
+
+// ═══════════════════════════════════════════════════════
+// BLOG APIs（公开）
+// ═══════════════════════════════════════════════════════
+
+// 博客文章列表（已发布）
+app.get('/api/posts', async (req, res) => {
+  try {
+    const { tag, page = 1, limit = 12 } = req.query;
+    const offset = (page - 1) * limit;
+    let where = "WHERE status='published'";
+    const params = [];
+    if (tag) {
+      where += ` AND tags LIKE ?`;
+      params.push('%' + tag + '%');
+    }
+    const { rows } = await pool.query(
+      `SELECT id, slug, title, excerpt, cover_url, tags, author, views, published_at, created_at
+       FROM posts ${where}
+       ORDER BY published_at DESC
+       LIMIT ? OFFSET ?`,
+      [...params, Number(limit), Number(offset)]
+    );
+    const { rows: countRows } = await pool.query(
+      `SELECT COUNT(*) as total FROM posts ${where}`, params
+    );
+    res.json({ posts: rows, total: Number(countRows[0]?.total || 0) });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 单篇文章（按 slug）
+app.get('/api/posts/:slug', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM posts WHERE slug=? AND status='published'`,
+      [req.params.slug]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Post not found' });
+    await pool.query(`UPDATE posts SET views=views+1 WHERE slug=?`, [req.params.slug]);
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ═══════════════════════════════════════════════════════
+// ADMIN BLOG APIs
+// ═══════════════════════════════════════════════════════
+
+// 文章列表（后台，含草稿）
+app.get('/api/admin/posts', adminAuth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+    let where = ''; const params = [];
+    if (status) { where = `WHERE status=?`; params.push(status); }
+    const { rows } = await pool.query(
+      `SELECT id, slug, title, excerpt, cover_url, tags, status, author, views, published_at, created_at, updated_at
+       FROM posts ${where}
+       ORDER BY created_at DESC
+       LIMIT ? OFFSET ?`,
+      [...params, Number(limit), Number(offset)]
+    );
+    const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
+    res.json({ posts: rows, total: Number(countRows[0]?.total || 0) });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 单篇文章详情（后台）
+app.get('/api/admin/posts/:id', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM posts WHERE id=?`, [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Post not found' });
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 新建文章
+app.post('/api/admin/posts', adminAuth, async (req, res) => {
+  try {
+    const { title, slug, excerpt, content, cover_url, tags, status, author } = req.body;
+    if (!title || !slug) return res.status(400).json({ error: 'title and slug required' });
+    const { rows: exists } = await pool.query(`SELECT id FROM posts WHERE slug=?`, [slug]);
+    if (exists.length) return res.status(409).json({ error: 'Slug already exists' });
+    const { v4: uuidv4 } = require('uuid');
+    const published_at = status === 'published' ? new Date().toISOString() : null;
+    const { rows } = await pool.query(
+      `INSERT INTO posts (id, slug, title, excerpt, content, cover_url, tags, status, author, published_at)
+       VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING *`,
+      [uuidv4(), slug, title, excerpt||'', content||'', cover_url||'',
+       JSON.stringify(tags||[]), status||'draft', author||'PCBAForge Team', published_at]
+    );
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 更新文章
+app.put('/api/admin/posts/:id', adminAuth, async (req, res) => {
+  try {
+    const { title, slug, excerpt, content, cover_url, tags, status, author } = req.body;
+    if (slug) {
+      const { rows: exists } = await pool.query(`SELECT id FROM posts WHERE slug=? AND id!=?`, [slug, req.params.id]);
+      if (exists.length) return res.status(409).json({ error: 'Slug already exists' });
+    }
+    const { rows: current } = await pool.query(`SELECT status, published_at FROM posts WHERE id=?`, [req.params.id]);
+    if (!current.length) return res.status(404).json({ error: 'Post not found' });
+    const published_at = (status === 'published' && !current[0].published_at)
+      ? new Date().toISOString() : current[0].published_at;
+    await pool.query(
+      `UPDATE posts SET
+       title=COALESCE(?,title), slug=COALESCE(?,slug), excerpt=COALESCE(?,excerpt),
+       content=COALESCE(?,content), cover_url=COALESCE(?,cover_url),
+       tags=COALESCE(?,tags), status=COALESCE(?,status), author=COALESCE(?,author),
+       published_at=?, updated_at=datetime('now')
+       WHERE id=?`,
+      [title, slug, excerpt, content, cover_url,
+       tags ? JSON.stringify(tags) : null, status, author, published_at, req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 删除文章
+app.delete('/api/admin/posts/:id', adminAuth, async (req, res) => {
+  try {
+    await pool.query(`DELETE FROM posts WHERE id=?`, [req.params.id]);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ PCBAForge server running on http://localhost:${PORT}`);
 });
