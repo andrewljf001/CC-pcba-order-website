@@ -350,6 +350,119 @@ tr:hover td{background:rgba(0,255,65,.025)}
         </div>
       </div>
 
+
+        <!-- 邮件服务配置 -->
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-ht">// MAIL SERVER CONFIGURATION</span>
+            <button class="btn btn-outline btn-sm" onclick="testMail()">📧 SEND TEST EMAIL</button>
+          </div>
+          <div class="card-body">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;line-height:1.7">
+              Configure your mail server. Passwords are <strong style="color:var(--green)">AES-256-GCM encrypted</strong> before storage — never stored in plaintext. Switch between SMTP and Resend at any time.
+            </div>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <div class="setting-key">mail_driver</div>
+                <div class="setting-desc">Mail driver</div>
+                <div class="setting-input-wrap">
+                  <select id="setting-mail_driver" onchange="toggleMailFields()">
+                    <option value="smtp">SMTP (Gmail / Outlook / self-hosted)</option>
+                    <option value="resend">Resend API</option>
+                  </select>
+                  <button class="btn btn-outline btn-sm" onclick="saveSetting('mail_driver')">SAVE</button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-key">mail_from</div>
+                <div class="setting-desc">Sender email address</div>
+                <div class="setting-input-wrap">
+                  <input type="text" id="setting-mail_from" placeholder="noreply@yourdomain.com">
+                  <button class="btn btn-outline btn-sm" onclick="saveSetting('mail_from')">SAVE</button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-key">mail_from_name</div>
+                <div class="setting-desc">Sender display name</div>
+                <div class="setting-input-wrap">
+                  <input type="text" id="setting-mail_from_name" placeholder="CC PCBA">
+                  <button class="btn btn-outline btn-sm" onclick="saveSetting('mail_from_name')">SAVE</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="smtp-fields">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin:1rem 0 .5rem;padding-top:.8rem;border-top:1px solid var(--border)">// SMTP SETTINGS</div>
+              <div class="settings-grid">
+                <div class="setting-item">
+                  <div class="setting-key">smtp_host</div>
+                  <div class="setting-desc">SMTP server (e.g. smtp.gmail.com)</div>
+                  <div class="setting-input-wrap">
+                    <input type="text" id="setting-smtp_host" placeholder="smtp.gmail.com">
+                    <button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_host')">SAVE</button>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-key">smtp_port</div>
+                  <div class="setting-desc">Port (587=TLS, 465=SSL)</div>
+                  <div class="setting-input-wrap">
+                    <input type="text" id="setting-smtp_port" placeholder="587">
+                    <button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_port')">SAVE</button>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-key">smtp_secure</div>
+                  <div class="setting-desc">Use SSL (true for port 465)</div>
+                  <div class="setting-input-wrap">
+                    <select id="setting-smtp_secure">
+                      <option value="false">false (TLS/STARTTLS)</option>
+                      <option value="true">true (SSL)</option>
+                    </select>
+                    <button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_secure')">SAVE</button>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-key">smtp_user</div>
+                  <div class="setting-desc">SMTP username</div>
+                  <div class="setting-input-wrap">
+                    <input type="text" id="setting-smtp_user" placeholder="your@email.com">
+                    <button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_user')">SAVE</button>
+                  </div>
+                </div>
+                <div class="setting-item" style="grid-column:1/-1">
+                  <div class="setting-key">smtp_pass_enc</div>
+                  <div class="setting-desc">SMTP password — <span style="color:var(--green)">AES-256-GCM encrypted</span></div>
+                  <div class="setting-input-wrap">
+                    <input type="password" id="smtp-pass-input" placeholder="Enter new password to update">
+                    <button class="btn btn-amber btn-sm" onclick="saveEncrypted('smtp_pass_enc','smtp-pass-input')">ENCRYPT & SAVE</button>
+                  </div>
+                  <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem">Enter a new password to update. Current value is stored encrypted.</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="resend-fields" style="display:none">
+              <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin:1rem 0 .5rem;padding-top:.8rem;border-top:1px solid var(--border)">// RESEND API SETTINGS</div>
+              <div class="settings-grid">
+                <div class="setting-item" style="grid-column:1/-1">
+                  <div class="setting-key">resend_api_key_enc</div>
+                  <div class="setting-desc">Resend API Key — <span style="color:var(--green)">AES-256-GCM encrypted</span>. Get key from <a href="https://resend.com" target="_blank" style="color:var(--green)">resend.com</a></div>
+                  <div class="setting-input-wrap">
+                    <input type="password" id="resend-key-input" placeholder="re_xxxxxxxxxxxxxxxx">
+                    <button class="btn btn-amber btn-sm" onclick="saveEncrypted('resend_api_key_enc','resend-key-input')">ENCRYPT & SAVE</button>
+                  </div>
+                  <div style="font-size:.65rem;color:var(--muted);margin-top:.3rem">Enter a new API key to update. Current value is stored encrypted.</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;gap:.8rem;align-items:center;flex-wrap:wrap">
+              <input type="email" id="test-mail-to" placeholder="Send test email to..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.45rem .75rem;font-size:.82rem;outline:none;flex:1;min-width:200px">
+              <button class="btn btn-outline btn-sm" onclick="testMail()">SEND TEST</button>
+              <span id="test-mail-result" style="font-size:.75rem"></span>
+            </div>
+          </div>
+        </div>
       <!-- ── ADMINS ── -->
       <div class="page" id="page-admins">
         <div class="toolbar">
@@ -779,6 +892,12 @@ async function loadSettings() {
       smt_max_ic:'SMT Max Complex ICs', smt_max_dip:'SMT Max DIP Pins'
     };
     const BOOL_KEYS = ['google_oauth_enabled','github_oauth_enabled'];
+    // 初始化邮件字段
+    settingsData.forEach(s => {
+      const el = document.getElementById('setting-' + s.key);
+      if (el) el.value = s.value || '';
+    });
+    toggleMailFields();
     document.getElementById('settings-grid').innerHTML = settingsData.map(s =>
       `<div class="setting-item">
         <div class="setting-key">${s.key}</div>
@@ -800,7 +919,41 @@ async function saveSetting(key) {
     const val = document.getElementById('setting-' + key).value;
     await apiFetch(`/api/admin/settings/${key}`, { method:'PUT', body: JSON.stringify({ value: val }) });
     toast('✅ Setting saved: ' + key);
+    if (key === 'mail_driver') toggleMailFields();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function toggleMailFields() {
+  const driver = document.getElementById('setting-mail_driver')?.value || 'smtp';
+  const smtpEl   = document.getElementById('smtp-fields');
+  const resendEl = document.getElementById('resend-fields');
+  if (smtpEl)   smtpEl.style.display   = driver === 'smtp'   ? 'block' : 'none';
+  if (resendEl) resendEl.style.display = driver === 'resend' ? 'block' : 'none';
+}
+
+async function saveEncrypted(key, inputId) {
+  try {
+    const val = document.getElementById(inputId).value;
+    if (!val) { toast('Please enter a value', 'error'); return; }
+    await apiFetch(`/api/admin/settings/encrypted/${key}`, { method:'PUT', body: JSON.stringify({ value: val }) });
+    document.getElementById(inputId).value = '';
+    toast('🔐 Encrypted and saved: ' + key);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function testMail() {
+  const to    = document.getElementById('test-mail-to').value;
+  const resEl = document.getElementById('test-mail-result');
+  if (!to) { toast('Please enter a recipient email', 'error'); return; }
+  resEl.textContent = 'Sending...'; resEl.style.color = 'var(--muted)';
+  try {
+    await apiFetch('/api/admin/mail/test', { method:'POST', body: JSON.stringify({ to }) });
+    resEl.textContent = '✅ Test email sent!'; resEl.style.color = 'var(--green)';
+    toast('✅ Test email sent to ' + to);
+  } catch(e) {
+    resEl.textContent = '✗ ' + e.message; resEl.style.color = 'var(--red)';
+    toast('Error: ' + e.message, 'error');
+  }
 }
 
 async function saveAllSettings() {
