@@ -128,7 +128,7 @@ async function init() {
     ['whatsapp_number',     '',                   'WhatsApp 联系号码（含国码，如 +85212345678）'],
     ['shipping_address',    'Ligao Industrial Park, Longgang, Shenzhen, China', '客供料收件地址'],
     ['contact_email',       '',                   '运营联系邮箱'],
-    ['company_name',        'CC PCBA',            '公司名称'],
+    ['company_name',        'PCBAForge',          '公司名称'],
     ['google_oauth_enabled','false',              'Google OAuth 登录开关（true/false）'],
     ['github_oauth_enabled','false',              'GitHub OAuth 登录开关（true/false）'],
     ['pcb_tier1_price',     '50',                 'PCB Tier1 最低价（$）'],
@@ -141,7 +141,7 @@ async function init() {
     ['smt_max_dip',         '100',                'SMT 标准单最大插件脚数'],
     ['mail_driver',         'smtp',               '邮件驱动：smtp 或 resend'],
     ['mail_from',           '',                   '发件人邮箱地址'],
-    ['mail_from_name',      'CC PCBA',            '发件人显示名称'],
+    ['mail_from_name',      'PCBAForge',          '发件人显示名称'],
     ['smtp_host',           '',                   'SMTP 服务器地址（如 smtp.gmail.com）'],
     ['smtp_port',           '587',                'SMTP 端口（587=TLS / 465=SSL）'],
     ['smtp_secure',         'false',              'SMTP 是否使用 SSL（465端口填true）'],
@@ -163,11 +163,11 @@ async function init() {
   const { v4: uuidv4 } = require('uuid');
   const { rows: admins } = await query('SELECT COUNT(*) AS cnt FROM admin_users');
   if (parseInt(admins[0]?.cnt ?? 0) === 0) {
-    const hash = await bcrypt.hash(process.env.ADMIN_DEFAULT_PASSWORD || 'ccpcba2026', 12);
+    const hash = await bcrypt.hash(process.env.ADMIN_DEFAULT_PASSWORD || 'pcbaforge2026', 12);
     await query(
       `INSERT INTO admin_users (id, email, password_hash, name, role)
        VALUES (?, ?, ?, 'Super Admin', 'superadmin')`,
-      [uuidv4(), process.env.ADMIN_EMAIL || 'admin@ccpcba.com', hash]
+      [uuidv4(), process.env.ADMIN_EMAIL || 'admin@pcbaforge.com', hash]
     );
     console.log('✅ Default admin seeded. PLEASE CHANGE PASSWORD after first login.');
   }
