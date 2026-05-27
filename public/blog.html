@@ -52,8 +52,10 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
 .fi{max-width:var(--max);margin:0 auto;text-align:center}
 .flogo{font-family:'Orbitron',monospace;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
-.flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks{display:flex;justify-content:center;gap:1.5rem;margin-bottom:.6rem;flex-wrap:wrap}
 .flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
+.flinks2{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks2 a{font-size:.75rem;color:var(--muted);transition:color .2s}.flinks2 a:hover{color:var(--green)}
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
 @media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
@@ -67,6 +69,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
     <li><a href="index.html#quote">Quote</a></li>
     <li><a href="index.html#services">Services</a></li>
     <li><a href="index.html#capabilities">Capabilities</a></li>
+    <li><a href="index.html#process">Process</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
     <li><a href="blog.html" class="active">Blog</a></li>
     <li><a href="track.html">Track Order</a></li>
   </ul>
@@ -90,8 +94,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   <div class="fi">
     <div class="flogo">▶ PCBAForge</div>
     <div class="flinks">
-      <a href="index.html#services">Services</a><a href="index.html#quote">Get Quote</a>
-      <a href="blog.html">Blog</a><a href="quote.html">Submit Inquiry</a><a href="track.html">Track Order</a>
+      <a href="index.html#services">Services</a>
+      <a href="index.html#quote">Get Quote</a>
+      <a href="index.html#capabilities">Capabilities</a>
+      <a href="blog.html">Blog</a>
+      <a href="quote.html">Submit Inquiry</a>
+      <a href="track.html">Track Order</a>
+    </div>
+    <div class="flinks2">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="shipping.html">Shipping Policy</a>
+      <a href="terms.html">Terms of Service</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
@@ -102,7 +115,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 </a>
 
 <script>
-var currentTag='', currentPage=1, totalPosts=0, limit=12;
+var currentTag='', currentPage=1, totalPosts=0, limit=12, allTags=new Set();
 
 function fmtDate(d){ return d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : ''; }
 
@@ -115,8 +128,7 @@ function renderCards(posts){
   grid.innerHTML=posts.map(function(p){
     var tags=[];try{tags=JSON.parse(p.tags||'[]');}catch(e){}
     var tagsHtml=tags.map(function(t){return '<span class="post-tag">'+t+'</span>';}).join('');
-    var cover=p.cover_url
-      ?'<img class="post-cover" src="'+p.cover_url+'" alt="'+p.title+'" loading="lazy">'
+    var cover=p.cover_url?'<img class="post-cover" src="'+p.cover_url+'" alt="'+p.title+'" loading="lazy">'
       :'<div class="post-cover-ph">// NO COVER</div>';
     return '<div class="post-card" onclick="location.href=\'blog-post.html?slug='+p.slug+'\'">'+
       cover+'<div class="post-body">'+
@@ -140,18 +152,24 @@ function renderPagination(){
 
 function goPage(p){currentPage=p;loadPosts();}
 
+function renderTagBar(){
+  var bar=document.getElementById('tag-bar');
+  var html='<button class="tag-btn'+(currentTag===''?' active':'')+'" onclick="filterTag(\'\')">ALL</button>';
+  Array.from(allTags).forEach(function(t){
+    html+='<button class="tag-btn'+(currentTag===t?' active':'')+'" onclick="filterTag(\''+t+'\')">'+t+'</button>';
+  });
+  bar.innerHTML=html;
+}
+
+function filterTag(tag){currentTag=tag;currentPage=1;loadPosts();}
+
 async function loadPosts(){
   document.getElementById('blog-grid').innerHTML='<div class="loading"><span class="ldot2"></span><span class="ldot2"></span><span class="ldot2"></span></div>';
   try{
     var url='/api/posts?page='+currentPage+'&limit='+limit+(currentTag?'&tag='+encodeURIComponent(currentTag):'');
-    var res=await fetch(url);
-    var data=await res.json();
+    var data=await(await fetch(url)).json();
     totalPosts=data.total||0;
-
-    // 收集所有标签
-    (data.posts||[]).forEach(function(p){
-      try{JSON.parse(p.tags||'[]').forEach(function(t){allTags.add(t);});}catch(e){}
-    });
+    (data.posts||[]).forEach(function(p){try{JSON.parse(p.tags||'[]').forEach(function(t){allTags.add(t);});}catch(e){}});
     renderTagBar();
     renderCards(data.posts||[]);
     renderPagination();
@@ -159,19 +177,6 @@ async function loadPosts(){
     document.getElementById('blog-grid').innerHTML='<div class="empty-state"><div class="empty-icon">⚠</div><div class="empty-t">LOAD ERROR</div><div class="empty-s">'+e.message+'</div></div>';
   }
 }
-
-var allTags=new Set();
-function renderTagBar(){
-  var bar=document.getElementById('tag-bar');
-  var tagArr=Array.from(allTags);
-  var html='<button class="tag-btn'+(currentTag===''?' active':'')+'" onclick="filterTag(\'\')">ALL</button>';
-  tagArr.forEach(function(t){
-    html+='<button class="tag-btn'+(currentTag===t?' active':'')+'" onclick="filterTag(\''+t+'\')">'+t+'</button>';
-  });
-  bar.innerHTML=html;
-}
-
-function filterTag(tag){currentTag=tag;currentPage=1;loadPosts();}
 
 loadPosts();
 </script>
