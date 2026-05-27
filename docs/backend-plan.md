@@ -1,340 +1,292 @@
 # CC PCBA 订单网站 — 技术架构方案
 
-> 最后更新：2026-05-26
-> 状态：✅ 定稿（第二版）
+> 最后更新：2026-05-27
+> 状态：✅ 定稿（第三版）
 
 ---
 
-## 一、整体架构
+## 一、最终架构决策
+
+### 核心原则：VPS 只跑业务逻辑，数据完全剥离到 Cloudflare
 
 ```
-┌─────────────────────────────────────────────────┐
-│  客户浏览器                                       │
-│  前台网站（HTML/CSS/JS）                          │
-│  ├─ 首页 / 报价计算器                             │
-│  ├─ 询价表单（quote.html）                        │
-│  ├─ 订单追踪（track.html）                        │
-│  └─ 客户中心（account.html）                      │
-└───────────────────┬─────────────────────────────┘
-                    │ HTTPS
-┌───────────────────▼─────────────────────────────┐
-│  VPS（新加坡，4GB内存）                            │
-│  ├─ Nginx 反向代理                               │
-│  ├─ 前台静态文件服务                              │
-│  ├─ Node.js + Express API 服务                   │
-│  ├─ 运营后台（admin.html，同域名 /admin）          │
-│  └─ PostgreSQL（订单/报价/客户/用户数据）          │
-└───────────────────┬─────────────────────────────┘
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-┌───────▼────────┐   ┌──────────▼──────────┐
-│ Cloudflare R2  │   │  Cloudflare CDN      │
-│ 客户上传文件    │   │  静态资源加速         │
-│ Gerber/BOM等   │   │  全球访问加速         │
-└────────────────┘   └─────────────────────┘
-
-┌─────────────────────────────────────────────────┐
-│  你的 Mac（本地）                                 │
-│  ├─ 本地同步工具（Node.js + Playwright）          │
-│  ├─ 供应商适配器（嘉立创 / 其他）                  │
-│  ├─ 订单号映射表（本地存储）                       │
-│  └─ 定时推送状态到 VPS API                        │
-└─────────────────────────────────────────────────┘
+客户浏览器
+    ↓
+Cloudflare CDN（域名 / SSL / DDoS防护 / 全球加速）
+    ↓
+VPS · 美国（Nginx 反向代理）
+    ↓
+Node.js + Express（纯业务逻辑，完全无状态）
+    ↓              ↓
+Cloudflare D1   Cloudflare R2
+（数据库）      （文件存储）
+美国区域        美国区域
 ```
 
----
-
-## 二、VPS 配置
-
-| 项目 | 规格 |
-|------|------|
-| 内存 | 4GB |
-| CPU | 2核 |
-| 系统盘 | 40GB SSD |
-| 带宽 | 20Mbps |
-| 位置 | 新加坡（覆盖欧美延迟可接受，亚洲最优） |
-| 推荐服务商 | Hetzner（最性价比）/ DigitalOcean |
-| 月费预估 | $8~10/月 |
+### 架构优势
+- VPS 挂了/换机器 → 数据完全安全，重新部署代码即可恢复
+- 所有数据在 Cloudflare，自动冗余，无需手动备份
+- Cloudflare CDN 在前面，隐藏 VPS 真实 IP，防 DDoS
+- 静态资源全球 CDN 加速，动态 API 走美国 VPS
+- VPS 到 D1/R2 延迟约 5-15ms（同在美国），几乎无感知
+- 成本：VPS 之外全部免费
 
 ---
 
-## 三、技术栈
+## 二、基础设施规划
+
+| 组件 | 方案 | 区域 | 费用 |
+|------|------|------|------|
+| 应用服务器 | VPS（已有） | 美国 | 已有 |
+| 反向代理 | Nginx | VPS 上 | 免费 |
+| 进程管理 | PM2 | VPS 上 | 免费 |
+| 数据库 | Cloudflare D1（SQLite） | 美国 | 永久免费 |
+| 文件存储 | Cloudflare R2 | 美国 | 永久免费 |
+| CDN / SSL | Cloudflare | 全球 | 永久免费 |
+| 多站点支持 | Nginx 虚拟主机 | VPS 上 | 免费 |
+
+### Cloudflare 免费额度（永久）
+| 服务 | 免费额度 |
+|------|----------|
+| D1 存储 | 5GB |
+| D1 读取 | 每天 500 万次 |
+| D1 写入 | 每天 10 万次 |
+| R2 存储 | 每月 10GB |
+| R2 读取 | 每月 1000 万次 |
+| R2 写入 | 每月 100 万次 |
+| R2 出口流量 | 永久免费 |
+
+---
+
+## 三、VPS 多站点架构
+
+```
+Nginx（80/443端口）
+├── ccpcba.yourdomain.com  → Node.js :3001 (CC PCBA)
+├── site2.yourdomain.com   → Node.js :3002
+├── site3.yourdomain.com   → Node.js :3003
+└── ...
+```
+
+每个网站：
+- 独立 Node.js 进程，PM2 管理
+- 独立 D1 数据库（或共用，按需）
+- 共用 Nginx + SSL
+
+---
+
+## 四、技术栈
 
 | 层级 | 技术 | 说明 |
 |------|------|------|
-| 前台 | HTML + CSS + JS | 纯静态，极客绿黑风 |
-| 后台 | HTML + CSS + JS（同风格） | 自建极客绿黑风运营后台 |
-| API | Node.js + Express | RESTful API |
-| 认证 | JWT + bcrypt + OAuth2 | 用户登录 / Google / GitHub |
-| 数据库 | PostgreSQL | 订单、用户、系统设置 |
-| 文件存储 | Cloudflare R2 | 零出口费，免费10GB |
+| 前台 | HTML + CSS + JS | 极客绿黑风，纯静态 |
+| 后台 | HTML + CSS + JS | 同风格，单页应用 |
+| API | Node.js + Express | RESTful，完全无状态 |
+| 认证 | JWT + bcrypt + OAuth2 | 客户/管理员双轨 |
+| 数据库 | Cloudflare D1（SQLite） | 替代原 PostgreSQL |
+| 文件存储 | Cloudflare R2 | 替代本地 multer 存储 |
 | CDN | Cloudflare | 免费套餐 |
-| 反向代理 | Nginx | SSL终止 + 静态文件服务 |
-| 邮件服务 | Resend | 简单接入，有免费额度 |
-| 支付 | PayPal API + PingPong B2B | |
-| 本地工具 | Node.js + Playwright | Mac本地运行 |
+| 反向代理 | Nginx | SSL终止 + 多站点 |
+| 进程管理 | PM2 | 自动重启、日志管理 |
+| 邮件服务 | SMTP / Resend | 后台可切换，密码加密存储 |
+| 支付 | PayPal / PingPong | Phase 5 接入 |
 
 ---
 
-## 四、数据库表设计
+## 五、数据库表设计（D1 / SQLite 语法）
 
-### 4.1 users（客户账号）
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | UUID | 主键 |
-| email | VARCHAR | 唯一，登录用 |
-| password_hash | VARCHAR | bcrypt，OAuth用户可为空 |
-| name | VARCHAR | 显示名 |
-| company | VARCHAR | 公司名（可选） |
-| whatsapp | VARCHAR | WhatsApp 号码 |
-| customer_type | ENUM | normal / vip / blacklist |
-| note | TEXT | 运营备注（仅后台可见） |
-| google_id | VARCHAR | Google OAuth 绑定 |
-| github_id | VARCHAR | GitHub OAuth 绑定 |
-| email_verified | BOOLEAN | 邮箱是否已验证 |
-| created_at | TIMESTAMP | 注册时间 |
-| last_login_at | TIMESTAMP | 最后登录时间 |
-
-### 4.2 addresses（收货地址）
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | UUID | 主键 |
-| user_id | UUID | 关联 users |
-| label | VARCHAR | 地址标签（Home / Office 等） |
-| recipient | VARCHAR | 收件人 |
-| phone | VARCHAR | 联系电话 |
-| address_line | TEXT | 详细地址 |
-| city | VARCHAR | 城市 |
-| country | VARCHAR | 国家 |
-| is_default | BOOLEAN | 是否默认地址 |
-
-### 4.3 orders（订单）
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | UUID | 主键 |
-| order_no | VARCHAR | 展示用订单号（CC + 时间戳） |
-| user_id | UUID | 关联 users（可为空，未注册客户） |
-| guest_email | VARCHAR | 未登录客户邮箱 |
-| mode | ENUM | pcb / smt / turnkey |
-| status | ENUM | pending / quoted / confirmed / paid / production / shipped / completed / cancelled |
-| params | JSONB | 订单参数（PCB/SMT 具体规格） |
-| estimate | DECIMAL | 首页计算器估算价 |
-| quoted_price | DECIMAL | 工程师确认报价 |
-| shipping_fee | DECIMAL | 运费（生产后填写） |
-| total_paid | DECIMAL | 实际付款总额 |
-| payment_method | ENUM | paypal / pingpong |
-| payment_ref | VARCHAR | 支付流水号 |
-| tracking_no | VARCHAR | 物流单号 |
-| notes | TEXT | 客户备注 |
-| admin_note | TEXT | 运营备注（仅后台） |
-| files | JSONB | 上传文件列表（R2 路径） |
-| created_at | TIMESTAMP | 询价时间 |
-| updated_at | TIMESTAMP | 最后更新时间 |
-
-### 4.4 settings（系统设置）
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| key | VARCHAR | 唯一键 |
-| value | TEXT | 值 |
-| description | VARCHAR | 说明 |
-
-> 通过 settings 表管理的配置项：
-> - `whatsapp_number` — 前台 WA 按钮号码
-> - `shipping_address` — 客供料收件地址
-> - `pcb_tier1_price` / `pcb_tier2_price` / `pcb_tier3_price` — PCB 报价参数
-> - `smt_single_price` / `smt_double_price` — SMT 报价参数
-> - `google_oauth_enabled` / `github_oauth_enabled` — OAuth 开关
-
-### 4.5 admin_users（运营账号）
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | UUID | 主键 |
-| email | VARCHAR | 登录邮箱 |
-| password_hash | VARCHAR | bcrypt |
-| name | VARCHAR | 显示名 |
-| role | ENUM | superadmin / admin |
-| created_at | TIMESTAMP | |
-
----
-
-## 五、用户认证体系
-
-### 5.1 登录方式
-
-| 方式 | 说明 |
-|------|------|
-| 邮箱 + 密码 | 标准注册登录 |
-| Google OAuth | 一键登录，后台可开关 |
-| GitHub OAuth | 一键登录，后台可开关 |
-
-### 5.2 认证流程
-
-```
-注册：邮箱 + 密码 → 发送验证邮件 → 验证后激活账号
-登录：邮箱/OAuth → 验证 → 返回 JWT Token（7天有效）
-Token 存储：localStorage，每次请求带 Authorization: Bearer <token>
+### users（客户账号）
+```sql
+CREATE TABLE IF NOT EXISTS users (
+  id             TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  email          TEXT UNIQUE NOT NULL,
+  password_hash  TEXT,
+  name           TEXT NOT NULL DEFAULT '',
+  company        TEXT,
+  whatsapp       TEXT,
+  customer_type  TEXT NOT NULL DEFAULT 'normal',
+  note           TEXT,
+  google_id      TEXT UNIQUE,
+  github_id      TEXT UNIQUE,
+  email_verified INTEGER NOT NULL DEFAULT 0,
+  verify_token   TEXT,
+  reset_token    TEXT,
+  reset_expires  TEXT,
+  created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+  last_login_at  TEXT
+);
 ```
 
-### 5.3 OAuth 绑定规则
-
-- 同邮箱自动合并账号（Google / GitHub 邮箱与已注册邮箱一致时）
-- 已登录状态下可在账号设置页绑定 / 解绑 Google & GitHub
-- 后台可强制解绑某客户的 OAuth
-
----
-
-## 六、前台客户中心（account.html）
-
-### 页面结构
+### addresses（收货地址）
+```sql
+CREATE TABLE IF NOT EXISTS addresses (
+  id           TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label        TEXT NOT NULL DEFAULT 'Home',
+  recipient    TEXT NOT NULL,
+  phone        TEXT,
+  address_line TEXT NOT NULL,
+  city         TEXT NOT NULL,
+  country      TEXT NOT NULL DEFAULT 'US',
+  is_default   INTEGER NOT NULL DEFAULT 0,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
 ```
-account.html
-├─ 登录 / 注册 Tab（未登录时显示）
-│   ├─ 邮箱 + 密码登录
-│   ├─ Google 登录按钮
-│   └─ GitHub 登录按钮
-└─ 个人中心（已登录时显示）
-    ├─ 账号信息（姓名、邮箱、公司、WA号码）
-    ├─ 收货地址管理（增删改查，设默认）
-    ├─ 第三方绑定（绑定/解绑 Google / GitHub）
-    └─ 历史订单列表
-        ├─ 订单卡片（订单号 / 服务类型 / 状态 / 金额 / 日期）
-        └─ 点击展开订单详情 + 付款入口（状态 Quoted 时）
+
+### orders（订单）
+```sql
+CREATE TABLE IF NOT EXISTS orders (
+  id             TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  order_no       TEXT UNIQUE NOT NULL,
+  user_id        TEXT REFERENCES users(id) ON DELETE SET NULL,
+  guest_email    TEXT,
+  mode           TEXT NOT NULL,
+  status         TEXT NOT NULL DEFAULT 'pending',
+  params         TEXT NOT NULL DEFAULT '{}',
+  estimate       REAL,
+  quoted_price   REAL,
+  shipping_fee   REAL,
+  total_paid     REAL,
+  payment_method TEXT,
+  payment_ref    TEXT,
+  tracking_no    TEXT,
+  notes          TEXT,
+  admin_note     TEXT,
+  files          TEXT NOT NULL DEFAULT '[]',
+  created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+```
+
+### settings（系统设置）
+```sql
+CREATE TABLE IF NOT EXISTS settings (
+  key         TEXT PRIMARY KEY,
+  value       TEXT NOT NULL DEFAULT '',
+  description TEXT,
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+```
+
+### admin_users（运营账号）
+```sql
+CREATE TABLE IF NOT EXISTS admin_users (
+  id            TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+  email         TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  name          TEXT NOT NULL DEFAULT 'Admin',
+  role          TEXT NOT NULL DEFAULT 'admin',
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  last_login_at TEXT
+);
 ```
 
 ---
 
-## 七、运营后台（/admin）
+## 六、API 端点规划（不变）
 
-### 7.1 UI 风格
-- 与前台完全一致：极客绿黑科技风
-- 同一套 CSS 变量（--bg / --green / --border 等）
-- 左侧导航栏 + 右侧内容区布局
-
-### 7.2 功能模块
-
-```
-/admin
-├─ Dashboard        订单统计、待处理数量、近期收款
-├─ Orders           订单管理
-│   ├─ 订单列表（按状态筛选、搜索）
-│   └─ 订单详情（查看参数、下载文件、填写报价、更新状态、发送付款链接）
-├─ Customers        客户管理
-│   ├─ 客户列表（邮箱/公司/类型/订单数/总金额）
-│   ├─ 客户详情（资料 + 全部历史订单）
-│   └─ 标记客户类型（Normal / VIP / Blacklist）+ 运营备注
-├─ Payments         收款记录
-│   ├─ 已收款列表
-│   └─ 待补运费列表
-├─ Settings         系统设置
-│   ├─ WhatsApp 号码
-│   ├─ 客供料收件地址
-│   ├─ PCB / SMT 报价参数
-│   └─ OAuth 开关（Google / GitHub 登录开关）
-└─ Admins           管理员账号管理
-```
-
----
-
-## 八、API 端点规划
-
-### 公开接口（无需登录）
+### 公开接口
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | /api/inquiry | 提交询价（支持附件上传） |
-| GET | /api/order/:order_no | 查询订单状态（需邮箱验证） |
-| GET | /api/settings/public | 获取前台公开配置（WA号码、收件地址等） |
+| GET | /api/settings/public | 获取前台公开配置 |
+| POST | /api/inquiry | 提交询价（含文件上传到R2） |
+| POST | /api/order/lookup | 查询订单状态 |
 
 ### 客户接口（需客户 JWT）
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | POST | /api/auth/register | 注册 |
 | POST | /api/auth/login | 登录 |
-| GET | /api/auth/google | Google OAuth |
-| GET | /api/auth/github | GitHub OAuth |
-| GET | /api/me | 获取个人信息 |
-| PUT | /api/me | 更新个人信息 |
-| GET | /api/me/orders | 历史订单列表 |
-| GET | /api/me/addresses | 收货地址列表 |
-| POST | /api/me/addresses | 新增地址 |
-| PUT | /api/me/addresses/:id | 修改地址 |
-| DELETE | /api/me/addresses/:id | 删除地址 |
+| POST | /api/auth/google | Google OAuth |
+| POST | /api/auth/github | GitHub OAuth |
+| GET | /api/auth/verify | 邮箱验证 |
+| GET/PUT | /api/me | 个人信息 |
+| PUT | /api/me/password | 修改密码 |
+| GET | /api/me/orders | 历史订单 |
+| GET/POST | /api/me/addresses | 地址管理 |
+| PUT/DELETE | /api/me/addresses/:id | 地址操作 |
 
-### 运营后台接口（需管理员 JWT）
+### 管理员接口（需管理员 JWT）
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | POST | /api/admin/login | 管理员登录 |
+| GET | /api/admin/stats | Dashboard统计 |
 | GET | /api/admin/orders | 订单列表 |
-| GET | /api/admin/orders/:id | 订单详情 |
-| PUT | /api/admin/orders/:id | 更新订单（状态/报价/物流） |
-| POST | /api/admin/orders/:id/send-payment | 发送付款链接 |
+| GET/PUT | /api/admin/orders/:id | 订单详情/更新 |
+| POST | /api/admin/orders/:id/send-payment | 发付款链接 |
 | GET | /api/admin/customers | 客户列表 |
-| GET | /api/admin/customers/:id | 客户详情 + 历史订单 |
-| PUT | /api/admin/customers/:id | 更新客户信息/类型/备注 |
-| GET | /api/admin/settings | 获取系统设置 |
-| PUT | /api/admin/settings | 更新系统设置 |
+| GET/PUT | /api/admin/customers/:id | 客户详情/更新 |
+| GET/PUT | /api/admin/settings | 系统设置 |
+| PUT | /api/admin/settings/encrypted/:key | 加密保存敏感配置 |
+| POST | /api/admin/mail/test | 测试发信 |
+| GET/POST | /api/admin/admins | 管理员账号 |
+| PUT | /api/admin/admins/:id/password | 改密码 |
 
 ---
 
-## 九、订单状态流转
+## 七、文件存储流程（R2）
 
 ```
-pending     客户提交询价，等待工程师审核
+客户上传文件
     ↓
-quoted      工程师确认报价，系统发送付款链接给客户
+Node.js 接收（multer 内存缓冲）
     ↓
-paid        客户付款完成（PayPal自动 / PingPong人工确认）
+上传到 Cloudflare R2
+路径：orders/{order_no}/{filename}
     ↓
-production  进入生产（本地工具从供应商同步状态）
+数据库存储 R2 文件路径
     ↓
-shipped     已发货（运营填写物流单号，系统通知客户补付运费）
-    ↓
-completed   客户补付运费 + 确认收货
-    ↓
-cancelled   任意阶段可取消（运营操作）
-```
-
----
-
-## 十、本地同步工具架构
-
-```
-sync-tool/
-├─ index.js              # 主入口，定时任务
-├─ api.js                # 推送状态到网站的API客户端
-├─ mapping.json          # 订单号映射表（本地持久化）
-└─ adapters/
-    ├─ base.js           # 适配器基类（统一接口）
-    ├─ jlcpcb.js         # 嘉立创适配器（第一期）
-    └─ [vendor].js       # 其他供应商（按需扩展）
+后台下载时生成 R2 签名 URL（有效期1小时）
 ```
 
 ---
 
-## 十一、安全策略
+## 八、部署步骤
 
-- 客户密码 bcrypt hash，不存明文
-- 供应商账号密码只存 Mac 本地，不上 VPS
-- VPS 只开放 80 / 443 / SSH 端口
-- 后台 /admin 路由需管理员 JWT，IP 白名单可选
-- Cloudflare R2 文件通过签名 URL 访问，不公开直链
-- OAuth client secret 只存服务器环境变量
-- 数据库每日自动备份到异地（Backblaze B2）
+### 第一步：Cloudflare 配置
+1. 创建 D1 数据库（美国区域）
+2. 创建 R2 存储桶（美国区域）
+3. 生成 D1 API Token 和 R2 API Token
+4. 执行建表 SQL
+
+### 第二步：VPS 环境配置
+1. 安装 Node.js 18+
+2. 安装 Nginx
+3. 安装 PM2
+4. 配置 Nginx 多站点
+5. 配置 SSL（Let's Encrypt）
+
+### 第三步：代码改造
+1. 数据库驱动：pg → Cloudflare D1 HTTP API
+2. 文件存储：multer 本地 → R2（aws-sdk/client-s3）
+3. 更新环境变量
+
+### 第四步：上线
+1. 上传代码到 VPS
+2. PM2 启动服务
+3. 域名 DNS 指向 Cloudflare
+4. 测试全流程
 
 ---
 
-## 十二、成本预估（月）
+## 九、安全策略
+
+- JWT secret 存环境变量，不进代码
+- 敏感配置（邮件密码/API Key）AES-256-GCM 加密存数据库
+- VPS 只开放 80/443/SSH 端口
+- MySQL 不对外暴露（注：数据库已迁移至 D1，无 MySQL）
+- Cloudflare 在前面挡 DDoS 和爬虫
+- R2 文件通过签名 URL 访问，不公开直链
+- OAuth client secret 只存环境变量
+
+---
+
+## 十、成本预估（月）
 
 | 项目 | 费用 |
 |------|------|
-| VPS（Hetzner 4GB） | ~$8 |
-| Cloudflare R2（初期10GB内） | 免费 |
-| Cloudflare CDN | 免费 |
-| Resend 邮件（初期100封/天内） | 免费 |
-| 域名 | ~$1（年费分摊） |
-| **合计** | **~$9/月起** |
+| VPS（已有） | 已有 |
+| Cloudflare D1 | 永久免费 |
+| Cloudflare R2 | 永久免费 |
+| Cloudflare CDN/SSL | 永久免费 |
+| **合计新增** | **$0** |
