@@ -91,7 +91,7 @@ async function sendMail({ to, subject, html }) {
   try {
     const cfg = await getMailConfig();
     const driver   = cfg.mail_driver || 'smtp';
-    const fromAddr = cfg.mail_from      || process.env.MAIL_FROM || 'noreply@ccpcba.com';
+    const fromAddr = cfg.mail_from      || process.env.MAIL_FROM || 'noreply@pcbaforge.com';
     const fromName = cfg.mail_from_name || 'PCBAForge';
     const from     = `${fromName} <${fromAddr}>`;
 
@@ -210,9 +210,9 @@ app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
     const user_id = users.length ? users[0].id : null;
 
     await pool.query(
-      `INSERT INTO orders (order_no, user_id, guest_email, mode, params, estimate, notes, files)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-      [order_no, user_id, user_id ? null : email, mode,
+      `INSERT INTO orders (id, order_no, user_id, guest_email, mode, params, estimate, notes, files)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+      [uuidv4(), order_no, user_id, user_id ? null : email, mode,
        JSON.stringify(params), estimate ? parseFloat(estimate) : null, notes, JSON.stringify(files)]
     );
 
@@ -274,8 +274,8 @@ app.post('/api/auth/register', async (req, res) => {
     const hash         = await bcrypt.hash(password, 12);
     const verify_token = uuidv4();
     await pool.query(
-      `INSERT INTO users (email, password_hash, name, verify_token) VALUES ($1,$2,$3,$4)`,
-      [email.toLowerCase(), hash, name, verify_token]
+      `INSERT INTO users (id, email, password_hash, name, verify_token) VALUES ($1,$2,$3,$4,$5)`,
+      [uuidv4(), email.toLowerCase(), hash, name, verify_token]
     );
 
     const verifyUrl = `${process.env.SITE_URL || ''}/api/auth/verify?token=${verify_token}`;
@@ -297,7 +297,7 @@ app.get('/api/auth/verify', async (req, res) => {
   try {
     const { token } = req.query;
     const { rows } = await pool.query(
-      `UPDATE users SET email_verified=TRUE, verify_token=NULL WHERE verify_token=$1 RETURNING id`,
+      `UPDATE users SET email_verified=1, verify_token=NULL WHERE verify_token=$1 RETURNING id`,
       [token]
     );
     if (!rows.length) return res.status(400).send('Invalid or expired verification link.');
@@ -319,13 +319,13 @@ app.post('/api/auth/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ error: 'Invalid email or password' });
 
-    await pool.query('UPDATE users SET last_login_at=NOW() WHERE id=$1', [user.id]);
+    await pool.query("UPDATE users SET last_login_at=datetime('now') WHERE id=$1", [user.id]);
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Google OAuth（简化版，前端拿 access_token 过来验证）
+// Google OAuth
 app.post('/api/auth/google', async (req, res) => {
   try {
     const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='google_oauth_enabled'`);
@@ -342,16 +342,16 @@ app.post('/api/auth/google', async (req, res) => {
     let user = rows[0];
     if (!user) {
       const { rows: newRows } = await pool.query(
-        `INSERT INTO users (email, name, google_id, email_verified)
-         VALUES ($1,$2,$3,TRUE) RETURNING *`,
-        [gUser.email, gUser.name, gUser.id]
+        `INSERT INTO users (id, email, name, google_id, email_verified)
+         VALUES ($1,$2,$3,$4,1) RETURNING *`,
+        [uuidv4(), gUser.email, gUser.name, gUser.id]
       );
       user = newRows[0];
     } else if (!user.google_id) {
       await pool.query('UPDATE users SET google_id=$1 WHERE id=$2', [gUser.id, user.id]);
     }
 
-    await pool.query('UPDATE users SET last_login_at=NOW() WHERE id=$1', [user.id]);
+    await pool.query("UPDATE users SET last_login_at=datetime('now') WHERE id=$1", [user.id]);
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -364,7 +364,6 @@ app.post('/api/auth/github', async (req, res) => {
     if (cfg[0]?.value !== 'true') return res.status(403).json({ error: 'GitHub login is disabled' });
 
     const { code } = req.body;
-    // 用 code 换 access_token
     const tRes = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
       headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
@@ -383,16 +382,16 @@ app.post('/api/auth/github', async (req, res) => {
     let user = rows[0];
     if (!user) {
       const { rows: newRows } = await pool.query(
-        `INSERT INTO users (email, name, github_id, email_verified)
-         VALUES ($1,$2,$3,TRUE) RETURNING *`,
-        [primaryEmail, ghUser.name || ghUser.login, String(ghUser.id)]
+        `INSERT INTO users (id, email, name, github_id, email_verified)
+         VALUES ($1,$2,$3,$4,1) RETURNING *`,
+        [uuidv4(), primaryEmail, ghUser.name || ghUser.login, String(ghUser.id)]
       );
       user = newRows[0];
     } else if (!user.github_id) {
       await pool.query('UPDATE users SET github_id=$1 WHERE id=$2', [String(ghUser.id), user.id]);
     }
 
-    await pool.query('UPDATE users SET last_login_at=NOW() WHERE id=$1', [user.id]);
+    await pool.query("UPDATE users SET last_login_at=datetime('now') WHERE id=$1", [user.id]);
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -470,11 +469,11 @@ app.get('/api/me/addresses', userAuth, async (req, res) => {
 app.post('/api/me/addresses', userAuth, async (req, res) => {
   try {
     const { label, recipient, phone, address_line, city, country, is_default } = req.body;
-    if (is_default) await pool.query('UPDATE addresses SET is_default=FALSE WHERE user_id=$1', [req.user.id]);
+    if (is_default) await pool.query('UPDATE addresses SET is_default=0 WHERE user_id=$1', [req.user.id]);
     const { rows } = await pool.query(
-      `INSERT INTO addresses (user_id, label, recipient, phone, address_line, city, country, is_default)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [req.user.id, label||'Home', recipient, phone, address_line, city, country||'US', !!is_default]
+      `INSERT INTO addresses (id, user_id, label, recipient, phone, address_line, city, country, is_default)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [uuidv4(), req.user.id, label||'Home', recipient, phone, address_line, city, country||'US', is_default ? 1 : 0]
     );
     res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -483,7 +482,7 @@ app.post('/api/me/addresses', userAuth, async (req, res) => {
 app.put('/api/me/addresses/:id', userAuth, async (req, res) => {
   try {
     const { label, recipient, phone, address_line, city, country, is_default } = req.body;
-    if (is_default) await pool.query('UPDATE addresses SET is_default=FALSE WHERE user_id=$1', [req.user.id]);
+    if (is_default) await pool.query('UPDATE addresses SET is_default=0 WHERE user_id=$1', [req.user.id]);
     await pool.query(
       `UPDATE addresses SET label=COALESCE($1,label), recipient=COALESCE($2,recipient),
        phone=COALESCE($3,phone), address_line=COALESCE($4,address_line),
@@ -515,7 +514,7 @@ app.post('/api/admin/login', async (req, res) => {
     if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
     const ok = await bcrypt.compare(password, rows[0].password_hash);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
-    await pool.query('UPDATE admin_users SET last_login_at=NOW() WHERE id=$1', [rows[0].id]);
+    await pool.query("UPDATE admin_users SET last_login_at=datetime('now') WHERE id=$1", [rows[0].id]);
     const token = jwt.sign({ id: rows[0].id, email: rows[0].email, role: rows[0].role }, JWT_ADMIN_SECRET, { expiresIn: '12h' });
     res.json({ success: true, token, admin: { id: rows[0].id, name: rows[0].name, role: rows[0].role } });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -533,7 +532,7 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
         SUM(CASE WHEN status='production' THEN 1 ELSE 0 END) as production,
         SUM(CASE WHEN status='shipped' THEN 1 ELSE 0 END) as shipped,
         SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed,
-        SUM(CASE WHEN created_at::date = CURRENT_DATE THEN 1 ELSE 0 END) as today
+        SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END) as today
         FROM orders`),
       pool.query('SELECT COUNT(*) as total FROM users'),
       pool.query(`SELECT COALESCE(SUM(total_paid),0) as total_revenue FROM orders WHERE status='completed'`)
@@ -550,7 +549,7 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
     let where = []; const params = [];
     if (status) { where.push(`o.status=$${params.length+1}`); params.push(status); }
     if (q) {
-      where.push(`(o.order_no ILIKE $${params.length+1} OR u.email ILIKE $${params.length+1} OR u.name ILIKE $${params.length+1})`);
+      where.push(`(o.order_no LIKE $${params.length+1} OR u.email LIKE $${params.length+1} OR u.name LIKE $${params.length+1})`);
       params.push('%'+q+'%');
     }
     const whereStr = where.length ? 'WHERE ' + where.join(' AND ') : '';
@@ -592,7 +591,7 @@ app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
       `UPDATE orders SET
        status=COALESCE($1,status), quoted_price=COALESCE($2,quoted_price),
        shipping_fee=COALESCE($3,shipping_fee), tracking_no=COALESCE($4,tracking_no),
-       admin_note=COALESCE($5,admin_note), updated_at=NOW()
+       admin_note=COALESCE($5,admin_note), updated_at=datetime('now')
        WHERE id=$6 OR order_no=$6`,
       [status, quoted_price, shipping_fee, tracking_no, admin_note, req.params.id]
     );
@@ -612,7 +611,7 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
     const order = rows[0];
     if (!order.quoted_price) return res.status(400).json({ error: 'Please set quoted_price first' });
 
-    await pool.query(`UPDATE orders SET status='quoted', updated_at=NOW() WHERE id=$1`, [order.id]);
+    await pool.query(`UPDATE orders SET status='quoted', updated_at=datetime('now') WHERE id=$1`, [order.id]);
 
     const trackUrl = `${process.env.SITE_URL || ''}/track.html?order=${order.order_no}`;
     await sendMail({
@@ -644,7 +643,7 @@ app.get('/api/admin/customers', adminAuth, async (req, res) => {
     let where = []; const params = [];
     if (type) { where.push(`u.customer_type=$${params.length+1}`); params.push(type); }
     if (q) {
-      where.push(`(u.email ILIKE $${params.length+1} OR u.name ILIKE $${params.length+1} OR u.company ILIKE $${params.length+1})`);
+      where.push(`(u.email LIKE $${params.length+1} OR u.name LIKE $${params.length+1} OR u.company LIKE $${params.length+1})`);
       params.push('%'+q+'%');
     }
     const whereStr = where.length ? 'WHERE ' + where.join(' AND ') : '';
@@ -703,7 +702,7 @@ app.get('/api/admin/settings', adminAuth, async (req, res) => {
 
 app.put('/api/admin/settings/:key', adminAuth, async (req, res) => {
   try {
-    await pool.query('UPDATE settings SET value=$1, updated_at=NOW() WHERE key=$2', [req.body.value, req.params.key]);
+    await pool.query("UPDATE settings SET value=$1, updated_at=datetime('now') WHERE key=$2", [req.body.value, req.params.key]);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -721,7 +720,7 @@ app.post('/api/admin/admins', adminAuth, async (req, res) => {
     if (req.admin.role !== 'superadmin') return res.status(403).json({ error: 'Superadmin only' });
     const { email, password, name, role } = req.body;
     const hash = await bcrypt.hash(password, 12);
-    await pool.query('INSERT INTO admin_users (email,password_hash,name,role) VALUES ($1,$2,$3,$4)', [email, hash, name, role||'admin']);
+    await pool.query('INSERT INTO admin_users (id,email,password_hash,name,role) VALUES ($1,$2,$3,$4,$5)', [uuidv4(), email, hash, name, role||'admin']);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -736,9 +735,6 @@ app.put('/api/admin/admins/:id/password', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-
-
-
 // ── 后台：加密保存敏感设置 ────────────────────────────────
 app.put('/api/admin/settings/encrypted/:key', adminAuth, async (req, res) => {
   try {
@@ -748,7 +744,7 @@ app.put('/api/admin/settings/encrypted/:key', adminAuth, async (req, res) => {
     if (!ENCRYPTED_KEYS.includes(key)) return res.status(400).json({ error: 'Key is not an encrypted field' });
     if (!ENC_KEY) return res.status(500).json({ error: 'SETTINGS_ENCRYPT_KEY environment variable not set' });
     const encrypted = encrypt(value);
-    await pool.query('UPDATE settings SET value=$1, updated_at=NOW() WHERE key=$2', [encrypted, key]);
+    await pool.query("UPDATE settings SET value=$1, updated_at=datetime('now') WHERE key=$2", [encrypted, key]);
     res.json({ success: true, message: 'Value encrypted and saved' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -769,8 +765,6 @@ app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
     res.json({ success: true, message: 'Test email sent to ' + to });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`✅ PCBAForge server running on http://localhost:${PORT}`);
