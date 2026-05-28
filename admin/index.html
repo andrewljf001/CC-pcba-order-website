@@ -584,6 +584,7 @@ async function apiFetch(url, opts={}, auth=true) {
 const pageTitles = { dashboard:'DASHBOARD', orders:'ORDER MANAGEMENT', customers:'CUSTOMER MANAGEMENT', blog:'BLOG POSTS', payments:'PAYMENT TRACKING', settings:'SYSTEM SETTINGS', admins:'ADMIN ACCOUNTS' };
 
 function nav(page, el) {
+  closeBlogEditor();
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -1169,6 +1170,7 @@ async function doChangePwd(id) {
 }
 
 // ── INIT ────────────────────────────────────────────
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeBlogEditor(); closeDetail(); } });
 if (adminToken) { adminInfo = { name: 'Admin' }; showApp(); }
 </script>
 </body>
