@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCBAForge — Tested & Verified PCBA, Worldwide Shipping</title>
-<meta name="description" content="One-stop PCBA service. PCB fabrication, SMT assembly, full turnkey with functional testing. Small batch from 5 pcs. Worldwide shipping.">
+<meta name="description" content="One-stop PCBA service. PCB fabrication, SMT+DIP assembly, full turnkey with functional testing. Small batch from 5 pcs. Worldwide shipping.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -162,6 +162,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   <div class="ticker-inner">
     <span class="ti">PCB: <em>1–16 LAYERS</em></span>
     <span class="ti">SMT: <em>0201 / 01005</em></span>
+    <span class="ti">DIP: <em>THROUGH-HOLE</em></span>
     <span class="ti">AOI: <em>100% INSPECTION</em></span>
     <span class="ti">X-RAY: <em>BGA / QFN</em></span>
     <span class="ti">LEAD TIME: <em>3–7 DAYS</em></span>
@@ -172,6 +173,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
     <span class="ti">TURNKEY: <em>BOM + GERBER</em></span>
     <span class="ti">PCB: <em>1–16 LAYERS</em></span>
     <span class="ti">SMT: <em>0201 / 01005</em></span>
+    <span class="ti">DIP: <em>THROUGH-HOLE</em></span>
     <span class="ti">AOI: <em>100% INSPECTION</em></span>
     <span class="ti">X-RAY: <em>BGA / QFN</em></span>
     <span class="ti">LEAD TIME: <em>3–7 DAYS</em></span>
@@ -223,8 +225,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
       <div class="sc-body"><div class="sn">PCB FABRICATION</div><div class="sd">FR4 single to multi-layer boards. Standard prototype pricing from $50. Complex specs quoted manually.</div><span class="stag">FROM $50</span></div>
     </div>
     <div class="sc">
-      <img class="sc-img" src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&q=75" alt="SMT Assembly">
-      <div class="sc-body"><div class="sn">PCB + SMT ASSEMBLY</div><div class="sd">We fabricate your PCB and assemble components. Customer-supplied or sourced by us. Up to 10 pcs with standard pricing.</div><span class="stag">FROM $200</span></div>
+      <img class="sc-img" src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&q=75" alt="SMT DIP Assembly">
+      <div class="sc-body"><div class="sn">SMT + DIP ASSEMBLY</div><div class="sd">SMT soldering + through-hole DIP in one run. Supply your own PCBs or let us fabricate. Customer-supplied or sourced components. Up to 10 pcs with standard pricing.</div><span class="stag">FROM $200</span></div>
     </div>
     <div class="sc">
       <img class="sc-img" src="https://images.unsplash.com/photo-1601134467661-3d775b999c18?w=600&q=75" alt="Full Turnkey Testing">
@@ -240,7 +242,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   <div class="stitle">Configure Your Order</div>
   <div class="mode-tabs">
     <div class="mtab active" data-mode="pcb">PCB FABRICATION</div>
-    <div class="mtab" data-mode="smt">PCB + SMT ASSEMBLY</div>
+    <div class="mtab" data-mode="smt">SMT + DIP ASSEMBLY</div>
     <div class="mtab" data-mode="turnkey">FULL TURNKEY + TESTING</div>
   </div>
   <div class="qwrap">
@@ -330,7 +332,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           </div>
         </div>
 
-        <!-- PCB + SMT -->
+        <!-- SMT + DIP -->
         <div class="mode-panel" id="panel-smt">
           <div class="frow">
             <div class="fg"><label>QUANTITY</label>
@@ -348,8 +350,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
             </div>
           </div>
           <div class="frow">
-            <div class="fg"><label>TOTAL COMPONENTS</label>
-              <input type="number" id="smt-parts" value="50" min="1" max="9999" placeholder="Total component count">
+            <div class="fg"><label>SMT COMPONENTS (unique)</label>
+              <input type="number" id="smt-parts" value="50" min="1" max="9999" placeholder="Total unique SMT part types">
               <span style="font-size:.65rem;color:var(--muted);font-style:italic">≥ 200 pcs → manual quote</span>
             </div>
             <div class="fg"><label>COMPLEX IC COUNT</label>
@@ -360,11 +362,11 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div class="frow">
             <div class="fg"><label>DIP / THROUGH-HOLE PINS</label>
               <input type="number" id="smt-dip" value="0" min="0" max="9999" placeholder="0 if none">
-              <span style="font-size:.65rem;color:var(--muted);font-style:italic">≤ 100 pins included in flat rate</span>
+              <span style="font-size:.65rem;color:var(--muted);font-style:italic">Enter 0 if no DIP · ≤ 100 pins included in flat rate</span>
             </div>
             <div class="fg"><label>COMPONENT SUPPLY</label>
               <select id="smt-supply">
-                <option value="customer">Customer supplied</option>
+                <option value="customer">Customer supplied (CMS)</option>
                 <option value="us">We source (add-on quote)</option>
               </select>
             </div>
@@ -383,18 +385,18 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
                 <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.1em;margin-bottom:.5rem">// WHAT'S INCLUDED</div>
                 <div style="font-size:.82rem;color:var(--text);line-height:1.75">
                   ✔ PCB Fabrication (FR4, multi-layer)<br>
-                  ✔ SMT Assembly + DIP Through-Hole<br>
+                  ✔ SMT Assembly + DIP Through-Hole Soldering<br>
+                  ✔ Component Sourcing (we procure all parts)<br>
                   ✔ Functional Verification (power-on &amp; test)<br>
                   ✔ Engineer Remote Debug Support<br>
-                  ✔ 100% AOI Inspection<br>
-                  ✔ DFM Review
+                  ✔ 100% AOI Inspection · DFM Review
                 </div>
               </div>
               <div style="background:var(--bg3);border:1px solid var(--border);padding:.9rem 1rem">
                 <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.1em;margin-bottom:.5rem">// WHAT YOU NEED TO PREPARE</div>
                 <div style="font-size:.82rem;color:var(--text);line-height:1.75">
                   📁 Gerber files (with stackup &amp; impedance notes)<br>
-                  📋 BOM (Bill of Materials)<br>
+                  📋 BOM (Bill of Materials) with preferred part numbers<br>
                   📍 Pick &amp; Place / Centroid file<br>
                   📝 Functional test plan or validation document
                 </div>
@@ -402,9 +404,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
               <div style="background:rgba(255,68,68,.05);border:1px solid rgba(255,68,68,.2);padding:.8rem 1rem">
                 <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--red);letter-spacing:.1em;margin-bottom:.4rem">// WE DO NOT ACCEPT</div>
                 <div style="font-size:.8rem;color:var(--muted);line-height:1.7">
-                  ✗ SMT/DIP only (no PCB fabrication)<br>
-                  ✗ Through-hole only boards (no SMT)<br>
-                  ✗ Power supply / high-voltage boards
+                  ✗ Power supply / high-voltage boards (&gt; 48V DC)<br>
+                  ✗ Projects without a functional test plan
                 </div>
               </div>
             </div>
@@ -538,7 +539,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
       <a href="#services">Services</a><a href="#quote">Get Quote</a><a href="#capabilities">Capabilities</a>
       <a href="#process">Process</a><a href="quote.html">Submit Inquiry</a><a href="blog.html">Blog</a><a href="track.html">Track Order</a>
     </div>
-    <div class="flinks2" style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap"><a href="privacy.html" style="font-size:.75rem;color:var(--muted)">Privacy Policy</a><a href="shipping.html" style="font-size:.75rem;color:var(--muted)">Shipping Policy</a><a href="terms.html" style="font-size:.75rem;color:var(--muted)">Terms of Service</a></div><div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+    <div class="flinks2" style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap"><a href="privacy.html" style="font-size:.75rem;color:var(--muted)">Privacy Policy</a><a href="shipping.html" style="font-size:.75rem;color:var(--muted)">Shipping Policy</a><a href="terms.html" style="font-size:.75rem;color:var(--muted)">Terms of Service</a></div><div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
 </footer>
 
@@ -558,7 +559,7 @@ document.querySelectorAll('.mtab').forEach(function(tab){
     tab.classList.add('active');
     currentMode=tab.dataset.mode;
     document.getElementById('panel-'+currentMode).classList.add('active');
-    var titles={pcb:'PCB PARAMETERS',smt:'PCB + SMT PARAMETERS',turnkey:'FULL TURNKEY + TESTING'};
+    var titles={pcb:'PCB PARAMETERS',smt:'SMT + DIP PARAMETERS',turnkey:'FULL TURNKEY + TESTING'};
     document.getElementById('form-title').textContent=titles[currentMode];
     calc();
   });
@@ -618,12 +619,12 @@ function calcPCB(){
 
 function calcSMT(){
   var m=isManualSMT();
-  if(m.manual) return{isManual:true, reason:m.reason, mode:'PCB + SMT Assembly'};
+  if(m.manual) return{isManual:true, reason:m.reason, mode:'SMT + DIP Assembly'};
   var sides=document.getElementById('smt-sides').value;
   var base=sides==='single'?200:400;
   var qty=parseInt(document.getElementById('smt-qty').value)||10;
   var sidesLabel=sides==='single'?'Single Side — $200':'Double Side — $400';
-  return{isManual:false, total:base, qty:qty, base:base, sidesLabel:sidesLabel, mode:'PCB + SMT Assembly'};
+  return{isManual:false, total:base, qty:qty, base:base, sidesLabel:sidesLabel, mode:'SMT + DIP Assembly'};
 }
 
 function calcTurnkey(){
@@ -723,7 +724,6 @@ calc();
   var wafEl = document.querySelector('.waf');
   var bwaEl = document.querySelector('.bwa');
   var waLinks = document.querySelectorAll('[href^="https://wa.me"]');
-  // 先隐藏所有 WA 按钮
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
   fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
