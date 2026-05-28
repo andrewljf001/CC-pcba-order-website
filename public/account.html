@@ -172,6 +172,7 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
 @media(max-width:900px){.account-layout{grid-template-columns:1fr}.account-sidebar{position:static}.addr-grid{grid-template-columns:1fr}.connect-grid{grid-template-columns:1fr}.frow{grid-template-columns:1fr}}
 @media(max-width:768px){.nav-links{display:none}.auth-tabs{max-width:100%}.oauth-btns{flex-direction:column}}
 </style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
@@ -222,6 +223,7 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
           <div class="fg"><label>EMAIL <span class="req">*</span></label><input type="email" id="login-email" placeholder="john@company.com" autocomplete="email"></div>
           <div class="fg"><label>PASSWORD <span class="req">*</span></label><input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
           <div class="err-msg" id="login-err"></div>
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="dark" style="margin-bottom:.8rem"></div>
           <button class="btn-primary" id="login-btn" onclick="doLogin()">SIGN IN →</button>
           <p style="font-size:.75rem;color:var(--muted);margin-top:1rem;text-align:center">Don't have an account? <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('register')">Register free →</span></p>
         </div>
@@ -253,6 +255,7 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
           <div class="fg"><label>PASSWORD <span class="req">*</span></label><input type="password" id="reg-pwd" placeholder="Min 8 characters" autocomplete="new-password"></div>
           <div class="err-msg" id="reg-err"></div>
           <div class="ok-msg" id="reg-ok"></div>
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="dark" style="margin-bottom:.8rem"></div>
           <button class="btn-primary" id="reg-btn" onclick="doRegister()">CREATE ACCOUNT →</button>
           <p style="font-size:.75rem;color:var(--muted);margin-top:1rem;text-align:center">Already have an account? <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('login')">Sign in →</span></p>
         </div>
@@ -472,7 +475,8 @@ async function doLogin(){
   const btn  =document.getElementById('login-btn');
   errEl.textContent='';
   if(!email||!pwd){errEl.textContent='Please fill in all fields';return;}
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SIGNING IN...';
+  const cfToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+    btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SIGNING IN...';
   try{
     const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password:pwd})});
     token=d.token; localStorage.setItem('cc_token',token);
@@ -485,6 +489,7 @@ async function doLogin(){
 
 // ── REGISTER ──────────────────────────────────────────
 async function doRegister(){
+  const cfToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
   const name    =document.getElementById('reg-name').value;
   const email   =document.getElementById('reg-email').value;
   const pwd     =document.getElementById('reg-pwd').value;
