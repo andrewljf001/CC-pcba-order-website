@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--max:760px}
+:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:760px}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh}
 a{color:inherit;text-decoration:none}
@@ -16,12 +16,12 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
 .nav-back{font-size:.82rem;color:var(--muted);transition:color .2s}.nav-back:hover{color:var(--green)}
+.nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
+.nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
 .wrap{max-width:var(--max);margin:0 auto;padding:3rem 5%}
 .page-label{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
 .page-title{font-family:'Orbitron',monospace;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.5rem}
 .page-sub{font-size:.88rem;color:var(--muted);margin-bottom:2.5rem}
-
-/* SEARCH */
 .search-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:2rem}
 .search-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
 .search-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
@@ -34,12 +34,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .search-btn:hover{opacity:.85}
 .search-btn:disabled{opacity:.4;cursor:not-allowed}
 .search-hint{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted);margin-top:.75rem;letter-spacing:.04em}
-
-/* RESULT */
-.result{display:none}
-.result.show{display:block}
-
-/* ORDER HEADER */
+.result{display:none}.result.show{display:block}
 .order-top{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
 .order-top-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .order-no{font-family:'Orbitron',monospace;font-size:1rem;color:var(--white);letter-spacing:.1em}
@@ -53,11 +48,8 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .s-cancelled{color:var(--red);border-color:var(--red);background:rgba(255,68,68,.08)}
 .order-top-body{padding:1.2rem}
 .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-.ig-item{}
 .ig-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.3rem}
 .ig-val{font-size:.88rem;color:var(--white)}
-
-/* TIMELINE */
 .timeline-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
 .timeline-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
 .timeline-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
@@ -77,43 +69,45 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .tl-step.done .tl-name,.tl-step.active .tl-name{color:var(--white)}
 .tl-desc{font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.5}
 .tl-step.active .tl-desc{color:var(--text)}
-
-/* NOTES / TRACKING */
 .note-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
 .note-hdr{background:var(--dim);padding:.7rem 1.2rem;border-bottom:1px solid var(--border)}
 .note-ht{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--green);letter-spacing:.12em}
 .note-body{padding:1rem 1.2rem;font-size:.85rem;color:var(--text);line-height:1.7}
-
-/* ERROR / EMPTY */
 .msg-box{background:var(--bg2);border:1px solid var(--border);padding:3rem;text-align:center}
 .msg-icon{font-size:2.5rem;margin-bottom:1rem}
 .msg-title{font-family:'Orbitron',monospace;font-size:1rem;color:var(--white);margin-bottom:.5rem}
 .msg-sub{font-size:.82rem;color:var(--muted)}
-
-/* SPINNER */
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+.spinner.light{border-color:rgba(0,255,65,.2);border-top-color:var(--green)}
 @keyframes spin{to{transform:rotate(360deg)}}
-
 .actions{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
 .act-btn{display:inline-block;font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.4rem;cursor:pointer;border:1px solid var(--green3);color:var(--green);background:transparent;transition:all .2s}
 .act-btn:hover{background:rgba(0,255,65,.07)}
 .act-btn.primary{background:var(--green);color:#000;border-color:var(--green)}
 .act-btn.primary:hover{background:var(--green2)}
-
-@media(max-width:560px){
-  .info-grid{grid-template-columns:1fr 1fr}
-  .search-row{flex-direction:column}
-  .order-top-hdr{flex-direction:column;align-items:flex-start}
-}
+/* PayPal 支付区域 */
+.pay-card{background:var(--bg2);border:2px solid var(--green3);margin-bottom:1rem}
+.pay-hdr{background:rgba(0,255,65,.08);padding:.8rem 1.2rem;border-bottom:1px solid var(--green3);display:flex;align-items:center;gap:.6rem}
+.pay-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.pay-body{padding:1.5rem;text-align:center}
+.pay-amount{font-family:'Orbitron',monospace;font-size:2.2rem;color:var(--green);margin-bottom:.3rem}
+.pay-amount-sub{font-size:.78rem;color:var(--muted);margin-bottom:1.2rem}
+.pay-breakdown{display:flex;justify-content:center;gap:2rem;margin-bottom:1.2rem;flex-wrap:wrap}
+.pay-item{text-align:center}
+.pay-item-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.2rem}
+.pay-item-val{font-size:.9rem;color:var(--white)}
+#paypal-btn-container{max-width:400px;margin:0 auto}
+.pay-secure{font-size:.72rem;color:var(--muted);margin-top:.8rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+@media(max-width:560px){.info-grid{grid-template-columns:1fr 1fr}.search-row{flex-direction:column}.order-top-hdr{flex-direction:column;align-items:flex-start}}
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
 .fi{max-width:var(--max);margin:0 auto;text-align:center}
 .flogo{font-family:'Orbitron',monospace;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
-.flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks{display:flex;justify-content:center;gap:1.5rem;margin-bottom:.6rem;flex-wrap:wrap}
 .flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
+.flinks2{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks2 a{font-size:.75rem;color:var(--muted)}.flinks2 a:hover{color:var(--green)}
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
-.nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
-.nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
 @media(max-width:768px){.nav-links{display:none}}
 </style>
 </head>
@@ -121,13 +115,13 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 
 <nav>
   <a href="index.html" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
-  <a href="index.html" class="nav-back">← Back to Home</a>
   <ul class="nav-links">
     <li><a href="index.html#quote">Quote</a></li>
     <li><a href="index.html#services">Services</a></li>
     <li><a href="index.html#capabilities">Capabilities</a></li>
     <li><a href="index.html#process">Process</a></li>
     <li><a href="index.html#contact">Contact</a></li>
+    <li><a href="blog.html">Blog</a></li>
     <li><a href="track.html">Track Order</a></li>
   </ul>
   <a href="quote.html" class="nav-cta">GET QUOTE</a>
@@ -136,7 +130,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 <div class="wrap">
   <div class="page-label">// ORDER TRACKING</div>
   <h1 class="page-title">Track Your Order</h1>
-  <p class="page-sub">Enter your order number to check real-time status and updates.</p>
+  <p class="page-sub">Enter your order number and email to check real-time status.</p>
 
   <div class="search-card">
     <div class="search-hdr"><span class="search-ht">ENTER ORDER NUMBER</span></div>
@@ -157,85 +151,86 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   <div class="result" id="result"></div>
 </div>
 
+<footer>
+  <div class="fi">
+    <div class="flogo">▶ PCBAForge</div>
+    <div class="flinks">
+      <a href="index.html#services">Services</a>
+      <a href="index.html#quote">Get Quote</a>
+      <a href="index.html#capabilities">Capabilities</a>
+      <a href="blog.html">Blog</a>
+      <a href="quote.html">Submit Inquiry</a>
+      <a href="track.html">Track Order</a>
+    </div>
+    <div class="flinks2">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="shipping.html">Shipping Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+  </div>
+</footer>
+
+<a href="https://wa.me/YOUR_NUMBER" class="waf" target="_blank" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
+</a>
+
 <script>
+var trackData = null; // 保存当前订单数据
+var ppClientId = '';
+var ppLoaded = false;
+
 const STEPS = [
-  {key:'pending',    label:'INQUIRY RECEIVED',   desc:'Your inquiry has been received and is pending review by our team.'},
-  {key:'quoted',     label:'QUOTE SENT',          desc:'A detailed quotation has been sent to your email. Please confirm to proceed.'},
-  {key:'paid',       label:'PAYMENT CONFIRMED',   desc:'Payment received. Your order is queued for production.'},
-  {key:'production', label:'IN PRODUCTION',       desc:'Your PCBs and assemblies are being manufactured on our production line.'},
-  {key:'shipped',    label:'SHIPPED',             desc:'Your order has been dispatched. Tracking information is below.'},
-  {key:'completed',  label:'COMPLETED',           desc:'Order delivered successfully. Thank you for choosing PCBAForge!'},
+  {key:'pending',    label:'INQUIRY RECEIVED',  desc:'Your inquiry has been received and is pending review by our team.'},
+  {key:'quoted',     label:'QUOTE SENT',         desc:'A detailed quotation has been sent to your email. Please proceed with payment below.'},
+  {key:'paid',       label:'PAYMENT CONFIRMED',  desc:'Payment received. Your order is queued for production.'},
+  {key:'production', label:'IN PRODUCTION',      desc:'Your PCBs and assemblies are being manufactured on our production line.'},
+  {key:'shipped',    label:'SHIPPED',            desc:'Your order has been dispatched. Tracking information is below.'},
+  {key:'completed',  label:'COMPLETED',          desc:'Order delivered successfully. Thank you for choosing PCBAForge!'},
 ];
 
 const STATUS_CLASS = {pending:'s-pending',quoted:'s-quoted',paid:'s-paid',production:'s-production',shipped:'s-shipped',completed:'s-completed',cancelled:'s-cancelled'};
 
-function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-
-function fmtDate(s){
-  if(!s)return'—';
-  try{return new Date(s.includes('T')?s:s+' UTC').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
-  catch{return s}
-}
+function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtDate(s){if(!s)return'—';try{return new Date(s.includes('T')?s:s+' UTC').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch{return s;}}
 
 function doTrack(){
   const no    = document.getElementById('orderInput').value.trim().toUpperCase();
-  const email = document.getElementById('emailInput') ? document.getElementById('emailInput').value.trim() : '';
+  const email = document.getElementById('emailInput').value.trim();
   if(!no){alert('Please enter your order number.');return;}
   if(!email){alert('Please enter your email address.');return;}
   const btn = document.getElementById('trackBtn');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span>SEARCHING';
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SEARCHING';
 
-  fetch('/api/order/lookup',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({order_no:no, email:email})
-  })
+  fetch('/api/order/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_no:no,email})})
     .then(r=>r.json())
     .then(d=>{
       btn.disabled=false; btn.textContent='TRACK';
-      if(d.error) renderError(); else renderResult(d);
+      if(d.error) renderError(); else { trackData=d; renderResult(d); }
     })
-    .catch(()=>{
-      btn.disabled=false; btn.textContent='TRACK';
-      renderNetError();
-    });
+    .catch(()=>{ btn.disabled=false; btn.textContent='TRACK'; renderNetError(); });
 }
 
 function renderError(){
-  document.getElementById('result').innerHTML=`
-    <div class="msg-box">
-      <div class="msg-icon">🔍</div>
-      <div class="msg-title">Order Not Found</div>
-      <div class="msg-sub">Please double-check your order number. It was included in your confirmation email.</div>
-    </div>`;
+  document.getElementById('result').innerHTML=`<div class="msg-box"><div class="msg-icon">🔍</div><div class="msg-title">Order Not Found</div><div class="msg-sub">Please double-check your order number and email address.</div></div>`;
   document.getElementById('result').className='result show';
 }
-
 function renderNetError(){
-  document.getElementById('result').innerHTML=`
-    <div class="msg-box">
-      <div class="msg-icon">⚠️</div>
-      <div class="msg-title">Connection Error</div>
-      <div class="msg-sub">Unable to reach the server. Please try again in a moment.</div>
-    </div>`;
+  document.getElementById('result').innerHTML=`<div class="msg-box"><div class="msg-icon">⚠️</div><div class="msg-title">Connection Error</div><div class="msg-sub">Unable to reach the server. Please try again.</div></div>`;
   document.getElementById('result').className='result show';
 }
 
 function renderResult(d){
   const isCancelled = d.status==='cancelled';
   const stepIdx = STEPS.findIndex(s=>s.key===d.status);
+  const isQuoted = d.status==='quoted' && d.quoted_price;
 
-  // Timeline
   let tlHtml='';
   if(!isCancelled){
     tlHtml = STEPS.map((s,i)=>{
       const cls = i<stepIdx?'done': i===stepIdx?'active':'';
       return `<div class="tl-step ${cls}">
-        <div class="tl-left">
-          <div class="tl-dot"></div>
-          <div class="tl-line"></div>
-        </div>
+        <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
         <div class="tl-content">
           <div class="tl-name">${s.label}</div>
           ${cls==='active'?`<div class="tl-desc">${s.desc}</div>`:''}
@@ -243,17 +238,14 @@ function renderResult(d){
       </div>`;
     }).join('');
   } else {
-    tlHtml=`<div class="tl-step"><div class="tl-left"><div class="tl-dot" style="border-color:var(--red);background:var(--red)"></div></div><div class="tl-content"><div class="tl-name" style="color:var(--red)">ORDER CANCELLED</div><div class="tl-desc">This order has been cancelled. Please contact us for details.</div></div></div>`;
+    tlHtml=`<div class="tl-step"><div class="tl-left"><div class="tl-dot" style="border-color:var(--red);background:var(--red)"></div></div><div class="tl-content"><div class="tl-name" style="color:var(--red)">ORDER CANCELLED</div><div class="tl-desc">This order has been cancelled.</div></div></div>`;
   }
 
-  // Extra notes
   let extras='';
-  if(d.admin_note){
-    extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM PCBAForge TEAM</span></div><div class="note-body">${esc(d.admin_note)}</div></div>`;
-  }
-  if(d.tracking_no){
-    extras+=`<div class="note-card" style="border-color:#1565C0"><div class="note-hdr" style="background:rgba(21,101,192,.15)"><span class="note-ht" style="color:#64B5F6">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
-  }
+  if(d.admin_note) extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM PCBAForge TEAM</span></div><div class="note-body">${esc(d.admin_note)}</div></div>`;
+  if(d.tracking_no) extras+=`<div class="note-card" style="border-color:#1565C0"><div class="note-hdr" style="background:rgba(21,101,192,.15)"><span class="note-ht" style="color:#64B5F6">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
+
+  const total = (parseFloat(d.quoted_price||0) + parseFloat(d.shipping_fee||0)).toFixed(2);
 
   document.getElementById('result').innerHTML=`
     <div class="order-top">
@@ -266,7 +258,7 @@ function renderResult(d){
           <div class="ig-item"><div class="ig-label">CUSTOMER</div><div class="ig-val">${esc(d.customer_name||'—')}</div></div>
           <div class="ig-item"><div class="ig-label">SERVICE</div><div class="ig-val">${(d.mode||'—').toUpperCase()}</div></div>
           <div class="ig-item"><div class="ig-label">ESTIMATE</div><div class="ig-val">${d.estimate?'$'+Number(d.estimate).toFixed(2):'—'}</div></div>
-          <div class="ig-item"><div class="ig-label">QUOTED AMOUNT</div><div class="ig-val">${d.quoted_price?'<span style="color:var(--green)">'+'$'+Number(d.quoted_price).toFixed(2)+'</span>':'Pending review'}</div></div>
+          <div class="ig-item"><div class="ig-label">QUOTED AMOUNT</div><div class="ig-val">${d.quoted_price?'<span style="color:var(--green)">$'+Number(d.quoted_price).toFixed(2)+'</span>':'Pending review'}</div></div>
           <div class="ig-item"><div class="ig-label">SUBMITTED</div><div class="ig-val">${fmtDate(d.created_at)}</div></div>
           <div class="ig-item"><div class="ig-label">LAST UPDATED</div><div class="ig-val">${fmtDate(d.updated_at)}</div></div>
         </div>
@@ -280,16 +272,21 @@ function renderResult(d){
 
     ${extras}
 
-    ${d.status==='quoted' && d.quoted_price ? `
-    <div class="note-card" style="border-color:var(--green3)">
-      <div class="note-hdr" style="background:rgba(0,255,65,.06)">
-        <span class="note-ht" style="color:var(--green)">// PAYMENT REQUIRED</span>
+    ${isQuoted ? `
+    <div class="pay-card">
+      <div class="pay-hdr">
+        <span style="font-size:1.2rem">💳</span>
+        <span class="pay-ht">// COMPLETE YOUR PAYMENT</span>
       </div>
-      <div class="note-body" style="text-align:center;padding:1rem">
-        <div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem">Your quoted amount:</div>
-        <div style="font-family:'Orbitron',monospace;font-size:2rem;color:var(--green);margin-bottom:1rem">$${Number(d.quoted_price).toFixed(2)}</div>
-        <div style="font-size:.8rem;color:var(--muted);margin-bottom:1.2rem">Please contact us via WhatsApp or email to complete payment.</div>
-        <a href="https://wa.me/" id="pay-wa-btn" class="act-btn primary" style="display:inline-block">💬 CONTACT TO PAY</a>
+      <div class="pay-body">
+        <div class="pay-amount">$${total}</div>
+        <div class="pay-amount-sub">Total amount due (USD)</div>
+        <div class="pay-breakdown">
+          <div class="pay-item"><div class="pay-item-label">PCBA SERVICE</div><div class="pay-item-val">$${Number(d.quoted_price).toFixed(2)}</div></div>
+          ${d.shipping_fee ? `<div class="pay-item"><div class="pay-item-label">SHIPPING</div><div class="pay-item-val">$${Number(d.shipping_fee).toFixed(2)}</div></div>` : ''}
+        </div>
+        <div id="paypal-btn-container"><div style="text-align:center;padding:1rem;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.75rem"><span class="spinner light"></span> Loading payment...</div></div>
+        <div class="pay-secure">🔒 Secured by PayPal · SSL Encrypted</div>
       </div>
     </div>` : ''}
 
@@ -298,40 +295,104 @@ function renderResult(d){
       <a href="index.html" class="act-btn">← Back to Home</a>
     </div>
   `;
+
   document.getElementById('result').className='result show';
+
+  if(isQuoted) loadPayPal(d.order_no, total);
 }
 
-// 动态读取 WhatsApp 号码
+async function loadPayPal(order_no, total) {
+  try {
+    // 获取 PayPal Client ID
+    const cfg = await fetch('/api/payment/config').then(r=>r.json());
+    if(!cfg.client_id) {
+      document.getElementById('paypal-btn-container').innerHTML = '<div style="color:var(--amber);font-size:.78rem;padding:.5rem">PayPal not configured. Please contact us to arrange payment.</div>';
+      return;
+    }
+
+    // 动态加载 PayPal SDK
+    if(!ppLoaded){
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${cfg.client_id}&currency=USD&intent=capture`;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      ppLoaded = true;
+    }
+
+    const email = document.getElementById('emailInput').value.trim();
+
+    paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'gold',
+        shape: 'rect',
+        label: 'pay',
+        height: 48
+      },
+      createOrder: async function() {
+        const res = await fetch('/api/payment/create', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({order_no, email})
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error || 'Failed to create order');
+        // PayPal SDK 需要 order ID
+        return data.paypal_order_id;
+      },
+      onApprove: async function(data) {
+        document.getElementById('paypal-btn-container').innerHTML = '<div style="text-align:center;padding:1rem;color:var(--green);font-family:\'Share Tech Mono\',monospace;font-size:.8rem"><span class="spinner light"></span> Processing payment...</div>';
+        const res = await fetch('/api/payment/capture', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({order_no, token: data.orderID})
+        });
+        const result = await res.json();
+        if(result.success){
+          window.location.href = `/payment-success.html?order=${order_no}&token=${data.orderID}`;
+        } else {
+          alert('Payment processing error: ' + (result.error || 'Unknown error'));
+        }
+      },
+      onError: function(err) {
+        console.error('PayPal error:', err);
+        document.getElementById('paypal-btn-container').innerHTML = '<div style="color:var(--red);font-size:.78rem;padding:.5rem">Payment failed. Please try again or contact us.</div>';
+      },
+      onCancel: function() {
+        document.getElementById('paypal-btn-container').innerHTML = '<div style="color:var(--amber);font-size:.78rem;padding:.5rem">Payment cancelled. Click below to try again.</div><button onclick="loadPayPal(\''+order_no+'\',\''+total+'\')" style="margin-top:.5rem;background:var(--green);color:#000;border:none;padding:.5rem 1rem;font-family:\'Share Tech Mono\',monospace;font-size:.72rem;cursor:pointer;letter-spacing:.08em">TRY AGAIN</button>';
+      }
+    }).render('#paypal-btn-container');
+
+  } catch(e) {
+    console.error('PayPal load error:', e);
+    document.getElementById('paypal-btn-container').innerHTML = `<div style="color:var(--red);font-size:.78rem;padding:.5rem">Unable to load PayPal. Please contact us directly.</div>`;
+  }
+}
+
+// 动态读取 WhatsApp 号码和 PayPal 配置
 fetch('/api/settings/public').then(r=>r.json()).then(cfg=>{
   const wa = cfg.whatsapp_number || '';
-  const waBtn = document.getElementById('pay-wa-btn');
-  if(waBtn && wa) waBtn.href = 'https://wa.me/' + wa.replace(/[^0-9]/g,'');
-  // 更新 WA 浮动按钮
-  const waf = document.querySelector('.waf');
-  if(waf && wa) waf.href = 'https://wa.me/' + wa.replace(/[^0-9]/g,'');
+  if(wa){
+    document.querySelectorAll('[href*="wa.me"]').forEach(el=>{
+      el.href = 'https://wa.me/' + wa.replace(/[^0-9]/g,'');
+    });
+  }
 }).catch(()=>{});
 
 // Auto-track from URL ?order=CC…
 const p = new URLSearchParams(location.search);
 if(p.get('order')){
   document.getElementById('orderInput').value = p.get('order');
-  doTrack();
+  // 需要邮箱才能查询，如果 URL 里有 email 就自动填
+  if(p.get('email')) document.getElementById('emailInput').value = p.get('email');
+  if(p.get('cancelled')) {
+    // 从支付取消页回来
+  }
+  if(p.get('order') && document.getElementById('emailInput').value) doTrack();
 }
 </script>
-<footer>
-  <div class="fi">
-    <div class="flogo">▶ PCBAForge</div>
-    <div class="flinks">
-      <a href="index.html#services">Services</a><a href="index.html#quote">Get Quote</a><a href="index.html#capabilities">Capabilities</a>
-      <a href="index.html#process">Process</a><a href="quote.html">Submit Inquiry</a><a href="track.html">Track Order</a>
-    </div>
-    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
-  </div>
-</footer>
-
-<a href="https://wa.me/YOUR_NUMBER" class="waf" target="_blank" aria-label="WhatsApp">
-  <svg width="28" height="28" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
-</a>
-
 </body>
 </html>
