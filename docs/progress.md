@@ -8,7 +8,7 @@
 
 ## 📌 当前阶段
 
-🟡 **Phase 4 完成，Phase 5（支付接入）待开始**
+🟡 **安全加固完成，下一步：Gmail SMTP 配置 + 文件上传 R2**
 
 ---
 
@@ -26,34 +26,7 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 
 ---
 
-## ✅ Phase 1 — 业务架构定稿 & 首页 DEMO（完成）
-
-## ✅ Phase 2 — 报价计算器（完成）
-
-## ✅ Phase 3 — 后端基础 & 用户体系 & 询价下单（完成）
-
-## ✅ Phase 4 — 运营后台 + 架构迁移 + VPS 部署（完成）
-
-### 4A · 运营后台
-
-| # | 任务 | 状态 |
-|---|------|------|
-| 4.1~4.15 | 后台全功能（登录、Dashboard、订单、客户、设置、邮件） | ✅ 完成 |
-| 4.16 | account.html 加入 nav 链接 | ⬜ 待开始 |
-
-### 4B · 架构迁移
-
-| # | 任务 | 状态 | 备注 |
-|---|------|------|------|
-| 4.16b | VPS Apache → Nginx + PHP-FPM 彻底迁移 | ✅ 完成 | |
-| 4.17 | Cloudflare D1 建库 | ✅ 完成 | pcbaforge-db |
-| 4.18 | Cloudflare R2 建存储桶 | ✅ 完成 | pcbaforge-files |
-| 4.18a | Cloudflare API Token | ✅ 完成 | |
-| 4.18b | 后台公司信息配置完善 | ⬜ 待开始 | |
-| 4.18c | 前台动态读取公司信息 | ⬜ 待开始 | |
-| 4.19 | pg → D1 HTTP API | ✅ 完成 | SQLite 语法适配 |
-| 4.20 | 本地存储 → R2 | ⬜ 待开始 | |
-| 4.21~4.25 | VPS 环境 + Nginx + SSL + DNS + PM2 | ✅ 完成 | |
+## ✅ Phase 1~4（全部完成）
 
 ---
 
@@ -73,14 +46,18 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 | 7.10 | shipping.html 货运政策 | ✅ 完成 | |
 | 7.11 | blog.html 博客列表页 | ✅ 完成 | |
 | 7.12 | blog-post.html 文章详情页 | ✅ 完成 | |
-| 7.13 | 后台博客文章管理 CRUD | ✅ 完成 | API 完成，后台 UI 待接入 |
-| 7.14 | Cloudflare WAF 防火墙 | ⬜ 待开始 | |
-| 7.15 | Cloudflare Bot Fight Mode | ⬜ 待开始 | |
-| 7.16 | Cloudflare SSL Full Strict | ⬜ 待开始 | |
-| 7.17 | Cloudflare Rate Limiting | ⬜ 待开始 | |
-| 7.18 | Cloudflare Turnstile 人机验证 | ⬜ 待开始 | |
-| 7.19 | VPS SSH 安全加固 | ⬜ 待开始 | |
+| 7.13 | 后台博客文章管理 CRUD | ✅ 完成 | |
+| 7.14 | Cloudflare WAF | ❌ 需 Pro 版 | Nginx 限流替代 |
+| 7.15 | Cloudflare Bot Fight Mode | ✅ 完成 | |
+| 7.16 | Cloudflare SSL Full Strict | ✅ 完成 | |
+| 7.17 | Cloudflare Rate Limiting | ✅ 完成 | Nginx 限流实现 |
+| 7.18 | Cloudflare Turnstile 人机验证 | ✅ 完成 | 后台+登录+注册+询价 |
+| 7.19 | VPS SSH 安全加固 | ✅ 完成 | 非标端口+禁密码+UFW |
 | 7.20 | D1 数据定期备份到 R2 | ⬜ 待开始 | |
+| 7.21 | PM2 开机自启 | ✅ 完成 | VPS 重启自动恢复 |
+| 7.22 | 安全手册 security.md | ✅ 完成 | docs/security.md |
+| 7.23 | 文件上传 → R2 | ⬜ 待开始 | 防 VPS 重启丢文件 |
+| 7.24 | Gmail SMTP 配置 | ⬜ 待开始 | 邮件流程跑通 |
 
 ---
 
@@ -133,10 +110,19 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 - 品牌名全站：CC PCBA → PCBAForge
 - database.js: pg → D1 HTTP API，SQLite 语法适配
 - pcbaforge.com 正式上线，后台登录正常
-- 新增博客模块：posts 表 + API（公开读取 + 后台 CRUD）
-- 新增前台页面：blog.html + blog-post.html
+- 新增博客模块：posts 表 + API + blog.html + blog-post.html
 - 新增法律页面：privacy.html + shipping.html + terms.html
-- 全站 nav/footer 统一，所有页面互相链接
+- 全站 nav/footer 统一
+
+### 2026-05-28
+- 安全加固全面完成：
+  - UFW 防火墙（封 3001/22/3306/6379）
+  - Nginx 限流（登录5次/分钟，API 30次/分钟）
+  - Nginx 安全响应头
+  - Cloudflare SSL Full Strict + Bot Fight Mode
+  - Cloudflare Turnstile 接入后台登录、用户登录/注册、询价表单
+  - PM2 开机自启（pm2 save）
+  - 安全手册 docs/security.md
 
 ---
 
