@@ -435,6 +435,46 @@ tr:hover td{background:rgba(0,255,65,.025)}
         </div>
       </div>
 
+
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-ht">// PAYPAL PAYMENT CONFIGURATION</span>
+          </div>
+          <div class="card-body">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;line-height:1.7">
+              Configure PayPal payment gateway. Client Secret is <strong style="color:var(--green)">AES-256-GCM encrypted</strong> before storage.
+            </div>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <div class="setting-key">paypal_mode</div>
+                <div class="setting-desc">PayPal Mode</div>
+                <div class="setting-input-wrap">
+                  <select id="setting-paypal_mode">
+                    <option value="live">LIVE (Production)</option>
+                    <option value="sandbox">SANDBOX (Testing)</option>
+                  </select>
+                  <button class="btn btn-outline btn-sm" onclick="saveSetting('paypal_mode')">SAVE</button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-key">paypal_client_id</div>
+                <div class="setting-desc">PayPal Client ID</div>
+                <div class="setting-input-wrap">
+                  <input type="text" id="setting-paypal_client_id" placeholder="ASTNK3...">
+                  <button class="btn btn-outline btn-sm" onclick="saveSetting('paypal_client_id')">SAVE</button>
+                </div>
+              </div>
+              <div class="setting-item" style="grid-column:1/-1">
+                <div class="setting-key">paypal_client_secret_enc</div>
+                <div class="setting-desc">PayPal Client Secret — <span style="color:var(--green)">AES-256-GCM encrypted</span></div>
+                <div class="setting-input-wrap">
+                  <input type="password" id="paypal-secret-input" placeholder="Enter Client Secret to update">
+                  <button class="btn btn-amber btn-sm" onclick="saveEncrypted('paypal_client_secret_enc','paypal-secret-input')">ENCRYPT & SAVE</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       <!-- ── ADMINS ── -->
       <div class="page" id="page-admins">
         <div class="toolbar"><button class="btn btn-green btn-sm" onclick="showAddAdmin()">+ ADD ADMIN</button></div>
@@ -1044,7 +1084,7 @@ async function loadSettings() {
       smt_max_ic:'SMT Max Complex ICs', smt_max_dip:'SMT Max DIP Pins'
     };
     const BOOL_KEYS = ['google_oauth_enabled','github_oauth_enabled'];
-    const MAIL_KEYS = ['mail_driver','mail_from','mail_from_name','smtp_host','smtp_port','smtp_secure','smtp_user','smtp_pass_enc','resend_api_key_enc'];
+    const MAIL_KEYS = ['mail_driver','mail_from','mail_from_name','smtp_host','smtp_port','smtp_secure','smtp_user','smtp_pass_enc','resend_api_key_enc','paypal_client_id','paypal_client_secret_enc','paypal_mode'];
     settingsData.forEach(s => {
       const el = document.getElementById('setting-' + s.key);
       if (el) el.value = s.value || '';
