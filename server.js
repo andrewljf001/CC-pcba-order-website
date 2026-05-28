@@ -105,9 +105,6 @@ const upload = multer({
 
 // ── 邮件工具 ─────────────────────────────────────────────
 async function getMailConfig() {
-  const keys = ['mail_driver','mail_from','mail_from_name',
-                 'smtp_host','smtp_port','smtp_secure',
-                 'smtp_user','smtp_pass_enc','resend_api_key_enc'];
   const { rows } = await pool.query(
     `SELECT key, value FROM settings WHERE key IN ('mail_driver','mail_from','mail_from_name','smtp_host','smtp_port','smtp_secure','smtp_user','smtp_pass_enc','resend_api_key_enc')`
   );
@@ -206,7 +203,7 @@ app.get('/api/settings/public', async (req, res) => {
 // 提交询价（文件上传到 R2）
 app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
   try {
-    const { mode, name, email, whatsapp, company, notes, estimate, cf_turnstile } = req.body;
+    const { mode, name, email, whatsapp, company, notes, estimate } = req.body;
     if (!name || !email || !mode) return res.status(400).json({ error: 'name, email, mode required' });
 
     const params = {};
@@ -224,7 +221,6 @@ app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
       });
     }
 
-    // 上传文件到 R2
     const files = [];
     if (req.files && req.files.length > 0) {
       for (const f of req.files) {
@@ -310,7 +306,7 @@ app.post('/api/auth/register', async (req, res) => {
       [uuidv4(), email.toLowerCase(), hash, name, verify_token]
     );
 
-    const verifyUrl = `${process.env.SITE_URL || ''}/api/auth/verify?token=${verify_token}`;
+    const verifyUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/api/auth/verify?token=${verify_token}`;
     await sendMail({
       to: email,
       subject: 'Verify your PCBAForge account',
@@ -353,6 +349,58 @@ app.post('/api/auth/login', async (req, res) => {
     await pool.query("UPDATE users SET last_login_at=datetime('now') WHERE id=$1", [user.id]);
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── 忘记密码：发送重置邮件 ────────────────────────────────
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+    const { rows } = await pool.query('SELECT id, name FROM users WHERE email=$1', [email.toLowerCase()]);
+    // 无论是否找到用户都返回成功，防止枚举攻击
+    if (rows.length) {
+      const reset_token = uuidv4();
+      const expires = new Date(Date.now() + 3600000).toISOString(); // 1小时后过期
+      await pool.query(
+        `UPDATE users SET reset_token=$1, reset_token_expires=$2 WHERE id=$3`,
+        [reset_token, expires, rows[0].id]
+      );
+      const resetUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/account.html?reset_token=${reset_token}`;
+      await sendMail({
+        to: email,
+        subject: '[PCBAForge] Password Reset Request',
+        html: `<h2>Password Reset</h2>
+          <p>Hi ${rows[0].name},</p>
+          <p>We received a request to reset your password. Click the button below to set a new password:</p>
+          <p><a href="${resetUrl}" style="background:#00FF41;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">RESET PASSWORD →</a></p>
+          <p>This link expires in <strong>1 hour</strong>.</p>
+          <p>If you did not request a password reset, please ignore this email.</p>`
+      });
+    }
+    res.json({ success: true, message: 'If this email is registered, a reset link has been sent.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── 重置密码：用 token 设置新密码 ────────────────────────────
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) return res.status(400).json({ error: 'Token and password required' });
+    if (password.length < 8) return res.status(400).json({ error: 'Password min 8 characters' });
+
+    const { rows } = await pool.query(
+      `SELECT id FROM users WHERE reset_token=$1 AND reset_token_expires > datetime('now')`,
+      [token]
+    );
+    if (!rows.length) return res.status(400).json({ error: 'Invalid or expired reset link. Please request a new one.' });
+
+    const hash = await bcrypt.hash(password, 12);
+    await pool.query(
+      `UPDATE users SET password_hash=$1, reset_token=NULL, reset_token_expires=NULL, email_verified=1 WHERE id=$2`,
+      [hash, rows[0].id]
+    );
+    res.json({ success: true, message: 'Password reset successfully. You can now log in.' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -631,7 +679,7 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
 
     await pool.query(`UPDATE orders SET status='quoted', updated_at=datetime('now') WHERE id=$1`, [order.id]);
 
-    const trackUrl = `${process.env.SITE_URL || ''}/track.html?order=${order.order_no}`;
+    const trackUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/track.html?order=${order.order_no}`;
     await sendMail({
       to: order.customer_email,
       subject: `[PCBAForge] Your Quote is Ready — ${order.order_no}`,
@@ -702,6 +750,31 @@ app.put('/api/admin/customers/:id', adminAuth, async (req, res) => {
     params.push(req.params.id);
     await pool.query(sql, params);
     res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── 后台重置客户密码 ─────────────────────────────────────
+app.post('/api/admin/customers/:id/reset-password', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT email, name FROM users WHERE id=$1', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Customer not found' });
+    const reset_token = uuidv4();
+    const expires = new Date(Date.now() + 3600000).toISOString();
+    await pool.query(
+      `UPDATE users SET reset_token=$1, reset_token_expires=$2 WHERE id=$3`,
+      [reset_token, expires, req.params.id]
+    );
+    const resetUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/account.html?reset_token=${reset_token}`;
+    await sendMail({
+      to: rows[0].email,
+      subject: '[PCBAForge] Password Reset — Admin Action',
+      html: `<h2>Password Reset</h2>
+        <p>Hi ${rows[0].name},</p>
+        <p>An administrator has initiated a password reset for your account. Click the button below to set a new password:</p>
+        <p><a href="${resetUrl}" style="background:#00FF41;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">RESET PASSWORD →</a></p>
+        <p>This link expires in <strong>1 hour</strong>.</p>`
+    });
+    res.json({ success: true, message: 'Password reset email sent to ' + rows[0].email });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
