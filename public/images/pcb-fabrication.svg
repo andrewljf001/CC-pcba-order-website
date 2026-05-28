@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 280">
+  <rect width="600" height="280" fill="#0A0F0A"/>
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0L0 0 0 20" fill="none" stroke="#00FF41" stroke-width="0.3" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="280" fill="url(#g)"/>
+  <rect x="80" y="40" width="440" height="200" rx="4" fill="#0F2010" stroke="#00C832" stroke-width="1.5"/>
+  <polyline points="120,80 200,80 200,120 320,120" fill="none" stroke="#00FF41" stroke-width="2"/>
+  <polyline points="320,120 380,120 380,160 460,160" fill="none" stroke="#00FF41" stroke-width="2"/>
+  <polyline points="200,160 200,200 300,200 300,160 380,160" fill="none" stroke="#1E8F1E" stroke-width="1.5"/>
+  <polyline points="120,200 150,200 150,160 200,160" fill="none" stroke="#00C832" stroke-width="1.5"/>
+  <polyline points="460,80 460,120 420,120 420,80 340,80" fill="none" stroke="#00FF41" stroke-width="2"/>
+  <circle cx="200" cy="80" r="6" fill="#0A0F0A" stroke="#00FF41" stroke-width="1.5"/>
+  <circle cx="200" cy="80" r="2" fill="#00FF41"/>
+  <circle cx="380" cy="120" r="6" fill="#0A0F0A" stroke="#00FF41" stroke-width="1.5"/>
+  <circle cx="380" cy="120" r="2" fill="#00FF41"/>
+  <circle cx="300" cy="200" r="6" fill="#0A0F0A" stroke="#00C832" stroke-width="1.5"/>
+  <circle cx="300" cy="200" r="2" fill="#00C832"/>
+  <circle cx="460" cy="120" r="6" fill="#0A0F0A" stroke="#00FF41" stroke-width="1.5"/>
+  <circle cx="460" cy="120" r="2" fill="#00FF41"/>
+  <rect x="240" y="100" width="80" height="60" rx="2" fill="#162116" stroke="#00C832" stroke-width="1"/>
+  <text x="280" y="135" text-anchor="middle" font-family="monospace" font-size="10" fill="#00FF41">MCU</text>
+  <rect x="130" y="90" width="24" height="10" rx="1" fill="#1A2E1A" stroke="#008F24" stroke-width="1"/>
+  <rect x="130" y="110" width="24" height="10" rx="1" fill="#1A2E1A" stroke="#008F24" stroke-width="1"/>
+  <rect x="390" y="140" width="16" height="28" rx="1" fill="#1A2E1A" stroke="#008F24" stroke-width="1"/>
+  <text x="300" y="265" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A7A5A" letter-spacing="3">PCB FABRICATION</text>
+</svg>

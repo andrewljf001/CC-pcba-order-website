@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 280">
+  <rect width="600" height="280" fill="#0A0F0A"/>
+  <defs>
+    <pattern id="g3" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0L0 0 0 20" fill="none" stroke="#00FF41" stroke-width="0.3" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="280" fill="url(#g3)"/>
+  <rect x="60" y="40" width="280" height="180" rx="4" fill="#050A05" stroke="#00C832" stroke-width="2"/>
+  <rect x="70" y="50" width="260" height="160" rx="2" fill="#040D04" stroke="#1E3A1E" stroke-width="1"/>
+  <g stroke="#1E3A1E" stroke-width="0.5" opacity="0.8">
+    <line x1="70" y1="90" x2="330" y2="90"/>
+    <line x1="70" y1="130" x2="330" y2="130"/>
+    <line x1="70" y1="170" x2="330" y2="170"/>
+    <line x1="135" y1="50" x2="135" y2="210"/>
+    <line x1="200" y1="50" x2="200" y2="210"/>
+    <line x1="265" y1="50" x2="265" y2="210"/>
+  </g>
+  <polyline points="70,130 82,100 94,75 106,65 118,75 130,100 142,130 154,160 166,185 178,195 190,185 202,160 214,130 226,100 238,75 250,65 262,75 274,100 286,130 298,160 310,185 322,195 330,190" fill="none" stroke="#00FF41" stroke-width="2" stroke-linejoin="round"/>
+  <polyline points="70,150 90,140 110,130 130,125 150,130 170,140 190,150 210,160 230,165 250,160 270,150 290,140 310,135 330,138" fill="none" stroke="#00C832" stroke-width="1.5" stroke-linejoin="round" opacity="0.6"/>
+  <text x="80" y="220" font-family="monospace" font-size="10" fill="#00FF41">CH1: 3.3V  1kHz</text>
+  <text x="80" y="232" font-family="monospace" font-size="10" fill="#00C832">CH2: PASS</text>
+  <rect x="370" y="50" width="180" height="160" rx="3" fill="#0F2010" stroke="#00C832" stroke-width="1.5"/>
+  <circle cx="410" cy="90" r="6" fill="#0A0F0A" stroke="#FFB300" stroke-width="2"/>
+  <circle cx="410" cy="90" r="2" fill="#FFB300"/>
+  <line x1="410" y1="84" x2="410" y2="55" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="416" y="68" font-family="monospace" font-size="8" fill="#FFB300">TP1</text>
+  <circle cx="460" cy="110" r="6" fill="#0A0F0A" stroke="#FFB300" stroke-width="2"/>
+  <circle cx="460" cy="110" r="2" fill="#FFB300"/>
+  <line x1="460" y1="104" x2="460" y2="55" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="466" y="68" font-family="monospace" font-size="8" fill="#FFB300">TP2</text>
+  <rect x="400" y="130" width="60" height="50" rx="2" fill="#162116" stroke="#00C832" stroke-width="1"/>
+  <text x="430" y="160" text-anchor="middle" font-family="monospace" font-size="9" fill="#00FF41">MCU</text>
+  <rect x="390" y="188" width="140" height="18" rx="2" fill="rgba(0,200,50,0.12)" stroke="#00C832" stroke-width="1"/>
+  <text x="460" y="201" text-anchor="middle" font-family="monospace" font-size="9" fill="#00FF41" letter-spacing="1">VERIFIED PASS</text>
+  <text x="300" y="258" text-anchor="middle" font-family="monospace" font-size="9" fill="#5A7A5A" letter-spacing="2">TURNKEY + TESTING</text>
+</svg>
