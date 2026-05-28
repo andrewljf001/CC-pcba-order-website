@@ -309,8 +309,8 @@ app.post('/api/order/lookup', async (req, res) => {
               o.shipping_fee, o.total_paid, o.tracking_no, o.notes, o.admin_note,
               o.created_at, o.updated_at, u.name as customer_name
        FROM orders o LEFT JOIN users u ON o.user_id = u.id
-       WHERE o.order_no=$1 AND (o.guest_email=$2 OR u.email=$2)`,
-      [order_no.toUpperCase(), email.toLowerCase()]
+       WHERE o.order_no=$1 AND (o.guest_email=$2 OR u.email=$3)`,
+      [order_no.toUpperCase(), email.toLowerCase(), email.toLowerCase()]
     );
     if (!rows.length) return res.status(404).json({ error: 'Order not found' });
     res.json(rows[0]);
