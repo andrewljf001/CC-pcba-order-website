@@ -803,6 +803,8 @@ async function openCustomer(id) {
       <div class="form-group"><label>INTERNAL NOTE</label><textarea id="c-note" placeholder="Internal notes...">${c.note||''}</textarea></div>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem">
         <button class="btn btn-green btn-sm" onclick="saveCustomer('${c.id}')">💾 SAVE</button>
+        <button class="btn btn-amber btn-sm" onclick="adminResetPassword('${c.id}','${c.email}')">📧 RESET PASSWORD</button>
+        <button class="btn btn-amber btn-sm" onclick="adminResetPassword('${c.id}','${c.email}')">📧 RESET PASSWORD</button>
         ${c.google_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth('${c.id}','google')">Unbind Google</button>`:''}
         ${c.github_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth('${c.id}','github')">Unbind GitHub</button>`:''}
       </div>
@@ -1166,6 +1168,14 @@ async function doChangePwd(id) {
   try {
     await apiFetch(`/api/admin/admins/${id}/password`, { method:'PUT', body: JSON.stringify({ new_password: document.getElementById('new-pwd').value }) });
     toast('✅ Password updated'); closeDetail();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function adminResetPassword(id, email) {
+  if (!confirm('Send password reset email to ' + email + '?')) return;
+  try {
+    await apiFetch('/api/admin/customers/' + id + '/reset-password', { method: 'POST' });
+    toast('📧 Reset email sent to ' + email);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
