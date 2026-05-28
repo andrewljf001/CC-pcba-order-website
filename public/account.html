@@ -11,19 +11,13 @@
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column}
 a{color:inherit;text-decoration:none}
-
-/* NAV */
 nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
 .nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
 .ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
 .nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
 .nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
-
-/* PAGE WRAP */
 .page-wrap{max-width:var(--max);margin:0 auto;padding:2.5rem 5%;flex:1;width:100%}
-
-/* AUTH SECTION */
 #auth-section{display:none}
 .auth-tabs{display:flex;border:1px solid var(--border);margin-bottom:1.5rem;max-width:500px}
 .auth-tab{flex:1;padding:.7rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.1em;color:var(--muted);cursor:pointer;border-right:1px solid var(--border);transition:all .2s}
@@ -41,8 +35,6 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .divider-line{display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem}
 .divider-line::before,.divider-line::after{content:'';flex:1;height:1px;background:var(--border)}
 .divider-line span{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em}
-
-/* FORM */
 .fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.9rem}
 .fg label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em}
 .fg label .req{color:var(--red);margin-left:2px}
@@ -52,8 +44,6 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 .err-msg{font-size:.75rem;color:var(--red);min-height:1rem;margin-top:.3rem}
 .ok-msg{font-size:.75rem;color:var(--green);min-height:1rem;margin-top:.3rem}
-
-/* BUTTONS */
 .btn-primary{width:100%;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.85rem;border:none;cursor:pointer;transition:opacity .2s;margin-top:.3rem}
 .btn-primary:hover{opacity:.85}
 .btn-primary:disabled{opacity:.4;cursor:not-allowed}
@@ -66,8 +56,6 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
 .spinner.light{border-color:rgba(0,255,65,.2);border-top-color:var(--green)}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ACCOUNT SECTION */
 #account-section{display:none}
 .account-layout{display:grid;grid-template-columns:220px 1fr;gap:1.5rem;align-items:start}
 .account-sidebar{background:var(--bg2);border:1px solid var(--border);position:sticky;top:80px}
@@ -86,21 +74,15 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .acc-sidebar-footer{padding:.8rem 1rem;border-top:1px solid var(--border)}
 .btn-signout{width:100%;background:none;border:1px solid var(--border);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:.08em;padding:.45rem;cursor:pointer;transition:all .2s}
 .btn-signout:hover{border-color:var(--red);color:var(--red)}
-
-/* PANELS */
 .acc-main{min-width:0}
 .acc-panel{display:none}.acc-panel.active{display:block}
 .panel-hdr{margin-bottom:1.2rem}
 .panel-title{font-family:'Orbitron',monospace;font-size:1rem;color:var(--white);margin-bottom:.3rem}
 .panel-sub{font-size:.82rem;color:var(--muted)}
-
-/* CARDS */
 .card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1.2rem}
 .card-hdr{background:var(--dim);padding:.75rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
 .card-ht{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--green);letter-spacing:.12em}
 .card-body{padding:1.2rem}
-
-/* ORDER CARDS */
 .order-card{background:var(--bg3);border:1px solid var(--border);padding:1rem;margin-bottom:.8rem;transition:border-color .2s}
 .order-card:hover{border-color:var(--green3)}
 .order-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem}
@@ -116,8 +98,6 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .sb-shipped{color:#80CBC4;border-color:rgba(128,203,196,.3);background:rgba(128,203,196,.07)}
 .sb-completed{color:var(--green2);border-color:rgba(0,200,50,.3);background:rgba(0,200,50,.07)}
 .sb-cancelled{color:var(--red);border-color:rgba(255,68,68,.3);background:rgba(255,68,68,.07)}
-
-/* ADDRESS CARDS */
 .addr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
 .addr-card{background:var(--bg3);border:1px solid var(--border);padding:1rem;position:relative;transition:border-color .2s}
 .addr-card.default{border-color:var(--green3)}
@@ -130,8 +110,6 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .addr-new:hover{border-color:var(--green3)}
 .addr-new-icon{font-size:1.5rem;color:var(--muted)}
 .addr-new-text{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted);letter-spacing:.08em}
-
-/* CONNECT CARDS */
 .connect-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 .connect-card{background:var(--bg3);border:1px solid var(--border);padding:1rem;display:flex;align-items:center;gap:1rem}
 .connect-icon{font-size:1.5rem;flex-shrink:0}
@@ -139,8 +117,6 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .connect-name{font-size:.88rem;color:var(--white);font-weight:500;margin-bottom:.2rem}
 .connect-status{font-size:.72rem;color:var(--muted)}
 .connect-status.linked{color:var(--green)}
-
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal-box{background:var(--bg2);border:1px solid var(--green3);width:100%;max-width:460px;margin:1rem}
@@ -149,26 +125,21 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .modal-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;line-height:1}
 .modal-close:hover{color:var(--red)}
 .modal-body{padding:1.4rem}
-
-/* EMPTY STATE */
 .empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
 .empty-icon{font-size:2.5rem;margin-bottom:.8rem;opacity:.4}
 .empty-text{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.1em;margin-bottom:1rem}
-
-/* FOOTER */
 footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
 .fi{max-width:var(--max);margin:0 auto;text-align:center}
 .flogo{font-family:'Orbitron',monospace;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
-.flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks{display:flex;justify-content:center;gap:1.5rem;margin-bottom:.6rem;flex-wrap:wrap}
 .flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
+.flinks2{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks2 a{font-size:.75rem;color:var(--muted);transition:color .2s}.flinks2 a:hover{color:var(--green)}
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
-
-/* TOAST */
 .toast{position:fixed;bottom:6rem;right:2rem;background:var(--bg2);border:1px solid var(--green3);color:var(--white);padding:.8rem 1.2rem;font-size:.82rem;z-index:1000;transform:translateY(80px);opacity:0;transition:all .3s;max-width:300px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.error{border-color:var(--red);color:var(--red)}
-
 @media(max-width:900px){.account-layout{grid-template-columns:1fr}.account-sidebar{position:static}.addr-grid{grid-template-columns:1fr}.connect-grid{grid-template-columns:1fr}.frow{grid-template-columns:1fr}}
 @media(max-width:768px){.nav-links{display:none}.auth-tabs{max-width:100%}.oauth-btns{flex-direction:column}}
 </style>
@@ -184,6 +155,7 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
     <li><a href="index.html#capabilities">Capabilities</a></li>
     <li><a href="index.html#process">Process</a></li>
     <li><a href="index.html#contact">Contact</a></li>
+    <li><a href="blog.html">Blog</a></li>
     <li><a href="track.html">Track Order</a></li>
   </ul>
   <a href="quote.html" class="nav-cta">GET QUOTE</a>
@@ -191,7 +163,7 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
 
 <div class="page-wrap">
 
-  <!-- ══════════ AUTH SECTION ══════════ -->
+  <!-- AUTH SECTION -->
   <div id="auth-section">
     <div style="margin-bottom:1.5rem">
       <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.4rem">// MY ACCOUNT</div>
@@ -225,7 +197,42 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
           <div class="err-msg" id="login-err"></div>
           <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="dark" style="margin-bottom:.8rem"></div>
           <button class="btn-primary" id="login-btn" onclick="doLogin()">SIGN IN →</button>
-          <p style="font-size:.75rem;color:var(--muted);margin-top:1rem;text-align:center">Don't have an account? <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('register')">Register free →</span></p>
+          <p style="font-size:.75rem;color:var(--muted);margin-top:.8rem;text-align:center">
+            <span style="color:var(--green);cursor:pointer" onclick="showForgotPassword()">Forgot password?</span>
+            &nbsp;·&nbsp;
+            Don't have an account? <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('register')">Register free →</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div class="auth-panel" id="auth-panel-forgot">
+      <div class="auth-card">
+        <div class="auth-hdr"><span class="auth-ht">RESET PASSWORD</span></div>
+        <div class="auth-body">
+          <p style="font-size:.83rem;color:var(--muted);margin-bottom:1rem">Enter your email address and we'll send you a link to reset your password.</p>
+          <div class="fg"><label>EMAIL <span class="req">*</span></label><input type="email" id="forgot-email" placeholder="john@company.com"></div>
+          <div class="err-msg" id="forgot-err"></div>
+          <div class="ok-msg" id="forgot-ok"></div>
+          <button class="btn-primary" id="forgot-btn" onclick="doForgotPassword()">SEND RESET LINK →</button>
+          <p style="font-size:.75rem;color:var(--muted);margin-top:.8rem;text-align:center">
+            <span style="color:var(--green);cursor:pointer" onclick="switchAuthTab('login')">← Back to Sign In</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESET PASSWORD -->
+    <div class="auth-panel" id="auth-panel-reset">
+      <div class="auth-card">
+        <div class="auth-hdr"><span class="auth-ht">SET NEW PASSWORD</span></div>
+        <div class="auth-body">
+          <div class="fg"><label>NEW PASSWORD <span class="req">*</span></label><input type="password" id="reset-pwd" placeholder="Min 8 characters"></div>
+          <div class="fg"><label>CONFIRM PASSWORD <span class="req">*</span></label><input type="password" id="reset-pwd-confirm" placeholder="Repeat new password"></div>
+          <div class="err-msg" id="reset-err"></div>
+          <div class="ok-msg" id="reset-ok"></div>
+          <button class="btn-primary" id="reset-btn" onclick="doResetPassword()">SET NEW PASSWORD →</button>
         </div>
       </div>
     </div>
@@ -241,7 +248,7 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
               Sign up with Google
             </button>
             <button class="oauth-btn github" onclick="oauthLogin('github')">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text)"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--text)"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
               Sign up with GitHub
             </button>
           </div>
@@ -263,11 +270,9 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
     </div>
   </div>
 
-  <!-- ══════════ ACCOUNT SECTION ══════════ -->
+  <!-- ACCOUNT SECTION -->
   <div id="account-section">
     <div class="account-layout">
-
-      <!-- SIDEBAR -->
       <div class="account-sidebar">
         <div class="acc-user">
           <div class="acc-avatar" id="acc-avatar">?</div>
@@ -286,16 +291,9 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
           <button class="btn-signout" onclick="doSignout()">[ SIGN OUT ]</button>
         </div>
       </div>
-
-      <!-- MAIN PANELS -->
       <div class="acc-main">
-
-        <!-- PROFILE -->
         <div class="acc-panel active" id="panel-profile">
-          <div class="panel-hdr">
-            <div class="panel-title">Profile</div>
-            <div class="panel-sub">Update your personal information</div>
-          </div>
+          <div class="panel-hdr"><div class="panel-title">Profile</div><div class="panel-sub">Update your personal information</div></div>
           <div class="card">
             <div class="card-hdr"><span class="card-ht">// PERSONAL INFORMATION</span></div>
             <div class="card-body">
@@ -303,41 +301,24 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
                 <div class="fg"><label>FULL NAME</label><input type="text" id="p-name" placeholder="John Smith"></div>
                 <div class="fg"><label>COMPANY</label><input type="text" id="p-company" placeholder="Your Company Ltd"></div>
               </div>
-              <div class="fg"><label>EMAIL</label><input type="email" id="p-email" disabled style="opacity:.5;cursor:not-allowed"><span class="hint">Email cannot be changed. Contact support if needed.</span></div>
-              <div class="fg"><label>WHATSAPP</label><input type="text" id="p-whatsapp" placeholder="+1 234 567 8901"><span class="hint">Include country code. Used for order updates.</span></div>
+              <div class="fg"><label>EMAIL</label><input type="email" id="p-email" disabled style="opacity:.5;cursor:not-allowed"><span class="hint">Email cannot be changed.</span></div>
+              <div class="fg"><label>WHATSAPP</label><input type="text" id="p-whatsapp" placeholder="+1 234 567 8901"><span class="hint">Include country code.</span></div>
               <div class="ok-msg" id="profile-ok"></div>
               <div class="err-msg" id="profile-err"></div>
               <button class="btn-outline" onclick="saveProfile()">💾 SAVE CHANGES</button>
             </div>
           </div>
         </div>
-
-        <!-- ORDERS -->
         <div class="acc-panel" id="panel-orders">
-          <div class="panel-hdr">
-            <div class="panel-title">My Orders</div>
-            <div class="panel-sub">View all your past and current orders</div>
-          </div>
+          <div class="panel-hdr"><div class="panel-title">My Orders</div><div class="panel-sub">View all your past and current orders</div></div>
           <div id="orders-list"><div style="text-align:center;padding:2rem"><span class="spinner light"></span></div></div>
         </div>
-
-        <!-- ADDRESSES -->
         <div class="acc-panel" id="panel-addresses">
-          <div class="panel-hdr">
-            <div class="panel-title">Shipping Addresses</div>
-            <div class="panel-sub">Manage your saved shipping addresses</div>
-          </div>
-          <div class="addr-grid" id="addr-grid">
-            <div style="text-align:center;padding:2rem;grid-column:1/-1"><span class="spinner light"></span></div>
-          </div>
+          <div class="panel-hdr"><div class="panel-title">Shipping Addresses</div><div class="panel-sub">Manage your saved shipping addresses</div></div>
+          <div class="addr-grid" id="addr-grid"><div style="text-align:center;padding:2rem;grid-column:1/-1"><span class="spinner light"></span></div></div>
         </div>
-
-        <!-- SECURITY -->
         <div class="acc-panel" id="panel-security">
-          <div class="panel-hdr">
-            <div class="panel-title">Security</div>
-            <div class="panel-sub">Manage your password and account security</div>
-          </div>
+          <div class="panel-hdr"><div class="panel-title">Security</div><div class="panel-sub">Manage your password and account security</div></div>
           <div class="card">
             <div class="card-hdr"><span class="card-ht">// CHANGE PASSWORD</span></div>
             <div class="card-body">
@@ -350,18 +331,10 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
             </div>
           </div>
         </div>
-
-        <!-- CONNECTED APPS -->
         <div class="acc-panel" id="panel-connected">
-          <div class="panel-hdr">
-            <div class="panel-title">Connected Apps</div>
-            <div class="panel-sub">Manage your social login connections</div>
-          </div>
-          <div class="connect-grid" id="connect-grid">
-            <div style="text-align:center;padding:2rem;grid-column:1/-1"><span class="spinner light"></span></div>
-          </div>
+          <div class="panel-hdr"><div class="panel-title">Connected Apps</div><div class="panel-sub">Manage your social login connections</div></div>
+          <div class="connect-grid" id="connect-grid"><div style="text-align:center;padding:2rem;grid-column:1/-1"><span class="spinner light"></span></div></div>
         </div>
-
       </div>
     </div>
   </div>
@@ -401,8 +374,11 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
     <div class="flogo">▶ PCBAForge</div>
     <div class="flinks">
       <a href="index.html#services">Services</a><a href="index.html#quote">Get Quote</a>
-      <a href="index.html#capabilities">Capabilities</a><a href="quote.html">Submit Inquiry</a>
-      <a href="track.html">Track Order</a>
+      <a href="index.html#capabilities">Capabilities</a><a href="blog.html">Blog</a>
+      <a href="quote.html">Submit Inquiry</a><a href="track.html">Track Order</a>
+    </div>
+    <div class="flinks2">
+      <a href="privacy.html">Privacy Policy</a><a href="shipping.html">Shipping Policy</a><a href="terms.html">Terms of Service</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
@@ -417,39 +393,29 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
 var token    = localStorage.getItem('cc_token');
 var userData = null;
 var cfg      = {};
+var resetToken = null;
 
-// ── 公开配置 ────────────────────────────────────────
 fetch('/api/settings/public').then(r=>r.json()).then(c=>{
   cfg = c;
   if(c.whatsapp_number){
     const wa = c.whatsapp_number.replace(/[^0-9]/g,'');
-    document.querySelectorAll('[href*="wa.me"]').forEach(el=>{
-      el.href = el.href.replace('YOUR_NUMBER', wa);
-    });
+    document.querySelectorAll('[href*="wa.me"]').forEach(el=>{ el.href = el.href.replace('YOUR_NUMBER', wa); });
   }
-  // OAuth 按钮显示控制
   if(c.google_oauth_enabled==='true' || c.github_oauth_enabled==='true'){
     ['login-oauth-btns','reg-oauth-btns','login-divider','reg-divider'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.style.display='';
+      const el=document.getElementById(id); if(el) el.style.display='';
     });
-    if(c.google_oauth_enabled!=='true'){
-      document.querySelectorAll('.oauth-btn.google').forEach(el=>el.style.display='none');
-    }
-    if(c.github_oauth_enabled!=='true'){
-      document.querySelectorAll('.oauth-btn.github').forEach(el=>el.style.display='none');
-    }
+    if(c.google_oauth_enabled!=='true') document.querySelectorAll('.oauth-btn.google').forEach(el=>el.style.display='none');
+    if(c.github_oauth_enabled!=='true') document.querySelectorAll('.oauth-btn.github').forEach(el=>el.style.display='none');
   }
 }).catch(()=>{});
 
-// ── TOAST ────────────────────────────────────────────
 function toast(msg, type=''){
   const el=document.getElementById('toast');
   el.textContent=msg; el.className='toast'+(type?' '+type:'')+' show';
   setTimeout(()=>el.classList.remove('show'),3000);
 }
 
-// ── API HELPER ───────────────────────────────────────
 async function api(url, opts={}){
   const headers={'Content-Type':'application/json'};
   if(token) headers['Authorization']='Bearer '+token;
@@ -459,15 +425,21 @@ async function api(url, opts={}){
   return d;
 }
 
-// ── AUTH TAB ─────────────────────────────────────────
 function switchAuthTab(tab){
   document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-  document.getElementById('auth-panel-'+tab).classList.add('active');
+  const tabEl = document.querySelector(`[data-tab="${tab}"]`);
+  if(tabEl) tabEl.classList.add('active');
+  const panel = document.getElementById('auth-panel-'+tab);
+  if(panel) panel.classList.add('active');
 }
 
-// ── LOGIN ─────────────────────────────────────────────
+function showForgotPassword(){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('auth-panel-forgot').classList.add('active');
+}
+
 async function doLogin(){
   const email=document.getElementById('login-email').value;
   const pwd  =document.getElementById('login-pwd').value;
@@ -476,9 +448,9 @@ async function doLogin(){
   errEl.textContent='';
   if(!email||!pwd){errEl.textContent='Please fill in all fields';return;}
   const cfToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
-    btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SIGNING IN...';
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SIGNING IN...';
   try{
-    const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password:pwd})});
+    const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password:pwd,cf_turnstile:cfToken})});
     token=d.token; localStorage.setItem('cc_token',token);
     await loadAccount();
   }catch(e){
@@ -487,7 +459,46 @@ async function doLogin(){
   }
 }
 
-// ── REGISTER ──────────────────────────────────────────
+async function doForgotPassword(){
+  const email=document.getElementById('forgot-email').value.trim();
+  const errEl=document.getElementById('forgot-err');
+  const okEl =document.getElementById('forgot-ok');
+  const btn  =document.getElementById('forgot-btn');
+  errEl.textContent=''; okEl.textContent='';
+  if(!email){errEl.textContent='Please enter your email address';return;}
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SENDING...';
+  try{
+    await api('/api/auth/forgot-password',{method:'POST',body:JSON.stringify({email})});
+    okEl.textContent='✓ If this email is registered, a reset link has been sent. Check your inbox.';
+    btn.disabled=false; btn.textContent='SEND RESET LINK →';
+  }catch(e){
+    errEl.textContent=e.message;
+    btn.disabled=false; btn.textContent='SEND RESET LINK →';
+  }
+}
+
+async function doResetPassword(){
+  const pwd    =document.getElementById('reset-pwd').value;
+  const confirm=document.getElementById('reset-pwd-confirm').value;
+  const errEl  =document.getElementById('reset-err');
+  const okEl   =document.getElementById('reset-ok');
+  const btn    =document.getElementById('reset-btn');
+  errEl.textContent=''; okEl.textContent='';
+  if(!pwd||!confirm){errEl.textContent='Please fill in both fields';return;}
+  if(pwd!==confirm){errEl.textContent='Passwords do not match';return;}
+  if(pwd.length<8){errEl.textContent='Password must be at least 8 characters';return;}
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SAVING...';
+  try{
+    await api('/api/auth/reset-password',{method:'POST',body:JSON.stringify({token:resetToken,password:pwd})});
+    okEl.textContent='✓ Password reset successfully! You can now sign in.';
+    btn.disabled=false; btn.textContent='SET NEW PASSWORD →';
+    setTimeout(()=>switchAuthTab('login'), 2000);
+  }catch(e){
+    errEl.textContent=e.message;
+    btn.disabled=false; btn.textContent='SET NEW PASSWORD →';
+  }
+}
+
 async function doRegister(){
   const cfToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
   const name    =document.getElementById('reg-name').value;
@@ -503,11 +514,10 @@ async function doRegister(){
   if(pwd.length<8){errEl.textContent='Password must be at least 8 characters';return;}
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>CREATING ACCOUNT...';
   try{
-    await api('/api/auth/register',{method:'POST',body:JSON.stringify({name,email,password:pwd})});
-    // 更新 whatsapp/company
+    await api('/api/auth/register',{method:'POST',body:JSON.stringify({name,email,password:pwd,cf_turnstile:cfToken})});
     if(whatsapp||company){
       try{
-        const loginD=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password:pwd})});
+        const loginD=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password:pwd,cf_turnstile:cfToken})});
         token=loginD.token; localStorage.setItem('cc_token',token);
         await api('/api/me',{method:'PUT',body:JSON.stringify({whatsapp,company})});
         await loadAccount(); return;
@@ -521,57 +531,50 @@ async function doRegister(){
   }
 }
 
-// ── OAUTH ────────────────────────────────────────────
-function oauthLogin(provider){
-  toast('OAuth login coming soon. Please use email login for now.','error');
-}
+function oauthLogin(provider){ toast('OAuth login coming soon. Please use email login for now.','error'); }
 
-// ── LOAD ACCOUNT ────────────────────────────────────
 async function loadAccount(){
   try{
     userData=await api('/api/me');
     token=localStorage.getItem('cc_token');
-    // 更新侧边栏
     document.getElementById('acc-avatar').textContent=(userData.name||'?')[0].toUpperCase();
     document.getElementById('acc-name').textContent=userData.name||'—';
     document.getElementById('acc-email').textContent=userData.email||'—';
     const typeEl=document.getElementById('acc-type');
     typeEl.textContent=userData.customer_type?.toUpperCase()||'NORMAL';
     typeEl.className='acc-type '+(userData.customer_type||'normal');
-    // 填入 profile 表单
     document.getElementById('p-name').value=userData.name||'';
     document.getElementById('p-email').value=userData.email||'';
     document.getElementById('p-company').value=userData.company||'';
     document.getElementById('p-whatsapp').value=userData.whatsapp||'';
-    // 显示/隐藏
     document.getElementById('auth-section').style.display='none';
     document.getElementById('account-section').style.display='block';
-    // URL 参数
     const params=new URLSearchParams(location.search);
     if(params.get('tab')) switchPanel(params.get('tab'));
   }catch(e){
-    token=null; localStorage.removeItem('cc_token');
-    showAuth();
+    token=null; localStorage.removeItem('cc_token'); showAuth();
   }
 }
 
 function showAuth(){
   document.getElementById('auth-section').style.display='block';
   document.getElementById('account-section').style.display='none';
-  // URL 参数
   const params=new URLSearchParams(location.search);
   if(params.get('tab')==='register') switchAuthTab('register');
+  // 处理重置密码 token
+  const rt = params.get('reset_token');
+  if(rt){
+    resetToken = rt;
+    document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('auth-panel-reset').classList.add('active');
+  }
 }
 
-// ── SIGN OUT ─────────────────────────────────────────
 function doSignout(){
-  token=null; userData=null;
-  localStorage.removeItem('cc_token');
-  showAuth();
-  toast('Signed out');
+  token=null; userData=null; localStorage.removeItem('cc_token'); showAuth(); toast('Signed out');
 }
 
-// ── PANEL SWITCH ─────────────────────────────────────
 function switchPanel(panel){
   document.querySelectorAll('.acc-nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelectorAll('.acc-panel').forEach(p=>p.classList.remove('active'));
@@ -583,17 +586,12 @@ function switchPanel(panel){
   if(loaders[panel]) loaders[panel]();
 }
 
-// ── PROFILE ──────────────────────────────────────────
 async function saveProfile(){
-  const okEl =document.getElementById('profile-ok');
+  const okEl=document.getElementById('profile-ok');
   const errEl=document.getElementById('profile-err');
   okEl.textContent=''; errEl.textContent='';
   try{
-    await api('/api/me',{method:'PUT',body:JSON.stringify({
-      name:    document.getElementById('p-name').value,
-      company: document.getElementById('p-company').value,
-      whatsapp:document.getElementById('p-whatsapp').value
-    })});
+    await api('/api/me',{method:'PUT',body:JSON.stringify({name:document.getElementById('p-name').value,company:document.getElementById('p-company').value,whatsapp:document.getElementById('p-whatsapp').value})});
     okEl.textContent='✓ Profile updated';
     userData.name=document.getElementById('p-name').value;
     document.getElementById('acc-name').textContent=userData.name;
@@ -602,13 +600,12 @@ async function saveProfile(){
   }catch(e){ errEl.textContent=e.message; }
 }
 
-// ── PASSWORD ─────────────────────────────────────────
 async function changePassword(){
-  const cur    =document.getElementById('pwd-current').value;
-  const newPwd =document.getElementById('pwd-new').value;
+  const cur=document.getElementById('pwd-current').value;
+  const newPwd=document.getElementById('pwd-new').value;
   const confirm=document.getElementById('pwd-confirm').value;
-  const okEl   =document.getElementById('pwd-ok');
-  const errEl  =document.getElementById('pwd-err');
+  const okEl=document.getElementById('pwd-ok');
+  const errEl=document.getElementById('pwd-err');
   okEl.textContent=''; errEl.textContent='';
   if(newPwd!==confirm){errEl.textContent='New passwords do not match';return;}
   if(newPwd.length<8){errEl.textContent='Password must be at least 8 characters';return;}
@@ -622,7 +619,6 @@ async function changePassword(){
   }catch(e){ errEl.textContent=e.message; }
 }
 
-// ── ORDERS ───────────────────────────────────────────
 async function loadOrders(){
   const el=document.getElementById('orders-list');
   el.innerHTML='<div style="text-align:center;padding:2rem"><span class="spinner light"></span></div>';
@@ -637,10 +633,7 @@ async function loadOrders(){
     el.innerHTML=orders.map(o=>`
       <div class="order-card">
         <div class="order-card-top">
-          <div>
-            <div class="order-no">${o.order_no}</div>
-            <div class="order-date">${new Date(o.created_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</div>
-          </div>
+          <div><div class="order-no">${o.order_no}</div><div class="order-date">${new Date(o.created_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}</div></div>
           <span class="status-badge ${statusClass[o.status]||'sb-pending'}">${(o.status||'pending').toUpperCase()}</span>
         </div>
         <div class="order-meta">
@@ -656,7 +649,6 @@ async function loadOrders(){
   }catch(e){ el.innerHTML=`<div class="empty"><div class="empty-text">Failed to load orders</div></div>`; }
 }
 
-// ── ADDRESSES ────────────────────────────────────────
 async function loadAddresses(){
   const grid=document.getElementById('addr-grid');
   grid.innerHTML='<div style="text-align:center;padding:2rem;grid-column:1/-1"><span class="spinner light"></span></div>';
@@ -666,25 +658,15 @@ async function loadAddresses(){
       <div class="addr-card ${a.is_default?'default':''}">
         <div class="addr-label">${a.label}${a.is_default?'<span class="addr-default-badge">DEFAULT</span>':''}</div>
         <div class="addr-name">${a.recipient}</div>
-        <div class="addr-detail">
-          ${a.phone?a.phone+'<br>':''}
-          ${a.address_line}<br>
-          ${a.city}, ${a.country}
-        </div>
+        <div class="addr-detail">${a.phone?a.phone+'<br>':''}${a.address_line}<br>${a.city}, ${a.country}</div>
         <div class="addr-actions">
           <button class="btn-outline" style="font-size:.68rem;padding:.3rem .7rem" onclick="editAddress('${a.id}','${a.label}','${a.recipient}','${a.phone||''}','${a.address_line}','${a.city}','${a.country}',${a.is_default})">EDIT</button>
           ${!a.is_default?`<button class="btn-amber" onclick="setDefaultAddr('${a.id}')">SET DEFAULT</button>`:''}
           <button class="btn-red" onclick="deleteAddr('${a.id}')">DELETE</button>
         </div>
       </div>`).join('');
-    grid.innerHTML=cards+`
-      <div class="addr-new" onclick="openAddrModal()">
-        <div class="addr-new-icon">＋</div>
-        <div class="addr-new-text">ADD NEW ADDRESS</div>
-      </div>`;
-  }catch(e){
-    grid.innerHTML=`<div style="grid-column:1/-1"><div class="empty"><div class="empty-text">Failed to load addresses</div></div></div>`;
-  }
+    grid.innerHTML=cards+`<div class="addr-new" onclick="openAddrModal()"><div class="addr-new-icon">＋</div><div class="addr-new-text">ADD NEW ADDRESS</div></div>`;
+  }catch(e){ grid.innerHTML=`<div style="grid-column:1/-1"><div class="empty"><div class="empty-text">Failed to load addresses</div></div></div>`; }
 }
 
 function openAddrModal(id=''){
@@ -693,8 +675,7 @@ function openAddrModal(id=''){
   document.getElementById('addr-err').textContent='';
   if(!id){
     ['addr-label','addr-recipient','addr-phone','addr-country','addr-line','addr-city'].forEach(i=>{
-      const el=document.getElementById(i);
-      if(el) el.value=i==='addr-country'?'US':i==='addr-label'?'Home':'';
+      const el=document.getElementById(i); if(el) el.value=i==='addr-country'?'US':i==='addr-label'?'Home':'';
     });
     document.getElementById('addr-default').checked=false;
   }
@@ -712,53 +693,29 @@ function editAddress(id,label,recipient,phone,address_line,city,country,is_defau
   document.getElementById('addr-default').checked=is_default;
 }
 
-function closeAddrModal(){
-  document.getElementById('addr-modal').classList.remove('show');
-}
+function closeAddrModal(){ document.getElementById('addr-modal').classList.remove('show'); }
 
 async function saveAddress(){
   const id=document.getElementById('addr-editing-id').value;
-  const body={
-    label:      document.getElementById('addr-label').value,
-    recipient:  document.getElementById('addr-recipient').value,
-    phone:      document.getElementById('addr-phone').value,
-    address_line:document.getElementById('addr-line').value,
-    city:       document.getElementById('addr-city').value,
-    country:    document.getElementById('addr-country').value,
-    is_default: document.getElementById('addr-default').checked
-  };
+  const body={label:document.getElementById('addr-label').value,recipient:document.getElementById('addr-recipient').value,phone:document.getElementById('addr-phone').value,address_line:document.getElementById('addr-line').value,city:document.getElementById('addr-city').value,country:document.getElementById('addr-country').value,is_default:document.getElementById('addr-default').checked};
   const errEl=document.getElementById('addr-err');
   if(!body.recipient||!body.address_line||!body.city){errEl.textContent='Recipient, address and city are required';return;}
   try{
-    if(id){
-      await api(`/api/me/addresses/${id}`,{method:'PUT',body:JSON.stringify(body)});
-    }else{
-      await api('/api/me/addresses',{method:'POST',body:JSON.stringify(body)});
-    }
-    closeAddrModal();
-    toast('✅ Address saved');
-    loadAddresses();
+    if(id){ await api(`/api/me/addresses/${id}`,{method:'PUT',body:JSON.stringify(body)}); }
+    else{ await api('/api/me/addresses',{method:'POST',body:JSON.stringify(body)}); }
+    closeAddrModal(); toast('✅ Address saved'); loadAddresses();
   }catch(e){ errEl.textContent=e.message; }
 }
 
 async function deleteAddr(id){
   if(!confirm('Delete this address?')) return;
-  try{
-    await api(`/api/me/addresses/${id}`,{method:'DELETE'});
-    toast('Address deleted');
-    loadAddresses();
-  }catch(e){ toast(e.message,'error'); }
+  try{ await api(`/api/me/addresses/${id}`,{method:'DELETE'}); toast('Address deleted'); loadAddresses(); }catch(e){ toast(e.message,'error'); }
 }
 
 async function setDefaultAddr(id){
-  try{
-    await api(`/api/me/addresses/${id}`,{method:'PUT',body:JSON.stringify({is_default:true})});
-    toast('✅ Default address updated');
-    loadAddresses();
-  }catch(e){ toast(e.message,'error'); }
+  try{ await api(`/api/me/addresses/${id}`,{method:'PUT',body:JSON.stringify({is_default:true})}); toast('✅ Default address updated'); loadAddresses(); }catch(e){ toast(e.message,'error'); }
 }
 
-// ── CONNECTED APPS ───────────────────────────────────
 async function loadConnected(){
   const grid=document.getElementById('connect-grid');
   grid.innerHTML='<div style="text-align:center;padding:2rem;grid-column:1/-1"><span class="spinner light"></span></div>';
@@ -766,40 +723,21 @@ async function loadConnected(){
     const me=await api('/api/me');
     grid.innerHTML=`
       <div class="connect-card">
-        <div class="connect-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        </div>
-        <div class="connect-info">
-          <div class="connect-name">Google</div>
-          <div class="connect-status ${me.google_linked?'linked':''}">${me.google_linked?'Connected':'Not connected'}</div>
-        </div>
-        ${me.google_linked?'<button class="btn-red" onclick="toast(\'Contact support to unlink Google\',\'error\')">Unlink</button>':'<button class="btn-outline" onclick="oauthLogin(\'google\')">Connect</button>'}
+        <div class="connect-icon"><svg width="28" height="28" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg></div>
+        <div class="connect-info"><div class="connect-name">Google</div><div class="connect-status ${me.google_linked?'linked':''}">${me.google_linked?'Connected':'Not connected'}</div></div>
+        ${me.google_linked?'<button class="btn-red">Unlink</button>':'<button class="btn-outline" onclick="oauthLogin(\'google\')">Connect</button>'}
       </div>
       <div class="connect-card">
-        <div class="connect-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="var(--text)"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-        </div>
-        <div class="connect-info">
-          <div class="connect-name">GitHub</div>
-          <div class="connect-status ${me.github_linked?'linked':''}">${me.github_linked?'Connected':'Not connected'}</div>
-        </div>
-        ${me.github_linked?'<button class="btn-red" onclick="toast(\'Contact support to unlink GitHub\',\'error\')">Unlink</button>':'<button class="btn-outline" onclick="oauthLogin(\'github\')">Connect</button>'}
+        <div class="connect-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="var(--text)"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg></div>
+        <div class="connect-info"><div class="connect-name">GitHub</div><div class="connect-status ${me.github_linked?'linked':''}">${me.github_linked?'Connected':'Not connected'}</div></div>
+        ${me.github_linked?'<button class="btn-red">Unlink</button>':'<button class="btn-outline" onclick="oauthLogin(\'github\')">Connect</button>'}
       </div>`;
-  }catch(e){
-    grid.innerHTML=`<div style="grid-column:1/-1"><div class="empty"><div class="empty-text">Failed to load</div></div></div>`;
-  }
+  }catch(e){ grid.innerHTML=`<div style="grid-column:1/-1"><div class="empty"><div class="empty-text">Failed to load</div></div></div>`; }
 }
 
-// ── INIT ────────────────────────────────────────────
-document.getElementById('addr-modal').addEventListener('click', function(e){
-  if(e.target===this) closeAddrModal();
-});
+document.getElementById('addr-modal').addEventListener('click', function(e){ if(e.target===this) closeAddrModal(); });
 
-if(token){
-  loadAccount();
-}else{
-  showAuth();
-}
+if(token){ loadAccount(); }else{ showAuth(); }
 </script>
 </body>
 </html>
