@@ -8,7 +8,7 @@
 
 ## 📌 当前阶段
 
-🟢 **Phase 5 支付接入完成！下一步：Phase 6 本地同步工具 或 继续 Phase 7 优化**
+🟢 **Apple Pay 修复完成！下一步：Phase 6 本地同步工具 或 继续 Phase 7 优化**
 
 ---
 
@@ -30,7 +30,7 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 
 ---
 
-## ✅ Phase 5 — PayPal 支付接入（完成）
+## ✅ Phase 5 — PayPal + Apple Pay 支付接入（完成）
 
 | # | 任务 | 状态 | 备注 |
 |---|------|------|------|
@@ -41,6 +41,7 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 | 5.5 | 付款确认邮件 | ✅ 完成 | 客户+管理员双向通知 |
 | 5.6 | 后台 PayPal 配置 | ✅ 完成 | Client ID/Secret 加密存储，支持切换 live/sandbox |
 | 5.7 | PingPong 支付 | ❌ 不做 | 只做 PayPal |
+| 5.8 | Apple Pay 修复 | ✅ 完成 | PayPal SDK enable-funding=applepay，独立按钮渲染，域名验证路由 |
 
 ---
 
@@ -140,6 +141,16 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 - 后台 Settings 加 PayPal 配置区（Client ID/Secret 加密，live/sandbox 切换）
 - 完整业务闭环：询价→报价→付款→生产 全部打通
 
+### 2026-05-28（深夜）
+- **Apple Pay 修复完成**
+- track.html：PayPal SDK URL 加入 `enable-funding=applepay,venmo`
+- 新增独立 Apple Pay 按钮容器 `#applepay-btn-container`
+- 用 `paypal.Buttons({ fundingSource: paypal.FUNDING.APPLEPAY })` 单独渲染
+- `applePayBtn.isEligible()` 检测设备支持性，不支持时静默隐藏
+- PayPal/Apple Pay 共用 `createPayPalOrder()` 和 `capturePayPalOrder()` 函数
+- server.js：新增 `/.well-known/apple-developer-merchantid-domain-association` 路由
+  - 支持从文件系统、环境变量 `APPLE_PAY_DOMAIN_ASSOCIATION`、DB settings 三路读取
+
 ---
 
 ## 🔑 状态图例
@@ -152,4 +163,13 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 | ❌ | 搁置 / 取消 |
 
 ---
+
+## ⚙️ Apple Pay 激活步骤（部署后执行）
+
+1. 登录 [PayPal Developer Dashboard](https://developer.paypal.com) → 应用 PCBAForge → 启用 Apple Pay
+2. 下载 Apple Pay 域名验证文件
+3. 将文件放于 VPS：`public/.well-known/apple-developer-merchantid-domain-association`
+4. 在 PayPal 后台注册域名 `pcbaforge.com` → Apple Pay 域名验证
+5. 验证通过后 Apple Pay 按钮自动在 Safari/iOS 用户端显示
+
 *每次开工前更新当前阶段，完成一项打 ✅，工作日志按日期追加。*
