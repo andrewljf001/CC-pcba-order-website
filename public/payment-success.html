@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Successful — PCBAForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:700px}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden;min-height:100vh;display:flex;flex-direction:column}
+a{color:inherit;text-decoration:none}
+nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
+.nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
+.ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
+.nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
+.wrap{max-width:var(--max);margin:0 auto;padding:4rem 5%;flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+/* Success icon */
+.success-icon{width:90px;height:90px;background:rgba(0,255,65,.1);border:2px solid var(--green3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 2rem;animation:popIn .5s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.check{font-size:2.5rem}
+.slabel{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
+.stitle{font-family:'Orbitron',monospace;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.75rem}
+.sdesc{font-size:.9rem;color:var(--muted);margin-bottom:2.5rem;line-height:1.7}
+/* Order card */
+.order-card{background:var(--bg2);border:1px solid var(--green3);border-top:3px solid var(--green);padding:1.5rem;width:100%;margin-bottom:2rem;text-align:left}
+.oc-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(30,58,30,.5);font-size:.88rem}
+.oc-row:last-child{border-bottom:none}
+.oc-label{color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.08em}
+.oc-value{color:var(--white);font-weight:500}
+.oc-value.green{color:var(--green);font-family:'Orbitron',monospace}
+.oc-value.amber{color:var(--amber)}
+/* Timeline */
+.timeline{width:100%;margin-bottom:2.5rem;text-align:left}
+.tl-title{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.15em;margin-bottom:1rem}
+.tl-item{display:flex;gap:1rem;margin-bottom:.8rem;align-items:flex-start}
+.tl-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;margin-top:.1rem}
+.tl-dot.done{background:rgba(0,255,65,.15);border:1px solid var(--green3)}
+.tl-dot.pending{background:var(--dim);border:1px solid var(--border)}
+.tl-info{flex:1}
+.tl-label{font-size:.85rem;color:var(--white);font-weight:500;margin-bottom:.1rem}
+.tl-sub{font-size:.75rem;color:var(--muted)}
+/* Buttons */
+.btn-group{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.btn-green{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:.7rem 1.6rem;transition:opacity .2s;display:inline-block}.btn-green:hover{opacity:.85}
+.btn-outline{border:1px solid var(--green3);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.78rem;padding:.7rem 1.4rem;transition:all .2s;display:inline-block}.btn-outline:hover{background:rgba(0,255,65,.07)}
+/* Loading */
+.loading{text-align:center;padding:4rem 0}
+.ldot2{display:inline-block;width:10px;height:10px;background:var(--green);border-radius:50%;margin:0 4px;animation:blink 1.2s infinite}
+.ldot2:nth-child(2){animation-delay:.2s}.ldot2:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
+footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
+.fi{max-width:1200px;margin:0 auto;text-align:center}
+.flogo{font-family:'Orbitron',monospace;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
+.flinks{display:flex;justify-content:center;gap:1.5rem;margin-bottom:.6rem;flex-wrap:wrap}
+.flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
+.flinks2{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks2 a{font-size:.75rem;color:var(--muted)}.flinks2 a:hover{color:var(--green)}
+.fcopy{font-size:.75rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
+  <a href="quote.html" class="nav-cta">GET QUOTE</a>
+</nav>
+
+<div class="wrap" id="wrap">
+  <div class="loading">
+    <span class="ldot2"></span><span class="ldot2"></span><span class="ldot2"></span>
+  </div>
+</div>
+
+<footer>
+  <div class="fi">
+    <div class="flogo">▶ PCBAForge</div>
+    <div class="flinks">
+      <a href="index.html#services">Services</a>
+      <a href="index.html#quote">Get Quote</a>
+      <a href="blog.html">Blog</a>
+      <a href="track.html">Track Order</a>
+    </div>
+    <div class="flinks2">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="shipping.html">Shipping Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+  </div>
+</footer>
+
+<script>
+async function init() {
+  const params = new URLSearchParams(location.search);
+  const order_no = params.get('order');
+  const token    = params.get('token');
+  const wrap     = document.getElementById('wrap');
+
+  if (!order_no || !token) {
+    wrap.innerHTML = renderError('Invalid payment link.');
+    return;
+  }
+
+  try {
+    // 捕获付款
+    const res = await fetch('/api/payment/capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_no, token })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Payment failed');
+
+    const o = data.order;
+    const modeName = { pcb: 'PCB Fabrication', smt: 'PCB + SMT Assembly', turnkey: 'Full Turnkey + Testing' };
+    const leadTime = { pcb: '5–7 business days', smt: '7–12 business days', turnkey: '10–18 business days' };
+
+    wrap.innerHTML = `
+      <div class="success-icon"><span class="check">✓</span></div>
+      <div class="slabel">// PAYMENT CONFIRMED</div>
+      <div class="stitle">Order Received!</div>
+      <div class="sdesc">Thank you for your payment. Your order has been confirmed and our engineering team will begin production shortly.</div>
+
+      <div class="order-card">
+        <div class="oc-row"><span class="oc-label">ORDER NUMBER</span><span class="oc-value green">${o.order_no}</span></div>
+        <div class="oc-row"><span class="oc-label">SERVICE</span><span class="oc-value">${modeName[o.mode] || o.mode}</span></div>
+        <div class="oc-row"><span class="oc-label">AMOUNT PAID</span><span class="oc-value green">USD $${Number(o.total_paid).toFixed(2)}</span></div>
+        <div class="oc-row"><span class="oc-label">STATUS</span><span class="oc-value amber">IN PRODUCTION</span></div>
+        <div class="oc-row"><span class="oc-label">EST. LEAD TIME</span><span class="oc-value">${leadTime[o.mode] || '7–14 business days'}</span></div>
+      </div>
+
+      <div class="timeline">
+        <div class="tl-title">// WHAT HAPPENS NEXT</div>
+        <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-info"><div class="tl-label">Payment Confirmed</div><div class="tl-sub">Your payment has been received and verified.</div></div></div>
+        <div class="tl-item"><div class="tl-dot done">✓</div><div class="tl-info"><div class="tl-label">Engineer Review</div><div class="tl-sub">Our engineers will review your design files and confirm feasibility.</div></div></div>
+        <div class="tl-item"><div class="tl-dot pending">○</div><div class="tl-info"><div class="tl-label">Production</div><div class="tl-sub">PCB fabrication and assembly in progress.</div></div></div>
+        <div class="tl-item"><div class="tl-dot pending">○</div><div class="tl-info"><div class="tl-label">Quality Inspection</div><div class="tl-sub">AOI inspection and functional testing.</div></div></div>
+        <div class="tl-item"><div class="tl-dot pending">○</div><div class="tl-info"><div class="tl-label">Shipping</div><div class="tl-sub">Your order will be shipped via DHL Express. Tracking number sent by email.</div></div></div>
+      </div>
+
+      <div class="btn-group">
+        <a href="track.html?order=${o.order_no}" class="btn-green">📦 TRACK ORDER →</a>
+        <a href="index.html" class="btn-outline">← BACK TO HOME</a>
+      </div>`;
+
+  } catch(e) {
+    wrap.innerHTML = renderError(e.message);
+  }
+}
+
+function renderError(msg) {
+  return `<div style="text-align:center;padding:4rem 0">
+    <div style="font-size:3rem;margin-bottom:1rem">⚠</div>
+    <div style="font-family:'Orbitron',monospace;font-size:1rem;color:var(--red);margin-bottom:.5rem">PAYMENT ERROR</div>
+    <div style="font-size:.85rem;color:var(--muted);margin-bottom:2rem">${msg}</div>
+    <a href="index.html" style="background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;padding:.7rem 1.6rem;display:inline-block">← GO HOME</a>
+  </div>`;
+}
+
+init();
+</script>
+</body>
+</html>

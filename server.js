@@ -151,6 +151,36 @@ async function sendMail({ to, subject, html }) {
   }
 }
 
+// ── PayPal 工具 ──────────────────────────────────────────
+async function getPayPalConfig() {
+  const { rows } = await pool.query(
+    `SELECT key, value FROM settings WHERE key IN ('paypal_client_id','paypal_client_secret_enc','paypal_mode')`
+  );
+  const cfg = {};
+  rows.forEach(r => { cfg[r.key] = r.value; });
+  return {
+    clientId:     cfg.paypal_client_id     || process.env.PAYPAL_CLIENT_ID || '',
+    clientSecret: decrypt(cfg.paypal_client_secret_enc) || process.env.PAYPAL_CLIENT_SECRET || '',
+    mode:         cfg.paypal_mode          || process.env.PAYPAL_MODE || 'live',
+  };
+}
+
+async function getPayPalToken() {
+  const { clientId, clientSecret, mode } = await getPayPalConfig();
+  const base = mode === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
+  const res = await fetch(`${base}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64'),
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+  const data = await res.json();
+  if (!data.access_token) throw new Error('Failed to get PayPal token: ' + JSON.stringify(data));
+  return { token: data.access_token, base };
+}
+
 function genOrderNo() {
   const now  = new Date();
   const ymd  = now.getFullYear().toString().slice(-2) +
@@ -189,7 +219,8 @@ app.get('/api/settings/public', async (req, res) => {
     const PUBLIC_KEYS = ['whatsapp_number','shipping_address','company_name',
                          'smt_single_price','smt_double_price','pcb_tier1_price',
                          'pcb_tier2_price','pcb_tier3_price','smt_max_parts',
-                         'smt_max_ic','smt_max_dip','google_oauth_enabled','github_oauth_enabled'];
+                         'smt_max_ic','smt_max_dip','google_oauth_enabled','github_oauth_enabled',
+                         'paypal_client_id','paypal_mode'];
     const placeholders = PUBLIC_KEYS.map((_,i) => `$${i+1}`).join(',');
     const { rows } = await pool.query(
       `SELECT key, value FROM settings WHERE key IN (${placeholders})`, PUBLIC_KEYS
@@ -286,6 +317,149 @@ app.post('/api/order/lookup', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════
+// PAYPAL APIs
+// ═══════════════════════════════════════════════════════
+
+// 创建 PayPal 订单（客户点 PAY NOW 时调用）
+app.post('/api/payment/create', async (req, res) => {
+  try {
+    const { order_no, email } = req.body;
+    if (!order_no || !email) return res.status(400).json({ error: 'order_no and email required' });
+
+    const { rows } = await pool.query(
+      `SELECT o.*, COALESCE(u.email, o.guest_email) as cust_email
+       FROM orders o LEFT JOIN users u ON o.user_id = u.id
+       WHERE o.order_no=$1 AND (o.guest_email=$2 OR u.email=$2)`,
+      [order_no.toUpperCase(), email.toLowerCase()]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+    const order = rows[0];
+    if (!['quoted'].includes(order.status)) return res.status(400).json({ error: 'Order is not ready for payment' });
+    if (!order.quoted_price) return res.status(400).json({ error: 'No quoted price set' });
+
+    const total = parseFloat(order.quoted_price) + parseFloat(order.shipping_fee || 0);
+    const { token: ppToken, base } = await getPayPalToken();
+    const siteUrl = process.env.SITE_URL || 'https://pcbaforge.com';
+
+    const ppRes = await fetch(`${base}/v2/checkout/orders`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + ppToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        intent: 'CAPTURE',
+        purchase_units: [{
+          reference_id: order.order_no,
+          description: `PCBAForge Order ${order.order_no} — ${order.mode.toUpperCase()}`,
+          amount: { currency_code: 'USD', value: total.toFixed(2) },
+        }],
+        application_context: {
+          brand_name: 'PCBAForge',
+          landing_page: 'BILLING',
+          user_action: 'PAY_NOW',
+          return_url: `${siteUrl}/payment-success.html?order=${order.order_no}&token=PAYPAL_TOKEN`,
+          cancel_url: `${siteUrl}/track.html?order=${order.order_no}&cancelled=1`,
+        }
+      })
+    });
+    const ppData = await ppRes.json();
+    if (!ppRes.ok) throw new Error(ppData.message || 'PayPal order creation failed');
+
+    // 存储 PayPal order ID
+    await pool.query(
+      `UPDATE orders SET payment_intent=$1, updated_at=datetime('now') WHERE order_no=$2`,
+      [ppData.id, order.order_no]
+    );
+
+    const approveUrl = ppData.links.find(l => l.rel === 'approve')?.href;
+    res.json({ success: true, approve_url: approveUrl, paypal_order_id: ppData.id });
+  } catch (err) {
+    console.error('[PAYPAL CREATE ERROR]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 捕获付款（支付成功后自动调用）
+app.post('/api/payment/capture', async (req, res) => {
+  try {
+    const { order_no, token: paypalOrderId } = req.body;
+    if (!order_no || !paypalOrderId) return res.status(400).json({ error: 'order_no and token required' });
+
+    const { rows } = await pool.query(
+      `SELECT * FROM orders WHERE order_no=$1`,
+      [order_no.toUpperCase()]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Order not found' });
+    const order = rows[0];
+
+    // 防止重复捕获
+    if (order.status === 'paid' || order.status === 'production') {
+      return res.json({ success: true, order });
+    }
+
+    const { token: ppToken, base } = await getPayPalToken();
+    const captureRes = await fetch(`${base}/v2/checkout/orders/${paypalOrderId}/capture`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + ppToken, 'Content-Type': 'application/json' },
+    });
+    const captureData = await captureRes.json();
+    if (!captureRes.ok || captureData.status !== 'COMPLETED') {
+      throw new Error(captureData.message || 'Payment capture failed');
+    }
+
+    const amountPaid = parseFloat(
+      captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || 0
+    );
+
+    // 更新订单状态
+    await pool.query(
+      `UPDATE orders SET status='production', total_paid=$1, updated_at=datetime('now') WHERE order_no=$2`,
+      [amountPaid, order.order_no]
+    );
+
+    const updatedOrder = { ...order, status: 'production', total_paid: amountPaid };
+
+    // 发送确认邮件给客户
+    const custEmail = order.guest_email || (await pool.query('SELECT email FROM users WHERE id=$1', [order.user_id])).rows[0]?.email;
+    if (custEmail) {
+      await sendMail({
+        to: custEmail,
+        subject: `[PCBAForge] Payment Confirmed — ${order.order_no}`,
+        html: `<h2 style="color:#00C832">✅ Payment Confirmed!</h2>
+          <p>Thank you! Your payment of <b>USD $${amountPaid.toFixed(2)}</b> for order <b>${order.order_no}</b> has been received.</p>
+          <p>Our engineers will begin production shortly. You will receive shipping updates by email.</p>
+          <p><a href="${process.env.SITE_URL || ''}/track.html?order=${order.order_no}" style="background:#00C832;color:#000;padding:10px 20px;text-decoration:none;font-weight:bold;font-family:monospace">TRACK ORDER →</a></p>`
+      });
+    }
+
+    // 通知管理员
+    const { rows: adminCfg } = await pool.query(`SELECT value FROM settings WHERE key='contact_email'`);
+    if (adminCfg[0]?.value) {
+      await sendMail({
+        to: adminCfg[0].value,
+        subject: `[PCBAForge] 💰 Payment Received — ${order.order_no}`,
+        html: `<h2>Payment Received</h2>
+          <p>Order <b>${order.order_no}</b> has been paid.</p>
+          <p>Amount: <b>USD $${amountPaid.toFixed(2)}</b></p>
+          <p>Status updated to: <b>PRODUCTION</b></p>
+          <p><a href="${process.env.SITE_URL || ''}/admin">Open Admin Panel</a></p>`
+      });
+    }
+
+    res.json({ success: true, order: updatedOrder });
+  } catch (err) {
+    console.error('[PAYPAL CAPTURE ERROR]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 获取订单的 PayPal Client ID（前端用）
+app.get('/api/payment/config', async (req, res) => {
+  try {
+    const cfg = await getPayPalConfig();
+    res.json({ client_id: cfg.clientId, mode: cfg.mode });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ═══════════════════════════════════════════════════════
 // AUTH APIS
 // ═══════════════════════════════════════════════════════
 
@@ -352,16 +526,14 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── 忘记密码：发送重置邮件 ────────────────────────────────
 app.post('/api/auth/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email required' });
     const { rows } = await pool.query('SELECT id, name FROM users WHERE email=$1', [email.toLowerCase()]);
-    // 无论是否找到用户都返回成功，防止枚举攻击
     if (rows.length) {
       const reset_token = uuidv4();
-      const expires = new Date(Date.now() + 3600000).toISOString(); // 1小时后过期
+      const expires = new Date(Date.now() + 3600000).toISOString();
       await pool.query(
         `UPDATE users SET reset_token=$1, reset_token_expires=$2 WHERE id=$3`,
         [reset_token, expires, rows[0].id]
@@ -372,29 +544,24 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         subject: '[PCBAForge] Password Reset Request',
         html: `<h2>Password Reset</h2>
           <p>Hi ${rows[0].name},</p>
-          <p>We received a request to reset your password. Click the button below to set a new password:</p>
           <p><a href="${resetUrl}" style="background:#00FF41;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">RESET PASSWORD →</a></p>
-          <p>This link expires in <strong>1 hour</strong>.</p>
-          <p>If you did not request a password reset, please ignore this email.</p>`
+          <p>This link expires in <strong>1 hour</strong>.</p>`
       });
     }
     res.json({ success: true, message: 'If this email is registered, a reset link has been sent.' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── 重置密码：用 token 设置新密码 ────────────────────────────
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
     const { token, password } = req.body;
     if (!token || !password) return res.status(400).json({ error: 'Token and password required' });
     if (password.length < 8) return res.status(400).json({ error: 'Password min 8 characters' });
-
     const { rows } = await pool.query(
       `SELECT id FROM users WHERE reset_token=$1 AND reset_token_expires > datetime('now')`,
       [token]
     );
     if (!rows.length) return res.status(400).json({ error: 'Invalid or expired reset link. Please request a new one.' });
-
     const hash = await bcrypt.hash(password, 12);
     await pool.query(
       `UPDATE users SET password_hash=$1, reset_token=NULL, reset_token_expires=NULL, email_verified=1 WHERE id=$2`,
@@ -408,14 +575,10 @@ app.post('/api/auth/google', async (req, res) => {
   try {
     const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='google_oauth_enabled'`);
     if (cfg[0]?.value !== 'true') return res.status(403).json({ error: 'Google login is disabled' });
-
     const { access_token } = req.body;
-    const gRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: 'Bearer ' + access_token }
-    });
+    const gRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', { headers: { Authorization: 'Bearer ' + access_token } });
     if (!gRes.ok) return res.status(401).json({ error: 'Invalid Google token' });
     const gUser = await gRes.json();
-
     let { rows } = await pool.query('SELECT * FROM users WHERE google_id=$1 OR email=$2', [gUser.id, gUser.email]);
     let user = rows[0];
     if (!user) {
@@ -427,7 +590,6 @@ app.post('/api/auth/google', async (req, res) => {
     } else if (!user.google_id) {
       await pool.query('UPDATE users SET google_id=$1 WHERE id=$2', [gUser.id, user.id]);
     }
-
     await pool.query("UPDATE users SET last_login_at=datetime('now') WHERE id=$1", [user.id]);
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
@@ -438,7 +600,6 @@ app.post('/api/auth/github', async (req, res) => {
   try {
     const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='github_oauth_enabled'`);
     if (cfg[0]?.value !== 'true') return res.status(403).json({ error: 'GitHub login is disabled' });
-
     const { code } = req.body;
     const tRes = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
@@ -447,13 +608,11 @@ app.post('/api/auth/github', async (req, res) => {
     });
     const tData = await tRes.json();
     if (!tData.access_token) return res.status(401).json({ error: 'GitHub auth failed' });
-
     const uRes   = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + tData.access_token } });
     const ghUser = await uRes.json();
     const eRes   = await fetch('https://api.github.com/user/emails', { headers: { Authorization: 'Bearer ' + tData.access_token } });
     const emails = await eRes.json();
     const primaryEmail = emails.find(e => e.primary)?.email || ghUser.email;
-
     let { rows } = await pool.query('SELECT * FROM users WHERE github_id=$1 OR email=$2', [String(ghUser.id), primaryEmail]);
     let user = rows[0];
     if (!user) {
@@ -465,7 +624,6 @@ app.post('/api/auth/github', async (req, res) => {
     } else if (!user.github_id) {
       await pool.query('UPDATE users SET github_id=$1 WHERE id=$2', [String(ghUser.id), user.id]);
     }
-
     await pool.query("UPDATE users SET last_login_at=datetime('now') WHERE id=$1", [user.id]);
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, customer_type: user.customer_type } });
@@ -676,9 +834,7 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'Order not found' });
     const order = rows[0];
     if (!order.quoted_price) return res.status(400).json({ error: 'Please set quoted_price first' });
-
     await pool.query(`UPDATE orders SET status='quoted', updated_at=datetime('now') WHERE id=$1`, [order.id]);
-
     const trackUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/track.html?order=${order.order_no}`;
     await sendMail({
       to: order.customer_email,
@@ -694,7 +850,6 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
         <br>
         <p><a href="${trackUrl}" style="background:#00C832;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">VIEW ORDER & PAY →</a></p>`
     });
-
     res.json({ success: true, message: 'Payment link sent to ' + order.customer_email });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -753,7 +908,6 @@ app.put('/api/admin/customers/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── 后台重置客户密码 ─────────────────────────────────────
 app.post('/api/admin/customers/:id/reset-password', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT email, name FROM users WHERE id=$1', [req.params.id]);
@@ -770,7 +924,6 @@ app.post('/api/admin/customers/:id/reset-password', adminAuth, async (req, res) 
       subject: '[PCBAForge] Password Reset — Admin Action',
       html: `<h2>Password Reset</h2>
         <p>Hi ${rows[0].name},</p>
-        <p>An administrator has initiated a password reset for your account. Click the button below to set a new password:</p>
         <p><a href="${resetUrl}" style="background:#00FF41;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">RESET PASSWORD →</a></p>
         <p>This link expires in <strong>1 hour</strong>.</p>`
     });
@@ -823,7 +976,7 @@ app.put('/api/admin/settings/encrypted/:key', adminAuth, async (req, res) => {
   try {
     const { key } = req.params;
     const { value } = req.body;
-    const ENCRYPTED_KEYS = ['smtp_pass_enc', 'resend_api_key_enc'];
+    const ENCRYPTED_KEYS = ['smtp_pass_enc', 'resend_api_key_enc', 'paypal_client_secret_enc'];
     if (!ENCRYPTED_KEYS.includes(key)) return res.status(400).json({ error: 'Key is not an encrypted field' });
     if (!ENC_KEY) return res.status(500).json({ error: 'SETTINGS_ENCRYPT_KEY environment variable not set' });
     const encrypted = encrypt(value);
@@ -857,30 +1010,20 @@ app.get('/api/posts', async (req, res) => {
     const offset = (page - 1) * limit;
     let where = "WHERE status='published'";
     const params = [];
-    if (tag) {
-      where += ` AND tags LIKE ?`;
-      params.push('%' + tag + '%');
-    }
+    if (tag) { where += ` AND tags LIKE ?`; params.push('%' + tag + '%'); }
     const { rows } = await pool.query(
       `SELECT id, slug, title, excerpt, cover_url, tags, author, views, published_at, created_at
-       FROM posts ${where}
-       ORDER BY published_at DESC
-       LIMIT ? OFFSET ?`,
+       FROM posts ${where} ORDER BY published_at DESC LIMIT ? OFFSET ?`,
       [...params, Number(limit), Number(offset)]
     );
-    const { rows: countRows } = await pool.query(
-      `SELECT COUNT(*) as total FROM posts ${where}`, params
-    );
+    const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
     res.json({ posts: rows, total: Number(countRows[0]?.total || 0) });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get('/api/posts/:slug', async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      `SELECT * FROM posts WHERE slug=? AND status='published'`,
-      [req.params.slug]
-    );
+    const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [req.params.slug]);
     if (!rows.length) return res.status(404).json({ error: 'Post not found' });
     await pool.query(`UPDATE posts SET views=views+1 WHERE slug=?`, [req.params.slug]);
     res.json(rows[0]);
@@ -899,9 +1042,7 @@ app.get('/api/admin/posts', adminAuth, async (req, res) => {
     if (status) { where = `WHERE status=?`; params.push(status); }
     const { rows } = await pool.query(
       `SELECT id, slug, title, excerpt, cover_url, tags, status, author, views, published_at, created_at, updated_at
-       FROM posts ${where}
-       ORDER BY created_at DESC
-       LIMIT ? OFFSET ?`,
+       FROM posts ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       [...params, Number(limit), Number(offset)]
     );
     const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
@@ -946,14 +1087,10 @@ app.put('/api/admin/posts/:id', adminAuth, async (req, res) => {
     const published_at = (status === 'published' && !current[0].published_at)
       ? new Date().toISOString() : current[0].published_at;
     await pool.query(
-      `UPDATE posts SET
-       title=COALESCE(?,title), slug=COALESCE(?,slug), excerpt=COALESCE(?,excerpt),
-       content=COALESCE(?,content), cover_url=COALESCE(?,cover_url),
-       tags=COALESCE(?,tags), status=COALESCE(?,status), author=COALESCE(?,author),
-       published_at=?, updated_at=datetime('now')
-       WHERE id=?`,
-      [title, slug, excerpt, content, cover_url,
-       tags ? JSON.stringify(tags) : null, status, author, published_at, req.params.id]
+      `UPDATE posts SET title=COALESCE(?,title), slug=COALESCE(?,slug), excerpt=COALESCE(?,excerpt),
+       content=COALESCE(?,content), cover_url=COALESCE(?,cover_url), tags=COALESCE(?,tags),
+       status=COALESCE(?,status), author=COALESCE(?,author), published_at=?, updated_at=datetime('now') WHERE id=?`,
+      [title, slug, excerpt, content, cover_url, tags ? JSON.stringify(tags) : null, status, author, published_at, req.params.id]
     );
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }

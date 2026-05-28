@@ -8,7 +8,6 @@ const CF_API_TOKEN  = process.env.CLOUDFLARE_API_TOKEN;
 const BASE_URL = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/d1/database/${CF_DB_ID}/query`;
 
 async function query(sql, params = []) {
-  // D1 uses ? placeholders; convert $1,$2... to ?
   const d1sql = sql.replace(/\$(\d+)/g, '?');
   const res = await fetch(BASE_URL, {
     method: 'POST',
@@ -139,13 +138,15 @@ async function initDB() {
     ['smtp_user',         '',      'SMTP username'],
     ['smtp_pass_enc',     '',      'SMTP password (AES-256-GCM encrypted)'],
     ['resend_api_key_enc','',      'Resend API key (encrypted)'],
+    ['paypal_client_id',  '',      'PayPal Client ID'],
+    ['paypal_client_secret_enc', '', 'PayPal Client Secret (encrypted)'],
+    ['paypal_mode',       'live',  'PayPal mode: live or sandbox'],
   ];
 
   for (const sql of tables) {
     await query(sql);
   }
 
-  // Insert default settings
   for (const [key, value, description] of defaultSettings) {
     await query(
       `INSERT OR IGNORE INTO settings (key, value, description) VALUES (?, ?, ?)`,
@@ -153,11 +154,10 @@ async function initDB() {
     );
   }
 
-  // Add reset_token columns if missing (migration)
+  // Migrations
   try { await query(`ALTER TABLE users ADD COLUMN reset_token TEXT`); } catch(e) {}
   try { await query(`ALTER TABLE users ADD COLUMN reset_token_expires TEXT`); } catch(e) {}
 
-  // Create default admin if none exists
   const { rows } = await query('SELECT COUNT(*) as cnt FROM admin_users');
   if (!rows[0] || rows[0].cnt === 0) {
     const bcrypt = require('bcryptjs');
