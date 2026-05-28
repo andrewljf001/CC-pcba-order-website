@@ -874,7 +874,7 @@ function openPostEditor(post) {
   document.getElementById('post-author').value = post ? (post.author||'PCBAForge Team') : 'PCBAForge Team';
   document.getElementById('post-content').value = post ? (post.content||'') : '';
   renderTags();
-  document.getElementById('blog-panel').classList.add('open');
+  document.getElementById('blog-panel').style.right='0';
   document.getElementById('blog-overlay').classList.add('show');
 }
 
@@ -920,7 +920,7 @@ async function deletePost(id, title) {
 }
 
 function closeBlogEditor() {
-  document.getElementById('blog-panel').classList.remove('open');
+  document.getElementById('blog-panel').style.right='-700px';
   document.getElementById('blog-overlay').classList.remove('show');
 }
 
