@@ -161,5 +161,26 @@ function renderError(msg) {
 
 init();
 </script>
+<script>
+(function(){
+  var wafEl = document.querySelector('.waf');
+  var bwaEl = document.querySelector('.bwa');
+  var waLinks = document.querySelectorAll('[href^="https://wa.me"]');
+  // 先隐藏所有 WA 按钮
+  if(wafEl) wafEl.style.display='none';
+  if(bwaEl) bwaEl.style.display='none';
+  fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
+    var wa = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
+    if(!wa) return;
+    waLinks.forEach(function(el){
+      var orig = el.href;
+      var text = orig.includes('?text=') ? orig.split('?text=')[1] : '';
+      el.href = 'https://wa.me/' + wa + (text ? '?text='+text : '');
+    });
+    if(wafEl) wafEl.style.display='';
+    if(bwaEl) bwaEl.style.display='';
+  }).catch(function(){});
+})();
+</script>
 </body>
 </html>
