@@ -70,6 +70,38 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/admin', express.static('admin'));
 
+// ── Apple Pay 域名验证文件（PayPal Apple Pay 必须）────────
+// 需要将 Apple Developer 提供的验证文件内容存入环境变量 APPLE_PAY_DOMAIN_ASSOCIATION
+// 或放置于 public/.well-known/ 目录中（推荐）
+// 此路由作为后备，从 DB settings 或环境变量动态返回
+app.get('/.well-known/apple-developer-merchantid-domain-association', async (req, res) => {
+  try {
+    // 优先从文件系统读取（放于 public/.well-known/ 时 express.static 已处理，此处为后备）
+    const filePath = path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association');
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath);
+    }
+    // 从环境变量读取
+    const content = process.env.APPLE_PAY_DOMAIN_ASSOCIATION;
+    if (content) {
+      res.setHeader('Content-Type', 'text/plain');
+      return res.send(content);
+    }
+    // 从数据库 settings 读取
+    const { rows } = await pool.query(
+      `SELECT value FROM settings WHERE key='apple_pay_domain_association'`
+    );
+    if (rows[0]?.value) {
+      res.setHeader('Content-Type', 'text/plain');
+      return res.send(rows[0].value);
+    }
+    // 未配置时返回 404（Apple Pay 不可用，但不影响其他支付方式）
+    res.status(404).end();
+  } catch (err) {
+    res.status(500).end();
+  }
+});
+
 // ── Cloudflare R2 客户端 ─────────────────────────────────
 const r2Client = new S3Client({
   region: 'auto',
@@ -321,7 +353,7 @@ app.post('/api/order/lookup', async (req, res) => {
 // PAYPAL APIs
 // ═══════════════════════════════════════════════════════
 
-// 创建 PayPal 订单（客户点 PAY NOW 时调用）
+// 创建 PayPal 订单（PayPal 标准 & Apple Pay 共用）
 app.post('/api/payment/create', async (req, res) => {
   try {
     const { order_no, email } = req.body;
@@ -378,7 +410,7 @@ app.post('/api/payment/create', async (req, res) => {
   }
 });
 
-// 捕获付款（支付成功后自动调用）
+// 捕获付款（PayPal 标准 & Apple Pay 共用）
 app.post('/api/payment/capture', async (req, res) => {
   try {
     const { order_no, token: paypalOrderId } = req.body;
@@ -396,7 +428,7 @@ app.post('/api/payment/capture', async (req, res) => {
       return res.json({ success: true, order });
     }
 
-    // #6 强校验 payment_intent
+    // 强校验 payment_intent
     if (order.payment_intent && order.payment_intent !== paypalOrderId) {
       console.error('[SECURITY] payment_intent mismatch', order.order_no, order.payment_intent, paypalOrderId);
       return res.status(400).json({ error: 'Invalid payment token' });
