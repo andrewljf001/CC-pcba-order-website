@@ -109,7 +109,7 @@ async function getMailConfig() {
                  'smtp_host','smtp_port','smtp_secure',
                  'smtp_user','smtp_pass_enc','resend_api_key_enc'];
   const { rows } = await pool.query(
-    `SELECT key, value FROM settings WHERE key = ANY($1)`, [keys]
+    `SELECT key, value FROM settings WHERE key IN ('mail_driver','mail_from','mail_from_name','smtp_host','smtp_port','smtp_secure','smtp_user','smtp_pass_enc','resend_api_key_enc')`
   );
   const cfg = {};
   rows.forEach(r => { cfg[r.key] = r.value; });
