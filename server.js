@@ -8,11 +8,12 @@ const jwt      = require('jsonwebtoken');
 const bcrypt   = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
-// ── AES-256-GCM 加解密（用于敏感配置）──────────────────
+// ── AES-256-GCM 加解密 ───────────────────────────────────
 const ENC_KEY_RAW = process.env.SETTINGS_ENCRYPT_KEY || '';
 const ENC_KEY = ENC_KEY_RAW
-  ? crypto.createHash('sha256').update(ENC_KEY_RAW).digest()  // 32 bytes
+  ? crypto.createHash('sha256').update(ENC_KEY_RAW).digest()
   : null;
 
 function encrypt(text) {
@@ -28,7 +29,7 @@ function decrypt(ciphertext) {
   if (!ENC_KEY || !ciphertext) return ciphertext || '';
   try {
     const [ivHex, tagHex, encHex] = ciphertext.split(':');
-    if (!ivHex || !tagHex || !encHex) return ''; // 未加密的旧值
+    if (!ivHex || !tagHex || !encHex) return '';
     const iv      = Buffer.from(ivHex,  'hex');
     const tag     = Buffer.from(tagHex, 'hex');
     const enc     = Buffer.from(encHex, 'hex');
@@ -37,7 +38,8 @@ function decrypt(ciphertext) {
     return decipher.update(enc, null, 'utf8') + decipher.final('utf8');
   } catch { return ''; }
 }
-const pool     = require('./database');
+
+const pool = require('./database');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -48,12 +50,11 @@ if (!JWT_SECRET || !JWT_ADMIN_SECRET) {
   process.exit(1);
 }
 
-
-// ── Turnstile 人机验证 ────────────────────────────────
+// ── Turnstile 人机验证 ────────────────────────────────────
 async function verifyTurnstile(token) {
   if (!token) return false;
   const secret = process.env.TURNSTILE_SECRET;
-  if (!secret) return true; // 未配置则跳过
+  if (!secret) return true;
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -68,19 +69,32 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/admin', express.static('admin'));
-app.use('/uploads', express.static('uploads'));
 
-// ── 文件上传 ────────────────────────────────────────────
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    const dir = path.join('uploads', Date.now() + '_' + Math.random().toString(36).substr(2,6));
-    fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
+// ── Cloudflare R2 客户端 ─────────────────────────────────
+const r2Client = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId:     process.env.R2_ACCESS_KEY_ID     || '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
   },
-  filename(req, file, cb) { cb(null, file.originalname); }
 });
+
+async function uploadToR2(buffer, filename, mimetype) {
+  const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const key = `uploads/${Date.now()}_${safeName}`;
+  await r2Client.send(new PutObjectCommand({
+    Bucket:      process.env.R2_BUCKET || 'pcbaforge-files',
+    Key:         key,
+    Body:        buffer,
+    ContentType: mimetype || 'application/octet-stream',
+  }));
+  return { key, url: `${process.env.R2_PUBLIC_URL || 'https://static.pcbaforge.com'}/${key}` };
+}
+
+// ── 文件上传（内存缓存，上传到 R2）──────────────────────────
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter(req, file, cb) {
     const allowed = ['.zip','.rar','.gerber','.gbr','.drl','.xls','.xlsx','.csv','.txt','.pdf'];
@@ -89,7 +103,7 @@ const upload = multer({
   }
 });
 
-// ── 邮件工具（动态读取后台配置）────────────────────────────
+// ── 邮件工具 ─────────────────────────────────────────────
 async function getMailConfig() {
   const keys = ['mail_driver','mail_from','mail_from_name',
                  'smtp_host','smtp_port','smtp_secure',
@@ -120,16 +134,13 @@ async function sendMail({ to, subject, html }) {
       });
       if (!res.ok) console.error('[MAIL RESEND ERROR]', await res.text());
       else console.log('[MAIL] Resend sent to', to);
-
     } else {
-      // SMTP via nodemailer
       const nodemailer = require('nodemailer');
       const smtpPass   = decrypt(cfg.smtp_pass_enc) || process.env.SMTP_PASS || '';
       const smtpUser   = cfg.smtp_user || process.env.SMTP_USER || '';
       const host       = cfg.smtp_host || process.env.SMTP_HOST || '';
       const port       = parseInt(cfg.smtp_port || '587');
       const secure     = cfg.smtp_secure === 'true';
-
       if (!host || !smtpUser || !smtpPass) {
         console.warn('[MAIL] SMTP not configured. Skipping email to', to);
         return;
@@ -143,7 +154,6 @@ async function sendMail({ to, subject, html }) {
   }
 }
 
-// ── 生成订单号 ────────────────────────────────────────────
 function genOrderNo() {
   const now  = new Date();
   const ymd  = now.getFullYear().toString().slice(-2) +
@@ -153,7 +163,6 @@ function genOrderNo() {
   return 'CC' + ymd + rand;
 }
 
-// ── 中间件：客户 JWT ─────────────────────────────────────
 function userAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -164,7 +173,6 @@ function userAuth(req, res, next) {
   } catch { res.status(401).json({ error: 'Token expired or invalid' }); }
 }
 
-// ── 中间件：管理员 JWT ────────────────────────────────────
 function adminAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -179,7 +187,6 @@ function adminAuth(req, res, next) {
 // PUBLIC APIS
 // ═══════════════════════════════════════════════════════
 
-// 前台公开配置（WA号码、收件地址等）
 app.get('/api/settings/public', async (req, res) => {
   try {
     const PUBLIC_KEYS = ['whatsapp_number','shipping_address','company_name',
@@ -196,10 +203,10 @@ app.get('/api/settings/public', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 提交询价
+// 提交询价（文件上传到 R2）
 app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
   try {
-    const { mode, name, email, whatsapp, company, notes, estimate } = req.body;
+    const { mode, name, email, whatsapp, company, notes, estimate, cf_turnstile } = req.body;
     if (!name || !email || !mode) return res.status(400).json({ error: 'name, email, mode required' });
 
     const params = {};
@@ -217,10 +224,21 @@ app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
       });
     }
 
-    const files = req.files ? req.files.map(f => ({ name: f.originalname, path: f.path, size: f.size })) : [];
-    const order_no = genOrderNo();
+    // 上传文件到 R2
+    const files = [];
+    if (req.files && req.files.length > 0) {
+      for (const f of req.files) {
+        try {
+          const { key, url } = await uploadToR2(f.buffer, f.originalname, f.mimetype);
+          files.push({ name: f.originalname, key, url, size: f.size });
+        } catch (e) {
+          console.error('[R2 UPLOAD ERROR]', e.message);
+          files.push({ name: f.originalname, error: e.message, size: f.size });
+        }
+      }
+    }
 
-    // 找已注册用户
+    const order_no = genOrderNo();
     const { rows: users } = await pool.query('SELECT id FROM users WHERE email=$1', [email]);
     const user_id = users.length ? users[0].id : null;
 
@@ -231,7 +249,6 @@ app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
        JSON.stringify(params), estimate ? parseFloat(estimate) : null, notes, JSON.stringify(files)]
     );
 
-    // 通知运营
     const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='contact_email'`);
     const adminEmail = cfg[0]?.value;
     if (adminEmail) {
@@ -242,6 +259,7 @@ app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
           <p><b>Order:</b> ${order_no}</p>
           <p><b>Customer:</b> ${name} &lt;${email}&gt;</p>
           <p><b>Mode:</b> ${mode}</p>
+          <p><b>Files:</b> ${files.length} file(s) uploaded to R2</p>
           <p><b>Notes:</b> ${notes || '—'}</p>
           <p><a href="${process.env.SITE_URL || ''}/admin">Open Admin Panel</a></p>`
       });
@@ -254,15 +272,14 @@ app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
   }
 });
 
-// 查询订单（凭订单号+邮箱）
 app.post('/api/order/lookup', async (req, res) => {
   try {
     const { order_no, email } = req.body;
     if (!order_no || !email) return res.status(400).json({ error: 'order_no and email required' });
     const { rows } = await pool.query(
       `SELECT o.order_no, o.mode, o.status, o.params, o.estimate, o.quoted_price,
-              o.shipping_fee, o.total_paid, o.tracking_no, o.notes, o.created_at, o.updated_at,
-              u.name as customer_name
+              o.shipping_fee, o.total_paid, o.tracking_no, o.notes, o.admin_note,
+              o.created_at, o.updated_at, u.name as customer_name
        FROM orders o LEFT JOIN users u ON o.user_id = u.id
        WHERE o.order_no=$1 AND (o.guest_email=$2 OR u.email=$2)`,
       [order_no.toUpperCase(), email.toLowerCase()]
@@ -276,7 +293,6 @@ app.post('/api/order/lookup', async (req, res) => {
 // AUTH APIS
 // ═══════════════════════════════════════════════════════
 
-// 注册
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, name, cf_turnstile } = req.body;
@@ -308,7 +324,6 @@ app.post('/api/auth/register', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 邮箱验证
 app.get('/api/auth/verify', async (req, res) => {
   try {
     const { token } = req.query;
@@ -321,7 +336,6 @@ app.get('/api/auth/verify', async (req, res) => {
   } catch (err) { res.status(500).send('Server error'); }
 });
 
-// 登录
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password, cf_turnstile } = req.body;
@@ -342,7 +356,6 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Google OAuth
 app.post('/api/auth/google', async (req, res) => {
   try {
     const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='google_oauth_enabled'`);
@@ -359,8 +372,7 @@ app.post('/api/auth/google', async (req, res) => {
     let user = rows[0];
     if (!user) {
       const { rows: newRows } = await pool.query(
-        `INSERT INTO users (id, email, name, google_id, email_verified)
-         VALUES ($1,$2,$3,$4,1) RETURNING *`,
+        `INSERT INTO users (id, email, name, google_id, email_verified) VALUES ($1,$2,$3,$4,1) RETURNING *`,
         [uuidv4(), gUser.email, gUser.name, gUser.id]
       );
       user = newRows[0];
@@ -374,7 +386,6 @@ app.post('/api/auth/google', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// GitHub OAuth
 app.post('/api/auth/github', async (req, res) => {
   try {
     const { rows: cfg } = await pool.query(`SELECT value FROM settings WHERE key='github_oauth_enabled'`);
@@ -389,9 +400,9 @@ app.post('/api/auth/github', async (req, res) => {
     const tData = await tRes.json();
     if (!tData.access_token) return res.status(401).json({ error: 'GitHub auth failed' });
 
-    const uRes  = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + tData.access_token } });
+    const uRes   = await fetch('https://api.github.com/user', { headers: { Authorization: 'Bearer ' + tData.access_token } });
     const ghUser = await uRes.json();
-    const eRes  = await fetch('https://api.github.com/user/emails', { headers: { Authorization: 'Bearer ' + tData.access_token } });
+    const eRes   = await fetch('https://api.github.com/user/emails', { headers: { Authorization: 'Bearer ' + tData.access_token } });
     const emails = await eRes.json();
     const primaryEmail = emails.find(e => e.primary)?.email || ghUser.email;
 
@@ -399,8 +410,7 @@ app.post('/api/auth/github', async (req, res) => {
     let user = rows[0];
     if (!user) {
       const { rows: newRows } = await pool.query(
-        `INSERT INTO users (id, email, name, github_id, email_verified)
-         VALUES ($1,$2,$3,$4,1) RETURNING *`,
+        `INSERT INTO users (id, email, name, github_id, email_verified) VALUES ($1,$2,$3,$4,1) RETURNING *`,
         [uuidv4(), primaryEmail, ghUser.name || ghUser.login, String(ghUser.id)]
       );
       user = newRows[0];
@@ -415,10 +425,9 @@ app.post('/api/auth/github', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════
-// CUSTOMER APIs（需登录）
+// CUSTOMER APIs
 // ═══════════════════════════════════════════════════════
 
-// 获取个人信息
 app.get('/api/me', userAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -433,7 +442,6 @@ app.get('/api/me', userAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 更新个人信息
 app.put('/api/me', userAuth, async (req, res) => {
   try {
     const { name, company, whatsapp } = req.body;
@@ -446,7 +454,6 @@ app.put('/api/me', userAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 修改密码
 app.put('/api/me/password', userAuth, async (req, res) => {
   try {
     const { current_password, new_password } = req.body;
@@ -462,7 +469,6 @@ app.put('/api/me/password', userAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 历史订单
 app.get('/api/me/orders', userAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -475,7 +481,6 @@ app.get('/api/me/orders', userAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 收货地址 CRUD
 app.get('/api/me/addresses', userAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM addresses WHERE user_id=$1 ORDER BY is_default DESC, created_at', [req.user.id]);
@@ -523,7 +528,6 @@ app.delete('/api/me/addresses/:id', userAuth, async (req, res) => {
 // ADMIN APIs
 // ═══════════════════════════════════════════════════════
 
-// 管理员登录
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { email, password, cf_turnstile } = req.body;
@@ -538,10 +542,9 @@ app.post('/api/admin/login', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Dashboard 统计
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
   try {
-    const [oRes, uRes, rRes] = await Promise.all([
+    const [oRes, uRes, rRes, pRes] = await Promise.all([
       pool.query(`SELECT
         COUNT(*) as total,
         COALESCE(SUM(CASE WHEN status='pending' THEN 1 ELSE 0 END),0) as pending,
@@ -553,13 +556,13 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
         COALESCE(SUM(CASE WHEN date(created_at) = date('now') THEN 1 ELSE 0 END),0) as today
         FROM orders`),
       pool.query('SELECT COUNT(*) as total FROM users'),
-      pool.query(`SELECT COALESCE(SUM(total_paid),0) as total_revenue FROM orders WHERE status='completed'`)
+      pool.query(`SELECT COALESCE(SUM(total_paid),0) as total_revenue FROM orders WHERE status='completed'`),
+      pool.query(`SELECT COUNT(*) as total FROM posts WHERE status='published'`)
     ]);
-    res.json({ orders: oRes.rows[0], users: uRes.rows[0], revenue: rRes.rows[0] });
+    res.json({ orders: oRes.rows[0], users: uRes.rows[0], revenue: rRes.rows[0], posts: pRes.rows[0] });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 订单列表
 app.get('/api/admin/orders', adminAuth, async (req, res) => {
   try {
     const { status, page = 1, limit = 20, q } = req.query;
@@ -586,7 +589,6 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 订单详情
 app.get('/api/admin/orders/:id', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -601,7 +603,6 @@ app.get('/api/admin/orders/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 更新订单
 app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
   try {
     const { status, quoted_price, shipping_fee, tracking_no, admin_note } = req.body;
@@ -617,7 +618,6 @@ app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 发送付款链接
 app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -644,16 +644,13 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
           ${order.shipping_fee ? `<tr><td style="padding:8px;color:#666">Shipping Fee</td><td style="padding:8px"><b>USD $${order.shipping_fee}</b></td></tr>` : ''}
         </table>
         <br>
-        <p>To proceed with payment, please visit your order tracking page:</p>
-        <p><a href="${trackUrl}" style="background:#00C832;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">VIEW ORDER & PAY →</a></p>
-        <p style="color:#999;font-size:12px">If you have questions, reply to this email or contact us on WhatsApp.</p>`
+        <p><a href="${trackUrl}" style="background:#00C832;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">VIEW ORDER & PAY →</a></p>`
     });
 
     res.json({ success: true, message: 'Payment link sent to ' + order.customer_email });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 客户列表
 app.get('/api/admin/customers', adminAuth, async (req, res) => {
   try {
     const { q, type, page = 1, limit = 20 } = req.query;
@@ -683,7 +680,6 @@ app.get('/api/admin/customers', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 客户详情 + 历史订单
 app.get('/api/admin/customers/:id', adminAuth, async (req, res) => {
   try {
     const [uRes, oRes] = await Promise.all([
@@ -695,7 +691,6 @@ app.get('/api/admin/customers/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 更新客户（类型/备注/解绑OAuth）
 app.put('/api/admin/customers/:id', adminAuth, async (req, res) => {
   try {
     const { customer_type, note, unbind_google, unbind_github } = req.body;
@@ -710,7 +705,6 @@ app.put('/api/admin/customers/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 系统设置
 app.get('/api/admin/settings', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM settings ORDER BY key');
@@ -725,7 +719,6 @@ app.put('/api/admin/settings/:key', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 管理员账号管理
 app.get('/api/admin/admins', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT id,email,name,role,created_at,last_login_at FROM admin_users ORDER BY created_at');
@@ -753,7 +746,6 @@ app.put('/api/admin/admins/:id/password', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── 后台：加密保存敏感设置 ────────────────────────────────
 app.put('/api/admin/settings/encrypted/:key', adminAuth, async (req, res) => {
   try {
     const { key } = req.params;
@@ -767,7 +759,6 @@ app.put('/api/admin/settings/encrypted/:key', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── 后台：测试发送邮件 ────────────────────────────────────
 app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
   try {
     const { to } = req.body;
@@ -777,20 +768,16 @@ app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
       subject: '[PCBAForge] Mail Configuration Test',
       html: `<h2 style="color:#00C832">✅ Mail Configuration Working</h2>
         <p>This is a test email from your PCBAForge mail server.</p>
-        <p>If you received this, your mail configuration is correct.</p>
         <p style="color:#999;font-size:12px">Sent at ${new Date().toISOString()}</p>`
     });
     res.json({ success: true, message: 'Test email sent to ' + to });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-
-
 // ═══════════════════════════════════════════════════════
 // BLOG APIs（公开）
 // ═══════════════════════════════════════════════════════
 
-// 博客文章列表（已发布）
 app.get('/api/posts', async (req, res) => {
   try {
     const { tag, page = 1, limit = 12 } = req.query;
@@ -815,7 +802,6 @@ app.get('/api/posts', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 单篇文章（按 slug）
 app.get('/api/posts/:slug', async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -832,7 +818,6 @@ app.get('/api/posts/:slug', async (req, res) => {
 // ADMIN BLOG APIs
 // ═══════════════════════════════════════════════════════
 
-// 文章列表（后台，含草稿）
 app.get('/api/admin/posts', adminAuth, async (req, res) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
@@ -851,7 +836,6 @@ app.get('/api/admin/posts', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 单篇文章详情（后台）
 app.get('/api/admin/posts/:id', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`SELECT * FROM posts WHERE id=?`, [req.params.id]);
@@ -860,14 +844,12 @@ app.get('/api/admin/posts/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 新建文章
 app.post('/api/admin/posts', adminAuth, async (req, res) => {
   try {
     const { title, slug, excerpt, content, cover_url, tags, status, author } = req.body;
     if (!title || !slug) return res.status(400).json({ error: 'title and slug required' });
     const { rows: exists } = await pool.query(`SELECT id FROM posts WHERE slug=?`, [slug]);
     if (exists.length) return res.status(409).json({ error: 'Slug already exists' });
-    const { v4: uuidv4 } = require('uuid');
     const published_at = status === 'published' ? new Date().toISOString() : null;
     const { rows } = await pool.query(
       `INSERT INTO posts (id, slug, title, excerpt, content, cover_url, tags, status, author, published_at)
@@ -879,7 +861,6 @@ app.post('/api/admin/posts', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 更新文章
 app.put('/api/admin/posts/:id', adminAuth, async (req, res) => {
   try {
     const { title, slug, excerpt, content, cover_url, tags, status, author } = req.body;
@@ -905,7 +886,6 @@ app.put('/api/admin/posts/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 删除文章
 app.delete('/api/admin/posts/:id', adminAuth, async (req, res) => {
   try {
     await pool.query(`DELETE FROM posts WHERE id=?`, [req.params.id]);
