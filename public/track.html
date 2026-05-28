@@ -85,7 +85,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .act-btn:hover{background:rgba(0,255,65,.07)}
 .act-btn.primary{background:var(--green);color:#000;border-color:var(--green)}
 .act-btn.primary:hover{background:var(--green2)}
-/* PayPal 支付区域 */
+/* 支付区域 */
 .pay-card{background:var(--bg2);border:2px solid var(--green3);margin-bottom:1rem}
 .pay-hdr{background:rgba(0,255,65,.08);padding:.8rem 1.2rem;border-bottom:1px solid var(--green3);display:flex;align-items:center;gap:.6rem}
 .pay-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
@@ -96,7 +96,11 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .pay-item{text-align:center}
 .pay-item-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.2rem}
 .pay-item-val{font-size:.9rem;color:var(--white)}
+/* PayPal + Apple Pay 按钮容器 */
 #paypal-btn-container{max-width:400px;margin:0 auto}
+#applepay-btn-container{max-width:400px;margin:.5rem auto 0}
+.pay-divider{display:flex;align-items:center;gap:.6rem;max-width:400px;margin:.6rem auto;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em}
+.pay-divider::before,.pay-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 .pay-secure{font-size:.72rem;color:var(--muted);margin-top:.8rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
 @media(max-width:560px){.info-grid{grid-template-columns:1fr 1fr}.search-row{flex-direction:column}.order-top-hdr{flex-direction:column;align-items:flex-start}}
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
@@ -176,9 +180,10 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 </a>
 
 <script>
-var trackData = null; // 保存当前订单数据
+var trackData = null;
 var ppClientId = '';
 var ppLoaded = false;
+var ppSdkMode = ''; // 已加载的 SDK mode
 
 const STEPS = [
   {key:'pending',    label:'INQUIRY RECEIVED',  desc:'Your inquiry has been received and is pending review by our team.'},
@@ -285,8 +290,9 @@ function renderResult(d){
           <div class="pay-item"><div class="pay-item-label">PCBA SERVICE</div><div class="pay-item-val">$${Number(d.quoted_price).toFixed(2)}</div></div>
           ${d.shipping_fee ? `<div class="pay-item"><div class="pay-item-label">SHIPPING</div><div class="pay-item-val">$${Number(d.shipping_fee).toFixed(2)}</div></div>` : ''}
         </div>
-        <div id="paypal-btn-container"><div style="text-align:center;padding:1rem;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.75rem"><span class="spinner light"></span> Loading payment...</div></div>
-        <div class="pay-secure">🔒 Secured by PayPal · SSL Encrypted</div>
+        <div id="paypal-btn-container"><div style="text-align:center;padding:1rem;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.75rem"><span class="spinner light"></span> Loading payment options...</div></div>
+        <div id="applepay-btn-container"></div>
+        <div class="pay-secure">🔒 Secured by PayPal · Apple Pay · SSL Encrypted</div>
       </div>
     </div>` : ''}
 
@@ -301,89 +307,140 @@ function renderResult(d){
   if(isQuoted) loadPayPal(d.order_no, total);
 }
 
+// ── 创建 PayPal 订单（共用，PayPal 和 Apple Pay 均用此函数）──
+async function createPayPalOrder(order_no) {
+  const email = document.getElementById('emailInput').value.trim();
+  const res = await fetch('/api/payment/create', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({order_no, email})
+  });
+  const data = await res.json();
+  if(!res.ok) throw new Error(data.error || 'Failed to create order');
+  return data.paypal_order_id;
+}
+
+// ── 捕获付款（共用）──
+async function capturePayPalOrder(order_no, orderID) {
+  document.getElementById('paypal-btn-container').innerHTML =
+    '<div style="text-align:center;padding:1rem;color:var(--green);font-family:\'Share Tech Mono\',monospace;font-size:.8rem"><span class="spinner light"></span> Processing payment...</div>';
+  const res = await fetch('/api/payment/capture', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({order_no, token: orderID})
+  });
+  const result = await res.json();
+  if(result.success){
+    window.location.href = `/payment-success.html?order=${order_no}&token=${orderID}`;
+  } else {
+    throw new Error(result.error || 'Capture failed');
+  }
+}
+
 async function loadPayPal(order_no, total) {
   try {
     // 获取 PayPal Client ID
     const cfg = await fetch('/api/payment/config').then(r=>r.json());
     if(!cfg.client_id) {
-      document.getElementById('paypal-btn-container').innerHTML = '<div style="color:var(--amber);font-size:.78rem;padding:.5rem">PayPal not configured. Please contact us to arrange payment.</div>';
+      document.getElementById('paypal-btn-container').innerHTML =
+        '<div style="color:var(--amber);font-size:.78rem;padding:.5rem">PayPal not configured. Please contact us to arrange payment.</div>';
       return;
     }
 
-    // 动态加载 PayPal SDK
-    if(!ppLoaded){
+    // 动态加载 PayPal SDK（含 Apple Pay、Venmo 资金来源）
+    if(!ppLoaded || ppSdkMode !== cfg.mode){
+      // 移除旧脚本（若已加载不同 mode）
+      const oldScript = document.getElementById('paypal-sdk-script');
+      if(oldScript) oldScript.remove();
+
       await new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=${cfg.client_id}&currency=USD&intent=capture`;
+        script.id = 'paypal-sdk-script';
+        // enable-funding=applepay,venmo 让 SDK 检查可用支付方式并渲染对应按钮
+        script.src = `https://www.paypal.com/sdk/js?client-id=${cfg.client_id}&currency=USD&intent=capture&enable-funding=applepay,venmo&disable-funding=credit,card`;
+        script.setAttribute('data-namespace', 'paypal');
         script.onload = resolve;
         script.onerror = reject;
         document.head.appendChild(script);
       });
       ppLoaded = true;
+      ppSdkMode = cfg.mode;
     }
 
-    const email = document.getElementById('emailInput').value.trim();
+    // ── 渲染 PayPal 标准按钮 ──
+    const paypalContainer = document.getElementById('paypal-btn-container');
+    paypalContainer.innerHTML = ''; // 清除 loading
 
     paypal.Buttons({
       style: {
         layout: 'vertical',
-        color: 'gold',
-        shape: 'rect',
-        label: 'pay',
+        color:  'gold',
+        shape:  'rect',
+        label:  'pay',
         height: 48
       },
-      createOrder: async function() {
-        const res = await fetch('/api/payment/create', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({order_no, email})
-        });
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.error || 'Failed to create order');
-        // PayPal SDK 需要 order ID
-        return data.paypal_order_id;
+      createOrder: () => createPayPalOrder(order_no),
+      onApprove: async (data) => {
+        try { await capturePayPalOrder(order_no, data.orderID); }
+        catch(e) { alert('Payment processing error: ' + e.message); }
       },
-      onApprove: async function(data) {
-        document.getElementById('paypal-btn-container').innerHTML = '<div style="text-align:center;padding:1rem;color:var(--green);font-family:\'Share Tech Mono\',monospace;font-size:.8rem"><span class="spinner light"></span> Processing payment...</div>';
-        const res = await fetch('/api/payment/capture', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({order_no, token: data.orderID})
-        });
-        const result = await res.json();
-        if(result.success){
-          window.location.href = `/payment-success.html?order=${order_no}&token=${data.orderID}`;
-        } else {
-          alert('Payment processing error: ' + (result.error || 'Unknown error'));
-        }
-      },
-      onError: function(err) {
+      onError: (err) => {
         console.error('PayPal error:', err);
-        document.getElementById('paypal-btn-container').innerHTML = '<div style="color:var(--red);font-size:.78rem;padding:.5rem">Payment failed. Please try again or contact us.</div>';
+        paypalContainer.innerHTML =
+          '<div style="color:var(--red);font-size:.78rem;padding:.5rem">Payment failed. Please try again or contact us.</div>';
       },
-      onCancel: function() {
-        document.getElementById('paypal-btn-container').innerHTML = '<div style="color:var(--amber);font-size:.78rem;padding:.5rem">Payment cancelled. Click below to try again.</div><button onclick="loadPayPal(\''+order_no+'\',\''+total+'\')" style="margin-top:.5rem;background:var(--green);color:#000;border:none;padding:.5rem 1rem;font-family:\'Share Tech Mono\',monospace;font-size:.72rem;cursor:pointer;letter-spacing:.08em">TRY AGAIN</button>';
+      onCancel: () => {
+        paypalContainer.innerHTML =
+          '<div style="color:var(--amber);font-size:.78rem;padding:.5rem">Payment cancelled.</div>' +
+          `<button onclick="loadPayPal('${order_no}','${total}')" style="margin-top:.5rem;background:var(--green);color:#000;border:none;padding:.5rem 1rem;font-family:'Share Tech Mono',monospace;font-size:.72rem;cursor:pointer;letter-spacing:.08em">TRY AGAIN</button>`;
       }
     }).render('#paypal-btn-container');
 
+    // ── 渲染 Apple Pay 按钮（仅在支持的设备/浏览器显示）──
+    const applePayContainer = document.getElementById('applepay-btn-container');
+    if(applePayContainer && paypal.FUNDING && paypal.FUNDING.APPLEPAY) {
+      const applePayBtn = paypal.Buttons({
+        fundingSource: paypal.FUNDING.APPLEPAY,
+        style: {
+          layout: 'vertical',
+          color:  'black',
+          shape:  'rect',
+          height: 48
+        },
+        createOrder: () => createPayPalOrder(order_no),
+        onApprove: async (data) => {
+          try { await capturePayPalOrder(order_no, data.orderID); }
+          catch(e) { alert('Apple Pay error: ' + e.message); }
+        },
+        onError: (err) => {
+          console.error('Apple Pay error:', err);
+          // Apple Pay 不可用时静默隐藏，不报错给用户
+        }
+      });
+
+      // isEligible() 检查当前设备是否支持 Apple Pay
+      if(applePayBtn.isEligible()) {
+        // 在 PayPal 按钮与 Apple Pay 按钮之间加分隔线
+        const divider = document.createElement('div');
+        divider.className = 'pay-divider';
+        divider.textContent = 'OR';
+        applePayContainer.parentNode.insertBefore(divider, applePayContainer);
+        applePayBtn.render('#applepay-btn-container');
+      }
+    }
+
   } catch(e) {
     console.error('PayPal load error:', e);
-    document.getElementById('paypal-btn-container').innerHTML = `<div style="color:var(--red);font-size:.78rem;padding:.5rem">Unable to load PayPal. Please contact us directly.</div>`;
+    document.getElementById('paypal-btn-container').innerHTML =
+      `<div style="color:var(--red);font-size:.78rem;padding:.5rem">Unable to load payment. Please contact us directly.</div>`;
   }
 }
-
-// 动态读取 WhatsApp 号码和 PayPal 配置
-
 
 // Auto-track from URL ?order=CC…
 const p = new URLSearchParams(location.search);
 if(p.get('order')){
   document.getElementById('orderInput').value = p.get('order');
-  // 需要邮箱才能查询，如果 URL 里有 email 就自动填
   if(p.get('email')) document.getElementById('emailInput').value = p.get('email');
-  if(p.get('cancelled')) {
-    // 从支付取消页回来
-  }
   if(p.get('order') && document.getElementById('emailInput').value) doTrack();
 }
 </script>
@@ -392,7 +449,6 @@ if(p.get('order')){
   var wafEl = document.querySelector('.waf');
   var bwaEl = document.querySelector('.bwa');
   var waLinks = document.querySelectorAll('[href^="https://wa.me"]');
-  // 先隐藏所有 WA 按钮
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
   fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
