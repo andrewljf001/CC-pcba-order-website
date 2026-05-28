@@ -193,7 +193,7 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
           </div>
           <div class="divider-line" id="login-divider" style="display:none"><span>OR</span></div>
           <div class="fg"><label>EMAIL <span class="req">*</span></label><input type="email" id="login-email" placeholder="john@company.com" autocomplete="email"></div>
-          <div class="fg"><label>PASSWORD <span class="req">*</span></label><input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+          <div class="fg"><label>PASSWORD <span class="req">*</span></label><input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" inputmode="none"></div>
           <div class="err-msg" id="login-err"></div>
           <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="dark" style="margin-bottom:.8rem"></div>
           <button class="btn-primary" id="login-btn" onclick="doLogin()">SIGN IN →</button>
@@ -228,8 +228,8 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
       <div class="auth-card">
         <div class="auth-hdr"><span class="auth-ht">SET NEW PASSWORD</span></div>
         <div class="auth-body">
-          <div class="fg"><label>NEW PASSWORD <span class="req">*</span></label><input type="password" id="reset-pwd" placeholder="Min 8 characters"></div>
-          <div class="fg"><label>CONFIRM PASSWORD <span class="req">*</span></label><input type="password" id="reset-pwd-confirm" placeholder="Repeat new password"></div>
+          <div class="fg"><label>NEW PASSWORD <span class="req">*</span></label><input type="password" id="reset-pwd" placeholder="Min 8 characters" inputmode="none"></div>
+          <div class="fg"><label>CONFIRM PASSWORD <span class="req">*</span></label><input type="password" id="reset-pwd-confirm" placeholder="Repeat new password" inputmode="none"></div>
           <div class="err-msg" id="reset-err"></div>
           <div class="ok-msg" id="reset-ok"></div>
           <button class="btn-primary" id="reset-btn" onclick="doResetPassword()">SET NEW PASSWORD →</button>
@@ -259,7 +259,7 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
           </div>
           <div class="fg"><label>EMAIL <span class="req">*</span></label><input type="email" id="reg-email" placeholder="john@company.com" autocomplete="email"></div>
           <div class="fg"><label>WHATSAPP</label><input type="text" id="reg-whatsapp" placeholder="+1 234 567 8901"><span class="hint">Include country code</span></div>
-          <div class="fg"><label>PASSWORD <span class="req">*</span></label><input type="password" id="reg-pwd" placeholder="Min 8 characters" autocomplete="new-password"></div>
+          <div class="fg"><label>PASSWORD <span class="req">*</span></label><input type="password" id="reg-pwd" placeholder="Min 8 characters" autocomplete="new-password" inputmode="none"></div>
           <div class="err-msg" id="reg-err"></div>
           <div class="ok-msg" id="reg-ok"></div>
           <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="dark" style="margin-bottom:.8rem"></div>
@@ -322,9 +322,9 @@ footer{border-top:1px solid var(--border);padding:2rem 5%;margin-top:auto}
           <div class="card">
             <div class="card-hdr"><span class="card-ht">// CHANGE PASSWORD</span></div>
             <div class="card-body">
-              <div class="fg"><label>CURRENT PASSWORD</label><input type="password" id="pwd-current" placeholder="••••••••"></div>
-              <div class="fg"><label>NEW PASSWORD</label><input type="password" id="pwd-new" placeholder="Min 8 characters"></div>
-              <div class="fg"><label>CONFIRM NEW PASSWORD</label><input type="password" id="pwd-confirm" placeholder="Repeat new password"></div>
+              <div class="fg"><label>CURRENT PASSWORD</label><input type="password" id="pwd-current" placeholder="••••••••" inputmode="none"></div>
+              <div class="fg"><label>NEW PASSWORD</label><input type="password" id="pwd-new" placeholder="Min 8 characters" inputmode="none"></div>
+              <div class="fg"><label>CONFIRM NEW PASSWORD</label><input type="password" id="pwd-confirm" placeholder="Repeat new password" inputmode="none"></div>
               <div class="ok-msg" id="pwd-ok"></div>
               <div class="err-msg" id="pwd-err"></div>
               <button class="btn-outline" onclick="changePassword()">🔐 UPDATE PASSWORD</button>

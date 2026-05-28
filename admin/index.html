@@ -203,7 +203,7 @@ tr:hover td{background:rgba(0,255,65,.025)}
         </div>
         <div class="fg">
           <label>PASSWORD</label>
-          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" inputmode="none">
         </div>
         <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="dark" style="margin-bottom:.8rem"></div>
         <button class="login-btn" id="login-btn" onclick="doLogin()">ACCESS SYSTEM →</button>
@@ -413,7 +413,7 @@ tr:hover td{background:rgba(0,255,65,.025)}
                 <div class="setting-item"><div class="setting-key">smtp_user</div><div class="setting-desc">SMTP username</div><div class="setting-input-wrap"><input type="text" id="setting-smtp_user" placeholder="your@email.com"><button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_user')">SAVE</button></div></div>
                 <div class="setting-item" style="grid-column:1/-1">
                   <div class="setting-key">smtp_pass_enc</div><div class="setting-desc">SMTP password — <span style="color:var(--green)">AES-256-GCM encrypted</span></div>
-                  <div class="setting-input-wrap"><input type="password" id="smtp-pass-input" placeholder="Enter new password to update"><button class="btn btn-amber btn-sm" onclick="saveEncrypted('smtp_pass_enc','smtp-pass-input')">ENCRYPT & SAVE</button></div>
+                  <div class="setting-input-wrap"><input type="password" id="smtp-pass-input" placeholder="Enter new password to update" inputmode="none"><button class="btn btn-amber btn-sm" onclick="saveEncrypted('smtp_pass_enc','smtp-pass-input')">ENCRYPT & SAVE</button></div>
                 </div>
               </div>
             </div>
@@ -422,7 +422,7 @@ tr:hover td{background:rgba(0,255,65,.025)}
               <div class="settings-grid">
                 <div class="setting-item" style="grid-column:1/-1">
                   <div class="setting-key">resend_api_key_enc</div><div class="setting-desc">Resend API Key — <span style="color:var(--green)">encrypted</span></div>
-                  <div class="setting-input-wrap"><input type="password" id="resend-key-input" placeholder="re_xxxxxxxxxxxxxxxx"><button class="btn btn-amber btn-sm" onclick="saveEncrypted('resend_api_key_enc','resend-key-input')">ENCRYPT & SAVE</button></div>
+                  <div class="setting-input-wrap"><input type="password" id="resend-key-input" placeholder="re_xxxxxxxxxxxxxxxx" inputmode="none"><button class="btn btn-amber btn-sm" onclick="saveEncrypted('resend_api_key_enc','resend-key-input')">ENCRYPT & SAVE</button></div>
                 </div>
               </div>
             </div>
@@ -468,7 +468,7 @@ tr:hover td{background:rgba(0,255,65,.025)}
                 <div class="setting-key">paypal_client_secret_enc</div>
                 <div class="setting-desc">PayPal Client Secret — <span style="color:var(--green)">AES-256-GCM encrypted</span></div>
                 <div class="setting-input-wrap">
-                  <input type="password" id="paypal-secret-input" placeholder="Enter Client Secret to update">
+                  <input type="password" id="paypal-secret-input" placeholder="Enter Client Secret to update" inputmode="none">
                   <button class="btn btn-amber btn-sm" onclick="saveEncrypted('paypal_client_secret_enc','paypal-secret-input')">ENCRYPT & SAVE</button>
                 </div>
               </div>
@@ -1182,7 +1182,7 @@ function showAddAdmin() {
     <div class="section-title">// NEW ADMIN ACCOUNT</div>
     <div class="form-group"><label>NAME</label><input type="text" id="na-name" placeholder="Admin Name"></div>
     <div class="form-group"><label>EMAIL</label><input type="email" id="na-email" placeholder="admin@pcbaforge.com"></div>
-    <div class="form-group"><label>PASSWORD</label><input type="password" id="na-pwd" placeholder="Min 8 chars"></div>
+    <div class="form-group"><label>PASSWORD</label><input type="password" id="na-pwd" placeholder="Min 8 chars" inputmode="none"></div>
     <div class="form-group"><label>ROLE</label><select id="na-role"><option value="admin">ADMIN</option><option value="superadmin">SUPERADMIN</option></select></div>
     <button class="btn btn-green" onclick="createAdmin()">CREATE ACCOUNT →</button>`;
 }
@@ -1200,7 +1200,7 @@ function changeAdminPwd(id) {
   document.getElementById('dp-title').textContent = 'CHANGE PASSWORD';
   document.getElementById('dp-body').innerHTML = `
     <div class="section-title">// CHANGE ADMIN PASSWORD</div>
-    <div class="form-group"><label>NEW PASSWORD</label><input type="password" id="new-pwd" placeholder="Min 8 chars"></div>
+    <div class="form-group"><label>NEW PASSWORD</label><input type="password" id="new-pwd" placeholder="Min 8 chars" inputmode="none"></div>
     <button class="btn btn-green" onclick="doChangePwd('${id}')">UPDATE PASSWORD →</button>`;
 }
 
