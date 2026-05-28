@@ -234,7 +234,8 @@ app.get('/api/settings/public', async (req, res) => {
 // 提交询价（文件上传到 R2）
 app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
   try {
-    const { mode, name, email, whatsapp, company, notes, estimate } = req.body;
+    const { mode, name, email, whatsapp, company, notes, estimate, cf_turnstile } = req.body;
+    if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
     if (!name || !email || !mode) return res.status(400).json({ error: 'name, email, mode required' });
 
     const params = {};
@@ -393,6 +394,12 @@ app.post('/api/payment/capture', async (req, res) => {
     // 防止重复捕获
     if (order.status === 'paid' || order.status === 'production') {
       return res.json({ success: true, order });
+    }
+
+    // #6 强校验 payment_intent
+    if (order.payment_intent && order.payment_intent !== paypalOrderId) {
+      console.error('[SECURITY] payment_intent mismatch', order.order_no, order.payment_intent, paypalOrderId);
+      return res.status(400).json({ error: 'Invalid payment token' });
     }
 
     const { token: ppToken, base } = await getPayPalToken();
