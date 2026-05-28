@@ -58,6 +58,10 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 /* ── MODE PANELS ── */
 .mode-panel{display:none}.mode-panel.active{display:block}
 
+/* ── PCB SOURCE NOTICE ── */
+.source-notice{background:rgba(0,255,65,.04);border:1px solid var(--green3);padding:.7rem 1rem;margin-bottom:1rem;font-size:.78rem;color:var(--green);line-height:1.5}
+.source-notice strong{font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.1em;display:block;margin-bottom:.2rem}
+
 /* ── FILE UPLOAD ── */
 .upload-zone{border:2px dashed var(--border);padding:1.8rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--green3);background:rgba(0,255,65,.03)}
@@ -159,7 +163,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   <!-- MODE TABS -->
   <div class="mode-tabs">
     <div class="mtab" data-mode="pcb" id="tab-pcb">PCB FABRICATION</div>
-    <div class="mtab" data-mode="smt" id="tab-smt">PCB + SMT ASSEMBLY</div>
+    <div class="mtab" data-mode="smt" id="tab-smt">SMT + DIP ASSEMBLY</div>
     <div class="mtab" data-mode="turnkey" id="tab-turnkey">FULL TURNKEY + TESTING</div>
   </div>
 
@@ -298,8 +302,25 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
             </div>
           </div>
 
-          <!-- SMT PANEL -->
+          <!-- SMT + DIP PANEL -->
           <div class="mode-panel" id="panel-smt">
+            <!-- PCB SOURCE -->
+            <div class="frow full">
+              <div class="fg">
+                <label>PCB SOURCE <span class="req">*</span></label>
+                <select id="smt-pcb-source" onchange="onPcbSourceChange()">
+                  <option value="customer">I will supply my own PCBs</option>
+                  <option value="us">PCBAForge fabricates the PCB for me</option>
+                </select>
+                <span class="hint">Supplying your own boards? Ship them to our Shenzhen facility.</span>
+              </div>
+            </div>
+            <!-- customer-supplied notice -->
+            <div id="smt-ship-notice" class="source-notice" style="display:none">
+              <strong>// SHIP YOUR BARE BOARDS TO:</strong>
+              深圳市龙岗区利好工业园 · Ligao Industrial Park, Longgang, Shenzhen<br>
+              Contact us via WhatsApp for the full shipping address and receiving confirmation.
+            </div>
             <div class="frow">
               <div class="fg">
                 <label>QUANTITY <span class="req">*</span></label>
@@ -319,9 +340,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
             </div>
             <div class="frow">
               <div class="fg">
-                <label>TOTAL COMPONENTS <span class="req">*</span></label>
+                <label>SMT COMPONENTS (unique) <span class="req">*</span></label>
                 <input type="number" id="smt-parts" value="50" min="1" max="9999">
-                <span class="hint">≥ 200 pcs → manual quote</span>
+                <span class="hint">Total unique SMT part types — ≥ 200 → manual quote</span>
               </div>
               <div class="fg">
                 <label>COMPLEX IC COUNT</label>
@@ -333,13 +354,13 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
               <div class="fg">
                 <label>DIP / THROUGH-HOLE PINS</label>
                 <input type="number" id="smt-dip" value="0" min="0" max="9999">
-                <span class="hint">≤ 100 pins included in flat rate · > 100 → manual quote</span>
+                <span class="hint">Enter 0 if no through-hole components · > 100 pins → manual quote</span>
               </div>
               <div class="fg">
                 <label>COMPONENT SUPPLY <span class="req">*</span></label>
                 <select id="smt-supply">
-                  <option value="customer">Customer supplied</option>
-                  <option value="us">We source (add-on quote)</option>
+                  <option value="customer">Customer supplied (CMS)</option>
+                  <option value="us">We source components (add-on quote)</option>
                 </select>
               </div>
             </div>
@@ -355,7 +376,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
               <div class="info-block-title">// WHAT'S INCLUDED</div>
               <div class="info-block-body">
                 ✔ PCB Fabrication (FR4, multi-layer)<br>
-                ✔ SMT Assembly + DIP Through-Hole<br>
+                ✔ SMT Assembly + DIP Through-Hole Soldering<br>
+                ✔ Component Sourcing (we procure all parts)<br>
                 ✔ Functional Verification (power-on &amp; test)<br>
                 ✔ Engineer Remote Debug Support<br>
                 ✔ 100% AOI Inspection · DFM Review
@@ -365,7 +387,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
               <div class="info-block-title">// WHAT YOU NEED TO PREPARE</div>
               <div class="info-block-body">
                 📁 Gerber files (with stackup &amp; impedance notes)<br>
-                📋 BOM (Bill of Materials)<br>
+                📋 BOM (Bill of Materials) with preferred part numbers<br>
                 📍 Pick &amp; Place / Centroid file<br>
                 📝 Functional test plan or validation document
               </div>
@@ -373,9 +395,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
             <div class="info-block danger">
               <div class="info-block-title">// WE DO NOT ACCEPT</div>
               <div class="info-block-body">
-                ✗ SMT/DIP only (no PCB fabrication)<br>
-                ✗ Through-hole only boards (no SMT)<br>
-                ✗ Power supply / high-voltage boards
+                ✗ Power supply / high-voltage boards (&gt; 48V DC)<br>
+                ✗ Projects without a functional test plan
               </div>
             </div>
           </div>
@@ -397,8 +418,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div style="margin-top:.8rem;font-size:.75rem;color:var(--muted);line-height:1.8" id="file-hint">
             <strong style="color:var(--white);font-family:'Share Tech Mono',monospace;font-size:.68rem">REQUIRED FILES:</strong><br>
             PCB Only: Gerber files (ZIP or individual .gbr / .drl)<br>
-            SMT Assembly: Gerber + BOM + Pick &amp; Place coordinates<br>
-            Turnkey: Gerber + BOM + Pick &amp; Place + Functional test plan
+            SMT + DIP Assembly: BOM + Pick &amp; Place coordinates (+ Gerber if we make the PCB)<br>
+            Full Turnkey: Gerber + BOM + Pick &amp; Place + Functional test plan
           </div>
         </div>
       </div>
@@ -414,8 +435,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
             </div>
           </div>
           <div style="font-size:.78rem;color:var(--muted);line-height:1.7;margin-top:.5rem">
-            📦 Customer-supplied components ship to:<br>
-            <strong style="color:var(--white)">深圳市龙岗区利好工业园 · Ligao Industrial Park, Longgang, Shenzhen</strong>
+            📦 Customer-supplied PCBs &amp; components ship to:<br>
+            <strong style="color:var(--white)" class="shipping-addr">深圳市龙岗区利好工业园 · Ligao Industrial Park, Longgang, Shenzhen</strong>
           </div>
         </div>
       </div>
@@ -439,6 +460,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
         <div class="card-body">
           <div class="rrows">
             <div class="rrow"><span class="rl">Service</span><span class="rv g" id="s-mode">PCB Fabrication</span></div>
+            <div class="rrow"><span class="rl">PCB source</span><span class="rv" id="s-pcb-source" style="display:none">—</span></div>
             <div class="rrow"><span class="rl">Quote type</span><span class="rv" id="s-qtype">—</span></div>
             <div class="rrow"><span class="rl">Est. price</span><span class="rv g" id="s-price">—</span></div>
             <div class="rrow"><span class="rl">Includes</span><span class="rv" id="s-includes">DFM Review · AOI</span></div>
@@ -512,9 +534,8 @@ function updateAuthUI() {
   if (currentUser) {
     bar.innerHTML = '<span style="font-size:.8rem;color:var(--green)">▶ ' + currentUser.name + '</span>' +
       ' <button onclick="logout()" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:.2rem .6rem;cursor:pointer;margin-left:.5rem">Sign Out</button>';
-    // 如果有名字/邮箱，预填联系信息
-    if (currentUser.name)  { var n=document.getElementById('name');  if(n&&!n.value) n.value=currentUser.name; }
-    if (currentUser.email) { var e=document.getElementById('email'); if(e&&!e.value) e.value=currentUser.email; }
+    if (currentUser.name)     { var n=document.getElementById('name');     if(n&&!n.value) n.value=currentUser.name; }
+    if (currentUser.email)    { var e=document.getElementById('email');    if(e&&!e.value) e.value=currentUser.email; }
     if (currentUser.whatsapp) { var w=document.getElementById('whatsapp'); if(w&&!w.value) w.value=currentUser.whatsapp; }
     if (currentUser.company)  { var c=document.getElementById('company');  if(c&&!c.value) c.value=currentUser.company; }
   } else {
@@ -530,6 +551,14 @@ function logout() {
   updateAuthUI();
 }
 
+// ── PCB SOURCE CHANGE ────────────────────────────────
+function onPcbSourceChange() {
+  var src = document.getElementById('smt-pcb-source').value;
+  var notice = document.getElementById('smt-ship-notice');
+  notice.style.display = (src === 'customer') ? 'block' : 'none';
+  updateSummary();
+}
+
 // ── MODE SWITCHING ────────────────────────────────────
 function setMode(mode) {
   currentMode = mode;
@@ -537,10 +566,15 @@ function setMode(mode) {
   document.querySelectorAll('.mode-panel').forEach(function(p){ p.classList.remove('active'); });
   document.getElementById('tab-' + mode).classList.add('active');
   document.getElementById('panel-' + mode).classList.add('active');
-  var titles = { pcb:'02 · PCB PARAMETERS', smt:'02 · SMT ASSEMBLY PARAMETERS', turnkey:'02 · FULL TURNKEY + TESTING' };
+  var titles = { pcb:'02 · PCB PARAMETERS', smt:'02 · SMT + DIP ASSEMBLY PARAMETERS', turnkey:'02 · FULL TURNKEY + TESTING' };
   document.getElementById('params-title').textContent = titles[mode];
-  var modeLabels = { pcb:'PCB Fabrication', smt:'PCB + SMT Assembly', turnkey:'Full Turnkey + Testing' };
+  var modeLabels = { pcb:'PCB Fabrication', smt:'SMT + DIP Assembly', turnkey:'Full Turnkey + Testing' };
   document.getElementById('s-mode').textContent = modeLabels[mode];
+  // 显示/隐藏 PCB source 摘要行
+  var srcRow = document.getElementById('s-pcb-source');
+  srcRow.parentElement.style.display = (mode === 'smt') ? 'flex' : 'none';
+  // 切换时重置 ship notice
+  if (mode === 'smt') onPcbSourceChange();
   updateSummary();
 }
 
@@ -564,12 +598,13 @@ function prefillFromParams() {
     if (params.get('color'))    setVal('pcb-color',    params.get('color'));
   }
   if (currentMode === 'smt') {
-    if (params.get('qty'))    setVal('smt-qty',    params.get('qty'));
-    if (params.get('sides'))  setVal('smt-sides',  params.get('sides'));
-    if (params.get('parts'))  setVal('smt-parts',  params.get('parts'));
-    if (params.get('ic'))     setVal('smt-ic',     params.get('ic'));
-    if (params.get('dip'))    setVal('smt-dip',    params.get('dip'));
-    if (params.get('supply')) setVal('smt-supply', params.get('supply'));
+    if (params.get('qty'))        setVal('smt-qty',        params.get('qty'));
+    if (params.get('sides'))      setVal('smt-sides',      params.get('sides'));
+    if (params.get('parts'))      setVal('smt-parts',      params.get('parts'));
+    if (params.get('ic'))         setVal('smt-ic',         params.get('ic'));
+    if (params.get('dip'))        setVal('smt-dip',        params.get('dip'));
+    if (params.get('supply'))     setVal('smt-supply',     params.get('supply'));
+    if (params.get('pcb_source')) setVal('smt-pcb-source', params.get('pcb_source'));
   }
   if (params.get('estimate')) {
     var banner = document.getElementById('estimate-banner');
@@ -580,7 +615,6 @@ function prefillFromParams() {
     if (params.get('sides')) detail.push(params.get('sides') === 'single' ? 'Single Side' : 'Double Side');
     document.getElementById('eb-detail').textContent = detail.join(' · ') || '—';
   }
-  // prefill 后重新计算摘要
   updateSummary();
 }
 
@@ -622,24 +656,29 @@ function updateSummary() {
     var dip    = parseInt(document.getElementById('smt-dip').value)    || 0;
     var supply = document.getElementById('smt-supply').value;
     var sides  = document.getElementById('smt-sides').value;
+    var pcbSrc = document.getElementById('smt-pcb-source').value;
     var isM    = (qty2 === 'manual' || parts >= 200 || ic >= 10 || dip > 100 || supply === 'us');
+    // 更新摘要行 PCB source
+    var srcEl = document.getElementById('s-pcb-source');
+    srcEl.textContent = (pcbSrc === 'customer') ? 'Customer supplied' : 'PCBAForge fabricates';
+    srcEl.className   = (pcbSrc === 'customer') ? 'rv a' : 'rv g';
     if (isM) {
       setSummary('Manual Quote','rv a','To be confirmed','rv a','SMT + DIP + Stencil + AOI','obtn manual');
     } else {
       var base = sides === 'single' ? 200 : 400;
-      setSummary('Standard — Est. price shown','rv g','FROM $'+base+' (all-in)','rv g','SMT + DIP(≤100 pins) + Stencil + AOI','obtn');
+      setSummary('Standard — Est. price shown','rv g','FROM $'+base+' (assembly only)','rv g','SMT + DIP(≤100 pins) + Stencil + AOI','obtn');
     }
   } else {
     // turnkey
-    setSummary('Manual Quote','rv a','To be confirmed','rv a','PCB + SMT + DIP + Functional Test','obtn manual');
+    setSummary('Manual Quote','rv a','To be confirmed','rv a','PCB + SMT + DIP + Parts + Functional Test','obtn manual');
   }
 }
 
 function setSummary(qtype, qtypeClass, price, priceClass, includes, btnClass) {
-  document.getElementById('s-qtype').textContent   = qtype;
-  document.getElementById('s-qtype').className     = qtypeClass;
-  document.getElementById('s-price').textContent   = price;
-  document.getElementById('s-price').className     = priceClass;
+  document.getElementById('s-qtype').textContent    = qtype;
+  document.getElementById('s-qtype').className      = qtypeClass;
+  document.getElementById('s-price').textContent    = price;
+  document.getElementById('s-price').className      = priceClass;
   document.getElementById('s-includes').textContent = includes;
   document.getElementById('submit-btn').className   = btnClass;
 }
@@ -705,12 +744,13 @@ function collectFormData() {
     fd.append('pcb_finish',    document.getElementById('pcb-finish').value);
     fd.append('pcb_color',     document.getElementById('pcb-color').value);
   } else if (currentMode === 'smt') {
-    fd.append('smt_qty',    document.getElementById('smt-qty').value);
-    fd.append('smt_sides',  document.getElementById('smt-sides').value);
-    fd.append('smt_parts',  document.getElementById('smt-parts').value);
-    fd.append('smt_ic',     document.getElementById('smt-ic').value);
-    fd.append('smt_dip',    document.getElementById('smt-dip').value);
-    fd.append('smt_supply', document.getElementById('smt-supply').value);
+    fd.append('smt_pcb_source', document.getElementById('smt-pcb-source').value);
+    fd.append('smt_qty',        document.getElementById('smt-qty').value);
+    fd.append('smt_sides',      document.getElementById('smt-sides').value);
+    fd.append('smt_parts',      document.getElementById('smt-parts').value);
+    fd.append('smt_ic',         document.getElementById('smt-ic').value);
+    fd.append('smt_dip',        document.getElementById('smt-dip').value);
+    fd.append('smt_supply',     document.getElementById('smt-supply').value);
   }
   selectedFiles.forEach(function(f){ fd.append('files', f); });
   return fd;
@@ -759,7 +799,6 @@ document.getElementById('inquiry-form').addEventListener('submit', function(e){
 // ── 注册/登录弹窗 ────────────────────────────────────
 function showAuthModal() {
   document.getElementById('auth-modal').style.display = 'flex';
-  // 预填邮箱
   var email = document.getElementById('email').value;
   var name  = document.getElementById('name').value;
   if (email) document.getElementById('modal-email').value  = email;
@@ -768,7 +807,6 @@ function showAuthModal() {
 function hideAuthModal() {
   document.getElementById('auth-modal').style.display = 'none';
 }
-// 切 tab
 document.addEventListener('DOMContentLoaded', function(){
   document.querySelectorAll('.modal-tab').forEach(function(t){
     t.addEventListener('click', function(){
@@ -784,7 +822,6 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
-// 注册提交
 document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('modal-register-form').addEventListener('submit', async function(e){
     e.preventDefault();
@@ -800,7 +837,6 @@ document.addEventListener('DOMContentLoaded', function(){
       });
       var data = await res.json();
       if (data.success) {
-        // 注册成功 → 自动登录
         var loginRes  = await fetch('/api/auth/login', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ email, password })
@@ -810,7 +846,6 @@ document.addEventListener('DOMContentLoaded', function(){
           authToken   = loginData.token;
           currentUser = loginData.user;
           localStorage.setItem('cc_token', authToken);
-          // 把表单里填的名字/邮箱/whatsapp/company 同步到账号
           var fd2 = collectFormData();
           await fetch('/api/me', {
             method:'PUT', headers:{'Authorization':'Bearer '+authToken,'Content-Type':'application/json'},
@@ -831,7 +866,6 @@ document.addEventListener('DOMContentLoaded', function(){
     } catch(err) { errEl.textContent = 'Network error. Please try again.'; }
   });
 
-  // 登录提交
   document.getElementById('modal-login-form').addEventListener('submit', async function(e){
     e.preventDefault();
     var email    = document.getElementById('modal-login-email').value;
@@ -862,18 +896,15 @@ fetch('/api/settings/public').then(r=>r.json()).then(cfg=>{
   const wa = cfg.whatsapp_number || '';
   if(wa){
     const waNum = wa.replace(/[^0-9]/g,'');
-    // 更新所有 WA 链接
-    document.querySelectorAll('a[href*="wa.me/YOUR_NUMBER"], a.waf').forEach(el=>{
+    document.querySelectorAll('[href*="wa.me/YOUR_NUMBER"], a.waf').forEach(el=>{
       el.href = el.href.replace('YOUR_NUMBER', waNum).replace('wa.me/', 'wa.me/' + waNum).replace(/wa\.me\/[^?]+/, 'wa.me/' + waNum);
     });
     document.querySelectorAll('[href*="wa.me"]').forEach(el=>{
       if(el.href.includes('YOUR_NUMBER')) el.href = el.href.replace('YOUR_NUMBER', waNum);
     });
   }
-  // 更新收件地址
   if(cfg.shipping_address){
     document.querySelectorAll('[data-shipping-address]').forEach(el=>{ el.textContent = cfg.shipping_address; });
-    // 也更新硬编码的地址文字
     document.querySelectorAll('.shipping-addr').forEach(el=>{ el.textContent = cfg.shipping_address; });
   }
 }).catch(()=>{});
@@ -890,7 +921,7 @@ checkAuth();
       <a href="index.html#services">Services</a><a href="index.html#quote">Get Quote</a><a href="index.html#capabilities">Capabilities</a>
       <a href="index.html#process">Process</a><a href="quote.html">Submit Inquiry</a><a href="track.html">Track Order</a>
     </div>
-    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
 </footer>
 
@@ -908,13 +939,11 @@ checkAuth();
     </div>
     <div style="padding:1.2rem">
       <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">Create an account to track your order history and manage your profile. Your filled-in details will be saved automatically.</p>
-      <!-- tab 切换 -->
       <div style="display:flex;border:1px solid var(--border);margin-bottom:1.2rem">
         <div class="modal-tab active" data-tab="register" style="flex:1;padding:.6rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;cursor:pointer;background:var(--green);color:#000;font-weight:700">REGISTER</div>
         <div class="modal-tab" data-tab="login" style="flex:1;padding:.6rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;cursor:pointer;color:var(--muted)">SIGN IN</div>
       </div>
 
-      <!-- 注册 panel -->
       <div id="modal-panel-register" class="modal-panel active">
         <form id="modal-register-form" style="display:flex;flex-direction:column;gap:.8rem">
           <div style="display:flex;flex-direction:column;gap:.3rem">
@@ -935,7 +964,6 @@ checkAuth();
         <p style="font-size:.72rem;color:var(--muted);margin-top:.8rem;text-align:center">Already have an account? <span style="color:var(--green);cursor:pointer" onclick="document.querySelector('[data-tab=login]').click()">Sign in</span></p>
       </div>
 
-      <!-- 登录 panel -->
       <div id="modal-panel-login" class="modal-panel" style="display:none">
         <form id="modal-login-form" style="display:flex;flex-direction:column;gap:.8rem">
           <div style="display:flex;flex-direction:column;gap:.3rem">
@@ -952,7 +980,6 @@ checkAuth();
         <p style="font-size:.72rem;color:var(--muted);margin-top:.8rem;text-align:center">No account? <span style="color:var(--green);cursor:pointer" onclick="document.querySelector('[data-tab=register]').click()">Register free</span></p>
       </div>
 
-      <!-- 访客继续 -->
       <div style="text-align:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
         <button onclick="hideAuthModal();doSubmit(collectFormData());" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.78rem;padding:.5rem 1.2rem;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:.08em">CONTINUE AS GUEST →</button>
       </div>
@@ -972,7 +999,6 @@ checkAuth();
   var wafEl = document.querySelector('.waf');
   var bwaEl = document.querySelector('.bwa');
   var waLinks = document.querySelectorAll('[href^="https://wa.me"]');
-  // 先隐藏所有 WA 按钮
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
   fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
