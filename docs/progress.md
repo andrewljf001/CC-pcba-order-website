@@ -8,7 +8,7 @@
 
 ## 📌 当前阶段
 
-🟡 **Phase 7 进行中 — 下一步：Phase 5 支付接入（PayPal）**
+🟢 **Phase 5 支付接入完成！下一步：Phase 6 本地同步工具 或 继续 Phase 7 优化**
 
 ---
 
@@ -19,14 +19,28 @@ Phase 1  业务架构定稿 & 首页 DEMO              ✅ 完成
 Phase 2  报价计算器（三模式 + 前端模块建设）    ✅ 完成
 Phase 3  后端基础 & 用户体系 & 询价下单        ✅ 完成
 Phase 4  运营后台 + 架构迁移 + VPS 部署        ✅ 完成
-Phase 5  支付接入                              ⬜ 待开始
+Phase 5  支付接入                              ✅ 完成
 Phase 6  本地同步工具（Mac）                   ⬜ 待开始
-Phase 7  上线优化 & 运营功能                   🟡 进行中（大部分完成）
+Phase 7  上线优化 & 运营功能                   🟡 进行中
 ```
 
 ---
 
-## ✅ Phase 1~4（全部完成）
+## ✅ Phase 1~5（全部完成）
+
+---
+
+## ✅ Phase 5 — PayPal 支付接入（完成）
+
+| # | 任务 | 状态 | 备注 |
+|---|------|------|------|
+| 5.1 | PayPal 后端 API | ✅ 完成 | 创建订单、捕获付款 |
+| 5.2 | track.html PAY NOW 按钮 | ✅ 完成 | Quoted 状态自动显示 |
+| 5.3 | payment-success.html | ✅ 完成 | 支付成功确认页 |
+| 5.4 | 支付成功后状态自动更新 | ✅ 完成 | 自动更新为 production |
+| 5.5 | 付款确认邮件 | ✅ 完成 | 客户+管理员双向通知 |
+| 5.6 | 后台 PayPal 配置 | ✅ 完成 | Client ID/Secret 加密存储，支持切换 live/sandbox |
+| 5.7 | PingPong 支付 | ❌ 不做 | 只做 PayPal |
 
 ---
 
@@ -61,18 +75,6 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中（大部�
 | 7.25 | 忘记密码功能（前台） | ✅ 完成 | 邮件重置链接，1小时过期 |
 | 7.26 | 后台管理员重置客户密码 | ✅ 完成 | 客户详情页 Reset Password 按钮 |
 | 7.27 | 全站 nav/footer 统一 | ✅ 完成 | Blog、法律页链接全部对齐 |
-
----
-
-## ⏳ Phase 5 — 支付接入（下一步）
-
-| # | 任务 | 状态 |
-|---|------|------|
-| 5.1 | PayPal 支付接入 | ⬜ 待开始 |
-| 5.2 | PingPong 支付接入 | ⬜ 待开始 |
-| 5.3 | 运费补付流程 | ⬜ 待开始 |
-| 5.4 | 支付成功后状态自动更新 | ⬜ 待开始 |
-| 5.5 | track.html Quoted 状态显示支付按钮 | ⬜ 待开始 |
 
 ---
 
@@ -117,7 +119,7 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中（大部�
 - 新增法律页面：privacy.html + shipping.html + terms.html
 - 全站 nav/footer 统一
 
-### 2026-05-28
+### 2026-05-28（上午/下午）
 - 安全加固全面完成（UFW、Nginx限流、Turnstile、SSL、Bot Fight）
 - PM2 开机自启配置完成
 - 安全手册 docs/security.md
@@ -125,8 +127,18 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中（大部�
 - Zoho Mail 配置：admin@pcbaforge.com，MX/SPF/DKIM/DMARC 全部验证通过
 - SMTP 接入后台设置，AES-256-GCM 加密存储密码
 - 忘记密码功能：前台发重置邮件 + 后台管理员一键重置
-- 后台博客编辑器面板 bug 修复（默认隐藏，ESC/✕ 关闭）
-- 邮件系统全面打通：注册验证、询价通知、报价邮件、密码重置
+- 后台博客编辑器面板 bug 修复
+
+### 2026-05-28（晚上）
+- **Phase 5 支付接入完成！**
+- PayPal 新建应用 PCBAForge（Live 模式）
+- 后端：/api/payment/create、/api/payment/capture、/api/payment/config
+- track.html：quoted 状态自动显示 PayPal 支付按钮
+- payment-success.html：支付成功确认页（含生产时间表）
+- 支付成功后自动更新订单为 production
+- 客户+管理员双向邮件通知
+- 后台 Settings 加 PayPal 配置区（Client ID/Secret 加密，live/sandbox 切换）
+- 完整业务闭环：询价→报价→付款→生产 全部打通
 
 ---
 
