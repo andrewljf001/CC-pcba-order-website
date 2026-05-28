@@ -97,59 +97,39 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .pay-item-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.2rem}
 .pay-item-val{font-size:.9rem;color:var(--white)}
 
-/* ── 支付按钮区 ── */
+/* ── 支付按钮 ── */
 .pay-btns{max-width:400px;margin:0 auto;display:flex;flex-direction:column;gap:.75rem}
-
-/* PayPal 隐藏容器（SDK 需要 DOM 节点，但我们不展示它的按钮） */
-.pp-sdk-hidden{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;left:-9999px}
-
-/* 自定义支付按钮 */
 .pay-btn{
-  display:flex;align-items:center;justify-content:center;gap:.6rem;
+  display:flex;align-items:center;justify-content:center;gap:.65rem;
   width:100%;height:52px;border:none;cursor:pointer;
-  font-family:'Share Tech Mono',monospace;font-size:.82rem;letter-spacing:.1em;
-  transition:opacity .2s,transform .1s;position:relative;overflow:hidden;
+  font-size:.84rem;letter-spacing:.06em;
+  transition:opacity .18s,transform .1s;
 }
-.pay-btn:hover{opacity:.88}
+.pay-btn:hover{opacity:.86}
 .pay-btn:active{transform:scale(.98)}
-.pay-btn:disabled{opacity:.4;cursor:not-allowed}
+.pay-btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
 .pay-btn svg{flex-shrink:0}
 
-/* PayPal — 黑底绿字极客风 */
+/* PayPal — 黑底 + 绿边 + Orbitron */
 .pay-btn-paypal{
-  background:var(--bg3);
-  border:1px solid var(--green3);
-  color:var(--green);
+  background:var(--bg3);border:1px solid var(--green3);color:var(--green);
 }
-.pay-btn-paypal .btn-label{font-family:'Orbitron',monospace;font-size:.75rem;font-weight:700;letter-spacing:.12em}
+.pay-btn-paypal .lbl{font-family:'Orbitron',monospace;font-weight:700;font-size:.76rem;letter-spacing:.14em}
 
-/* Apple Pay — 纯黑（苹果品牌规范） */
-.pay-btn-apple{
-  background:#000;
-  border:1px solid #333;
-  color:#fff;
-}
-.pay-btn-apple .btn-label{font-family:-apple-system,'SF Pro Display','Helvetica Neue',sans-serif;font-size:.88rem;font-weight:500;letter-spacing:.02em}
+/* Google Pay — 深灰底 白字 */
+.pay-btn-google{background:#1c1c1c;border:1px solid #2e2e2e;color:#fff}
+.pay-btn-google .lbl{font-family:'DM Sans',sans-serif;font-weight:500;font-size:.85rem}
 
-/* Google Pay — 深灰（Google 品牌规范） */
-.pay-btn-google{
-  background:#1a1a1a;
-  border:1px solid #333;
-  color:#fff;
-}
-.pay-btn-google .btn-label{font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;letter-spacing:.02em}
+/* Apple Pay — 纯黑底 白字（苹果品牌规范） */
+.pay-btn-apple{background:#000;border:1px solid #2a2a2a;color:#fff}
+.pay-btn-apple .lbl{font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif;font-weight:500;font-size:.85rem;letter-spacing:.01em}
 
 /* OR 分隔线 */
-.pay-or{display:flex;align-items:center;gap:.5rem;font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.12em}
+.pay-or{display:flex;align-items:center;gap:.5rem;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.14em}
 .pay-or::before,.pay-or::after{content:'';flex:1;height:1px;background:var(--border)}
 
-/* 处理中遮罩 */
-.pay-processing{
-  display:none;text-align:center;padding:1rem;
-  color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.8rem;
-}
-
-.pay-secure{font-size:.72rem;color:var(--muted);margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.pay-processing{display:none;text-align:center;padding:1rem;color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.8rem}
+.pay-secure{font-size:.7rem;color:var(--muted);margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:.35rem;flex-wrap:wrap}
 
 @media(max-width:560px){
   .info-grid{grid-template-columns:1fr 1fr}
@@ -169,7 +149,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 </style>
 </head>
 <body>
-
 <nav>
   <a href="index.html" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <ul class="nav-links">
@@ -188,7 +167,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   <div class="page-label">// ORDER TRACKING</div>
   <h1 class="page-title">Track Your Order</h1>
   <p class="page-sub">Enter your order number and email to check real-time status.</p>
-
   <div class="search-card">
     <div class="search-hdr"><span class="search-ht">ENTER ORDER NUMBER</span></div>
     <div class="search-body">
@@ -204,7 +182,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
       <div class="search-hint">» Order number was emailed to you after submission (format: CC + timestamp)</div>
     </div>
   </div>
-
   <div class="result" id="result"></div>
 </div>
 
@@ -233,87 +210,77 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 </a>
 
 <script>
-// ── 全局状态 ──────────────────────────────────────────────
-var ppLoaded = false;
-var ppSdkMode = '';
-var ppButtons = {};  // { paypal, googlepay, applepay } — SDK Button 实例
+/* ══════════════════════════════════════════════════════════
+   GLOBALS
+══════════════════════════════════════════════════════════ */
+var IS_APPLE = !!(
+  /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+  (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1) ||
+  window.ApplePaySession
+);
 
-// 在加载 SDK 前检测苹果设备（避免非苹果设备加载 Apple Pay）
-var IS_APPLE = (function() {
-  // Safari on macOS / iOS / iPadOS
-  var ua = navigator.userAgent || '';
-  return /iPhone|iPad|iPod/i.test(ua) ||
-         (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) ||
-         (typeof window.ApplePaySession !== 'undefined');
-})();
+var _orderNo = '', _total = '0.00', _email = '';
 
-const STEPS = [
-  {key:'pending',    label:'INQUIRY RECEIVED',  desc:'Your inquiry has been received and is pending review by our team.'},
-  {key:'quoted',     label:'QUOTE SENT',         desc:'A detailed quotation has been sent to your email. Please proceed with payment below.'},
-  {key:'paid',       label:'PAYMENT CONFIRMED',  desc:'Payment received. Your order is queued for production.'},
-  {key:'production', label:'IN PRODUCTION',      desc:'Your PCBs and assemblies are being manufactured on our production line.'},
-  {key:'shipped',    label:'SHIPPED',            desc:'Your order has been dispatched. Tracking information is below.'},
-  {key:'completed',  label:'COMPLETED',          desc:'Order delivered successfully. Thank you for choosing PCBAForge!'},
+const STEPS=[
+  {key:'pending',   label:'INQUIRY RECEIVED',  desc:'Your inquiry has been received and is pending review by our team.'},
+  {key:'quoted',    label:'QUOTE SENT',         desc:'A detailed quotation has been sent to your email. Please proceed with payment below.'},
+  {key:'paid',      label:'PAYMENT CONFIRMED',  desc:'Payment received. Your order is queued for production.'},
+  {key:'production',label:'IN PRODUCTION',      desc:'Your PCBs and assemblies are being manufactured on our production line.'},
+  {key:'shipped',   label:'SHIPPED',            desc:'Your order has been dispatched. Tracking information is below.'},
+  {key:'completed', label:'COMPLETED',          desc:'Order delivered successfully. Thank you for choosing PCBAForge!'},
 ];
-const STATUS_CLASS = {pending:'s-pending',quoted:'s-quoted',paid:'s-paid',production:'s-production',shipped:'s-shipped',completed:'s-completed',cancelled:'s-cancelled'};
-
+const SC={pending:'s-pending',quoted:'s-quoted',paid:'s-paid',production:'s-production',shipped:'s-shipped',completed:'s-completed',cancelled:'s-cancelled'};
 function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtDate(s){if(!s)return'—';try{return new Date(s.includes('T')?s:s+' UTC').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch{return s;}}
 
-// ── 追踪 ─────────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════════
+   TRACK
+══════════════════════════════════════════════════════════ */
 function doTrack(){
-  const no    = document.getElementById('orderInput').value.trim().toUpperCase();
-  const email = document.getElementById('emailInput').value.trim();
+  const no=document.getElementById('orderInput').value.trim().toUpperCase();
+  const em=document.getElementById('emailInput').value.trim();
   if(!no){alert('Please enter your order number.');return;}
-  if(!email){alert('Please enter your email address.');return;}
-  const btn = document.getElementById('trackBtn');
+  if(!em){alert('Please enter your email address.');return;}
+  const btn=document.getElementById('trackBtn');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SEARCHING';
-  fetch('/api/order/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_no:no,email})})
+  fetch('/api/order/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_no:no,email:em})})
     .then(r=>r.json())
-    .then(d=>{btn.disabled=false;btn.textContent='TRACK';if(d.error)renderError();else renderResult(d);})
-    .catch(()=>{btn.disabled=false;btn.textContent='TRACK';renderNetError();});
+    .then(d=>{btn.disabled=false;btn.textContent='TRACK';d.error?renderError():renderResult(d);})
+    .catch(()=>{btn.disabled=false;btn.textContent='TRACK';renderNetErr();});
 }
 function renderError(){
   document.getElementById('result').innerHTML='<div class="msg-box"><div class="msg-icon">🔍</div><div class="msg-title">Order Not Found</div><div class="msg-sub">Please double-check your order number and email address.</div></div>';
   document.getElementById('result').className='result show';
 }
-function renderNetError(){
+function renderNetErr(){
   document.getElementById('result').innerHTML='<div class="msg-box"><div class="msg-icon">⚠️</div><div class="msg-title">Connection Error</div><div class="msg-sub">Unable to reach the server. Please try again.</div></div>';
   document.getElementById('result').className='result show';
 }
 
-// ── 渲染结果 ──────────────────────────────────────────────
+/* ══════════════════════════════════════════════════════════
+   RENDER RESULT
+══════════════════════════════════════════════════════════ */
 function renderResult(d){
-  const isCancelled = d.status==='cancelled';
-  const stepIdx = STEPS.findIndex(s=>s.key===d.status);
-  const isQuoted = d.status==='quoted' && d.quoted_price;
+  const isCancelled=d.status==='cancelled';
+  const stepIdx=STEPS.findIndex(s=>s.key===d.status);
+  const isQuoted=d.status==='quoted'&&d.quoted_price;
 
-  let tlHtml='';
-  if(!isCancelled){
-    tlHtml=STEPS.map((s,i)=>{
-      const cls=i<stepIdx?'done':i===stepIdx?'active':'';
-      return `<div class="tl-step ${cls}"><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-content"><div class="tl-name">${s.label}</div>${cls==='active'?`<div class="tl-desc">${s.desc}</div>`:''}</div></div>`;
-    }).join('');
-  } else {
-    tlHtml='<div class="tl-step"><div class="tl-left"><div class="tl-dot" style="border-color:var(--red);background:var(--red)"></div></div><div class="tl-content"><div class="tl-name" style="color:var(--red)">ORDER CANCELLED</div><div class="tl-desc">This order has been cancelled.</div></div></div>';
-  }
+  const tlHtml=isCancelled
+    ?'<div class="tl-step"><div class="tl-left"><div class="tl-dot" style="border-color:var(--red);background:var(--red)"></div></div><div class="tl-content"><div class="tl-name" style="color:var(--red)">ORDER CANCELLED</div><div class="tl-desc">This order has been cancelled.</div></div></div>'
+    :STEPS.map((s,i)=>{const c=i<stepIdx?'done':i===stepIdx?'active':'';return`<div class="tl-step ${c}"><div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-content"><div class="tl-name">${s.label}</div>${c==='active'?`<div class="tl-desc">${s.desc}</div>`:''}</div></div>`;}).join('');
 
   let extras='';
-  if(d.admin_note) extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM PCBAForge TEAM</span></div><div class="note-body">${esc(d.admin_note)}</div></div>`;
-  if(d.tracking_no) extras+=`<div class="note-card" style="border-color:#1565C0"><div class="note-hdr" style="background:rgba(21,101,192,.15)"><span class="note-ht" style="color:#64B5F6">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
+  if(d.admin_note)extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM PCBAForge TEAM</span></div><div class="note-body">${esc(d.admin_note)}</div></div>`;
+  if(d.tracking_no)extras+=`<div class="note-card" style="border-color:#1565C0"><div class="note-hdr" style="background:rgba(21,101,192,.15)"><span class="note-ht" style="color:#64B5F6">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
 
   const total=(parseFloat(d.quoted_price||0)+parseFloat(d.shipping_fee||0)).toFixed(2);
-
-  // 安全标志文字根据设备决定是否显示 Apple Pay
-  const secureText = IS_APPLE
-    ? '🔒 Secured by PayPal · Apple Pay · Google Pay · SSL'
-    : '🔒 Secured by PayPal · Google Pay · SSL Encrypted';
+  const secLine=IS_APPLE?'🔒 PayPal · Apple Pay · Google Pay · SSL':'🔒 PayPal · Google Pay · SSL Encrypted';
 
   document.getElementById('result').innerHTML=`
     <div class="order-top">
       <div class="order-top-hdr">
         <div class="order-no">${esc(d.order_no)}</div>
-        <div class="status-pill ${STATUS_CLASS[d.status]||'s-pending'}">${(d.status||'pending').toUpperCase()}</div>
+        <div class="status-pill ${SC[d.status]||'s-pending'}">${(d.status||'pending').toUpperCase()}</div>
       </div>
       <div class="order-top-body">
         <div class="info-grid">
@@ -326,20 +293,14 @@ function renderResult(d){
         </div>
       </div>
     </div>
-
     <div class="timeline-card">
       <div class="timeline-hdr"><span class="timeline-ht">// PROGRESS TIMELINE</span></div>
       <div class="timeline-body"><div class="tl">${tlHtml}</div></div>
     </div>
-
     ${extras}
-
-    ${isQuoted ? `
+    ${isQuoted?`
     <div class="pay-card">
-      <div class="pay-hdr">
-        <span style="font-size:1.1rem">💳</span>
-        <span class="pay-ht">// COMPLETE YOUR PAYMENT</span>
-      </div>
+      <div class="pay-hdr"><span style="font-size:1.1rem">💳</span><span class="pay-ht">// COMPLETE YOUR PAYMENT</span></div>
       <div class="pay-body">
         <div class="pay-amount">$${total}</div>
         <div class="pay-amount-sub">Total amount due (USD)</div>
@@ -347,287 +308,258 @@ function renderResult(d){
           <div class="pay-item"><div class="pay-item-label">PCBA SERVICE</div><div class="pay-item-val">$${Number(d.quoted_price).toFixed(2)}</div></div>
           ${d.shipping_fee?`<div class="pay-item"><div class="pay-item-label">SHIPPING</div><div class="pay-item-val">$${Number(d.shipping_fee).toFixed(2)}</div></div>`:''}
         </div>
-
-        <!-- 自定义支付按钮组 -->
         <div class="pay-btns" id="pay-btns">
           <div style="text-align:center;padding:.8rem;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.75rem">
             <span class="spinner light"></span> Loading payment options...
           </div>
         </div>
-
-        <!-- 处理中提示 -->
-        <div class="pay-processing" id="pay-processing">
-          <span class="spinner light"></span> Processing payment...
-        </div>
-
-        <!-- PayPal SDK 隐藏容器（SDK 必须有 DOM 节点才能初始化） -->
-        <div class="pp-sdk-hidden">
-          <div id="pp-sdk-paypal"></div>
-          <div id="pp-sdk-googlepay"></div>
-          <div id="pp-sdk-applepay"></div>
-        </div>
-
-        <div class="pay-secure">${secureText}</div>
+        <div class="pay-processing" id="pay-processing"><span class="spinner light"></span> Processing payment...</div>
+        <div class="pay-secure">${secLine}</div>
       </div>
-    </div>` : ''}
-
+    </div>`:''}
     <div class="actions">
       <a href="quote.html" class="act-btn primary">Submit New Inquiry</a>
       <a href="index.html" class="act-btn">← Back to Home</a>
-    </div>
-  `;
+    </div>`;
 
   document.getElementById('result').className='result show';
-  if(isQuoted) initPayment(d.order_no, total);
-}
-
-// ── 创建 & 捕获 PayPal 订单（三种支付共用） ──────────────
-async function createPayPalOrder(order_no){
-  const email=document.getElementById('emailInput').value.trim();
-  const res=await fetch('/api/payment/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_no,email})});
-  const data=await res.json();
-  if(!res.ok) throw new Error(data.error||'Failed to create order');
-  return data.paypal_order_id;
-}
-
-async function capturePayPalOrder(order_no, orderID){
-  showProcessing(true);
-  const res=await fetch('/api/payment/capture',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_no,token:orderID})});
-  const result=await res.json();
-  if(result.success){
-    window.location.href=`/payment-success.html?order=${order_no}&token=${orderID}`;
-  } else {
-    showProcessing(false);
-    throw new Error(result.error||'Capture failed');
+  if(isQuoted){
+    _orderNo=d.order_no; _total=total;
+    _email=document.getElementById('emailInput').value.trim();
+    initPayment();
   }
 }
 
-function showProcessing(show){
-  const el=document.getElementById('pay-processing');
-  const btns=document.getElementById('pay-btns');
-  if(!el||!btns) return;
-  el.style.display=show?'block':'none';
-  btns.style.display=show?'none':'flex';
+/* ══════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════ */
+function showProcessing(v){
+  const p=document.getElementById('pay-processing'),b=document.getElementById('pay-btns');
+  if(p)p.style.display=v?'block':'none';
+  if(b)b.style.display=v?'none':'flex';
+}
+function disableAll(v){document.querySelectorAll('.pay-btn').forEach(b=>b.disabled=v);}
+
+function loadScript(src,id){
+  return new Promise((ok,fail)=>{
+    if(document.getElementById(id)){ok();return;}
+    const s=document.createElement('script');
+    s.id=id; s.src=src;
+    s.onload=ok; s.onerror=fail;
+    document.head.appendChild(s);
+  });
 }
 
-function setBtnsDisabled(disabled){
-  document.querySelectorAll('.pay-btn').forEach(b=>b.disabled=disabled);
+/* server-side create + capture (same endpoints as before) */
+async function serverCreateOrder(){
+  const r=await fetch('/api/payment/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_no:_orderNo,email:_email})});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error||'Failed to create order');
+  return d.paypal_order_id; // PayPal order ID
 }
 
-// ── 初始化支付 ────────────────────────────────────────────
-async function initPayment(order_no, total){
-  const btnsEl=document.getElementById('pay-btns');
-  if(!btnsEl) return;
+async function serverCapture(ppOrderId){
+  showProcessing(true);
+  const r=await fetch('/api/payment/capture',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_no:_orderNo,token:ppOrderId})});
+  const d=await r.json();
+  if(d.success){window.location.href=`/payment-success.html?order=${_orderNo}&token=${ppOrderId}`;}
+  else{showProcessing(false);throw new Error(d.error||'Capture failed');}
+}
 
-  try {
+/* inject an "OR" divider */
+function addOr(container){
+  const d=document.createElement('div');d.className='pay-or';d.textContent='OR';
+  container.appendChild(d);
+}
+
+/* ══════════════════════════════════════════════════════════
+   INIT PAYMENT — orchestrates all three methods
+══════════════════════════════════════════════════════════ */
+async function initPayment(){
+  const wrap=document.getElementById('pay-btns');
+  if(!wrap)return;
+  try{
     const cfg=await fetch('/api/payment/config').then(r=>r.json());
     if(!cfg.client_id){
-      btnsEl.innerHTML='<div style="color:var(--amber);font-size:.78rem;padding:.5rem;text-align:center">PayPal not configured. Please contact us to arrange payment.</div>';
+      wrap.innerHTML='<div style="color:var(--amber);font-size:.78rem;padding:.5rem;text-align:center">Payment not configured. Please contact us.</div>';
       return;
     }
 
-    // ── 加载 PayPal SDK ──
-    // Apple Pay 只在苹果设备上启用，避免非苹果设备请求多余资源
-    if(!ppLoaded || ppSdkMode!==cfg.mode){
-      const oldScript=document.getElementById('paypal-sdk-script');
-      if(oldScript) oldScript.remove();
-      // 重置旧实例
-      ppButtons={};
+    wrap.innerHTML=''; // clear loader
+    let btnCount=0;
 
-      const enableFunding = IS_APPLE ? 'applepay,googlepay' : 'googlepay';
-      const disableFunding = 'credit,card,venmo,paylater';
+    /* ── 1. PayPal v6 ─────────────────────────────────── */
+    const ppSdkSrc=cfg.mode==='sandbox'
+      ?'https://www.sandbox.paypal.com/web-sdk/v6/core'
+      :'https://www.paypal.com/web-sdk/v6/core';
 
-      await new Promise((resolve,reject)=>{
-        const s=document.createElement('script');
-        s.id='paypal-sdk-script';
-        s.src=`https://www.paypal.com/sdk/js?client-id=${cfg.client_id}&currency=USD&intent=capture&enable-funding=${enableFunding}&disable-funding=${disableFunding}`;
-        s.onload=resolve; s.onerror=reject;
-        document.head.appendChild(s);
-      });
-      ppLoaded=true; ppSdkMode=cfg.mode;
-    }
+    await loadScript(ppSdkSrc,'pp-v6-core');
 
-    // ── 创建 SDK Button 实例并检测 eligible ──
-    const makeBtn=(fundingSource)=>paypal.Buttons({
-      fundingSource,
-      createOrder:()=>createPayPalOrder(order_no),
-      onApprove:async(data)=>{
-        try{ await capturePayPalOrder(order_no,data.orderID); }
-        catch(e){ alert('Payment error: '+e.message); setBtnsDisabled(false); }
-      },
-      onError:(err)=>{ console.error('[PayPal SDK error]',err); setBtnsDisabled(false); showProcessing(false); },
-      onCancel:()=>{ setBtnsDisabled(false); showProcessing(false); }
+    const sdkInstance=await window.paypal.createInstance({
+      clientId:cfg.client_id,
+      components:['paypal-payments'],
+      pageType:'checkout',
     });
 
-    // PayPal 标准按钮（必须渲染到 DOM 才能用，渲染在隐藏容器）
-    const ppBtn=makeBtn(paypal.FUNDING.PAYPAL);
-    await ppBtn.render('#pp-sdk-paypal');
+    const eligible=await sdkInstance.findEligibleMethods({currencyCode:'USD'});
 
-    // Google Pay
-    let gpEligible=false, gpBtn=null;
-    if(paypal.FUNDING.GOOGLEPAY){
-      gpBtn=makeBtn(paypal.FUNDING.GOOGLEPAY);
-      gpEligible=gpBtn.isEligible();
-      if(gpEligible) await gpBtn.render('#pp-sdk-googlepay');
-    }
-
-    // Apple Pay（只在苹果设备上尝试）
-    let apEligible=false, apBtn=null;
-    if(IS_APPLE && paypal.FUNDING.APPLEPAY){
-      apBtn=makeBtn(paypal.FUNDING.APPLEPAY);
-      apEligible=apBtn.isEligible();
-      if(apEligible) await apBtn.render('#pp-sdk-applepay');
-    }
-
-    // ── 渲染自定义按钮 ──
-    btnsEl.innerHTML=''; // 清空 loading
-
-    // 1. PayPal 按钮（永远显示）
-    const ppCustom=document.createElement('button');
-    ppCustom.className='pay-btn pay-btn-paypal';
-    ppCustom.innerHTML=`
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path d="M19.5 8.5C19.5 12.09 16.59 15 13 15H10L9 20H6L8 8.5H13C16.59 8.5 19.5 5.91 19.5 8.5Z" fill="#009CDE"/>
-        <path d="M21 6C21 9.59 18.09 12.5 14.5 12.5H11.5L10.5 17H7.5L9.5 6H14.5C18.09 6 21 3.41 21 6Z" fill="#003087"/>
-      </svg>
-      <span class="btn-label">PAY WITH PAYPAL</span>
-    `;
-    ppCustom.onclick=()=>{
-      setBtnsDisabled(true);
-      // 触发隐藏容器里真实 PayPal 按钮的点击
-      const realBtn=document.querySelector('#pp-sdk-paypal iframe');
-      if(realBtn){ realBtn.contentWindow.document.querySelector('[data-funding-source="paypal"] button')?.click(); }
-      // 降级：直接调用 SDK createOrder + approve 流程
-      ppBtn.close && ppBtn.close();
-      // 重新 trigger — PayPal SDK 没有公开 trigger，需要重新渲染弹窗
-      // 最可靠方案：重新 render 到临时节点后模拟点击
-      const tmp=document.createElement('div');
-      tmp.style.cssText='position:absolute;left:-9999px;width:1px;height:1px';
-      document.body.appendChild(tmp);
-      paypal.Buttons({
-        fundingSource:paypal.FUNDING.PAYPAL,
-        createOrder:()=>createPayPalOrder(order_no),
-        onApprove:async(data)=>{try{await capturePayPalOrder(order_no,data.orderID);}catch(e){alert('Payment error: '+e.message);setBtnsDisabled(false);}},
-        onError:(err)=>{console.error(err);setBtnsDisabled(false);showProcessing(false);},
-        onCancel:()=>{setBtnsDisabled(false);showProcessing(false);}
-      }).render(tmp).then(()=>{
-        setTimeout(()=>{
-          const iframe=tmp.querySelector('iframe');
-          if(iframe){
-            try{ iframe.contentWindow.document.querySelector('button')?.click(); }catch(e){}
-          }
-          document.body.removeChild(tmp);
-        },300);
+    if(eligible.isEligible('paypal')){
+      const session=sdkInstance.createPayPalOneTimePaymentSession({
+        onApprove:async(data)=>{try{await serverCapture(data.orderId);}catch(e){alert('PayPal error: '+e.message);disableAll(false);}},
+        onCancel:()=>{disableAll(false);showProcessing(false);},
+        onError:(e)=>{console.error('[PP v6]',e);disableAll(false);showProcessing(false);},
       });
-    };
-    btnsEl.appendChild(ppCustom);
 
-    // 2. Google Pay（eligible 才显示）
-    if(gpEligible && gpBtn){
-      const orGp=document.createElement('div');
-      orGp.className='pay-or'; orGp.textContent='OR';
-      btnsEl.appendChild(orGp);
-
-      const gpCustom=document.createElement('button');
-      gpCustom.className='pay-btn pay-btn-google';
-      gpCustom.innerHTML=`
-        <svg width="20" height="20" viewBox="0 0 24 24">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        <span class="btn-label">Pay with Google Pay</span>
-      `;
-      gpCustom.onclick=()=>{
-        setBtnsDisabled(true);
-        const tmp=document.createElement('div');
-        tmp.style.cssText='position:absolute;left:-9999px;width:1px;height:1px';
-        document.body.appendChild(tmp);
-        paypal.Buttons({
-          fundingSource:paypal.FUNDING.GOOGLEPAY,
-          createOrder:()=>createPayPalOrder(order_no),
-          onApprove:async(data)=>{try{await capturePayPalOrder(order_no,data.orderID);}catch(e){alert('Payment error: '+e.message);setBtnsDisabled(false);}},
-          onError:(err)=>{console.error(err);setBtnsDisabled(false);showProcessing(false);},
-          onCancel:()=>{setBtnsDisabled(false);showProcessing(false);}
-        }).render(tmp).then(()=>{
-          setTimeout(()=>{
-            try{tmp.querySelector('iframe')?.contentWindow.document.querySelector('button')?.click();}catch(e){}
-            document.body.removeChild(tmp);
-          },300);
-        });
+      if(btnCount>0)addOr(wrap);
+      const btn=document.createElement('button');
+      btn.className='pay-btn pay-btn-paypal';
+      btn.innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M19.5 8.5C19.5 12.09 16.59 15 13 15H10L9 20H6L8 8.5H13C16.59 8.5 19.5 5.91 19.5 8.5Z" fill="#009CDE"/><path d="M21 6C21 9.59 18.09 12.5 14.5 12.5H11.5L10.5 17H7.5L9.5 6H14.5C18.09 6 21 3.41 21 6Z" fill="#003087"/></svg><span class="lbl">PAY WITH PAYPAL</span>`;
+      btn.onclick=async()=>{
+        disableAll(true);
+        try{
+          const ppOrderId=await serverCreateOrder();
+          await session.start(
+            {presentationMode:'auto'},
+            Promise.resolve({orderId:ppOrderId})
+          );
+        }catch(e){alert('PayPal error: '+e.message);disableAll(false);}
       };
-      btnsEl.appendChild(gpCustom);
+      wrap.appendChild(btn);
+      btnCount++;
     }
 
-    // 3. Apple Pay（苹果设备 + eligible 才显示）
-    if(IS_APPLE && apEligible && apBtn){
-      const orAp=document.createElement('div');
-      orAp.className='pay-or'; orAp.textContent='OR';
-      btnsEl.appendChild(orAp);
+    /* ── 2. Google Pay (v5 APM SDK) ───────────────────── */
+    try{
+      await loadScript(`https://www.paypal.com/sdk/js?client-id=${cfg.client_id}&currency=USD&components=googlepay`+(cfg.mode==='sandbox'?'&buyer-country=US':''),'pp-googlepay-sdk');
+      await loadScript('https://pay.google.com/gp/p/js/pay.js','gp-sdk');
 
-      const apCustom=document.createElement('button');
-      apCustom.className='pay-btn pay-btn-apple';
-      apCustom.innerHTML=`
-        <svg width="20" height="22" viewBox="0 0 814 1000" fill="white">
-          <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-150.3-92.1c-52-65.2-95.7-175.9-95.7-280.8 0-156.8 102.7-239.6 204.7-239.6 51.4 0 94.1 33.8 126.3 33.8 30.9 0 79.9-35.8 140.2-35.8 21.4 0 85.5 1.9 131.3 59.7zm-207-219.1c32.7-39.5 56.2-95.1 56.2-150.7 0-7.7-.6-15.4-1.9-22.5-52.6 1.9-116.8 34.5-155.5 79.9-30.3 34.5-59.1 89.5-59.1 145.7 0 8.4 1.3 16.8 1.9 19.4 3.2.6 8.4 1.3 13.6 1.3 47.4 0 106.8-31.4 144.8-73.1z"/>
-        </svg>
-        <span class="btn-label">Pay with Apple Pay</span>
-      `;
-      apCustom.onclick=()=>{
-        setBtnsDisabled(true);
-        const tmp=document.createElement('div');
-        tmp.style.cssText='position:absolute;left:-9999px;width:1px;height:1px';
-        document.body.appendChild(tmp);
-        paypal.Buttons({
-          fundingSource:paypal.FUNDING.APPLEPAY,
-          createOrder:()=>createPayPalOrder(order_no),
-          onApprove:async(data)=>{try{await capturePayPalOrder(order_no,data.orderID);}catch(e){alert('Payment error: '+e.message);setBtnsDisabled(false);}},
-          onError:(err)=>{console.error(err);setBtnsDisabled(false);showProcessing(false);},
-          onCancel:()=>{setBtnsDisabled(false);showProcessing(false);}
-        }).render(tmp).then(()=>{
-          setTimeout(()=>{
-            try{tmp.querySelector('iframe')?.contentWindow.document.querySelector('button')?.click();}catch(e){}
-            document.body.removeChild(tmp);
-          },300);
-        });
-      };
-      btnsEl.appendChild(apCustom);
+      const gpConfig=await paypal.Googlepay().config();
+      const paymentsClient=new google.payments.api.PaymentsClient({environment:cfg.mode==='sandbox'?'TEST':'PRODUCTION'});
+      const ready=await paymentsClient.isReadyToPay({
+        apiVersion:2,apiVersionMinor:0,
+        allowedPaymentMethods:gpConfig.allowedPaymentMethods
+      });
+
+      if(ready.result){
+        if(btnCount>0)addOr(wrap);
+        const btn=document.createElement('button');
+        btn.className='pay-btn pay-btn-google';
+        btn.innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg><span class="lbl">Pay with Google Pay</span>`;
+        btn.onclick=async()=>{
+          disableAll(true);
+          try{
+            const ppOrderId=await serverCreateOrder();
+            const paymentDataReq={
+              apiVersion:2,apiVersionMinor:0,
+              allowedPaymentMethods:gpConfig.allowedPaymentMethods,
+              transactionInfo:{
+                totalPriceStatus:'FINAL',
+                totalPrice:_total,
+                currencyCode:'USD',
+                countryCode:gpConfig.countryCode||'US',
+              },
+              merchantInfo:{merchantName:'PCBAForge',merchantId:gpConfig.merchantId||''},
+            };
+            const paymentData=await paymentsClient.loadPaymentData(paymentDataReq);
+            await paypal.Googlepay().confirmOrder({
+              orderId:ppOrderId,
+              paymentMethodData:paymentData.paymentMethodData,
+            });
+            await serverCapture(ppOrderId);
+          }catch(e){
+            if(e.statusCode!=='CANCELED')alert('Google Pay error: '+e.message);
+            disableAll(false);showProcessing(false);
+          }
+        };
+        wrap.appendChild(btn);
+        btnCount++;
+      }
+    }catch(e){console.warn('[Google Pay]',e.message);}
+
+    /* ── 3. Apple Pay (v5 APM SDK) — Apple devices only ── */
+    if(IS_APPLE){
+      try{
+        if(!window.ApplePaySession||!ApplePaySession.canMakePayments()){throw new Error('ApplePaySession not available');}
+
+        await loadScript(`https://www.paypal.com/sdk/js?client-id=${cfg.client_id}&currency=USD&components=applepay`,'pp-applepay-sdk');
+        await loadScript('https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js','ap-sdk');
+
+        const apConfig=await paypal.Applepay().config();
+        if(!apConfig.isEligible)throw new Error('Apple Pay not eligible');
+
+        if(btnCount>0)addOr(wrap);
+        const btn=document.createElement('button');
+        btn.className='pay-btn pay-btn-apple';
+        btn.innerHTML=`<svg width="18" height="22" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-150.3-92.1c-52-65.2-95.7-175.9-95.7-280.8 0-156.8 102.7-239.6 204.7-239.6 51.4 0 94.1 33.8 126.3 33.8 30.9 0 79.9-35.8 140.2-35.8 21.4 0 85.5 1.9 131.3 59.7zm-207-219.1c32.7-39.5 56.2-95.1 56.2-150.7 0-7.7-.6-15.4-1.9-22.5-52.6 1.9-116.8 34.5-155.5 79.9-30.3 34.5-59.1 89.5-59.1 145.7 0 8.4 1.3 16.8 1.9 19.4 3.2.6 8.4 1.3 13.6 1.3 47.4 0 106.8-31.4 144.8-73.1z"/></svg><span class="lbl">Pay with Apple Pay</span>`;
+        btn.onclick=()=>{
+          disableAll(true);
+          const req={
+            countryCode:apConfig.countryCode,
+            merchantCapabilities:apConfig.merchantCapabilities,
+            supportedNetworks:apConfig.supportedNetworks,
+            currencyCode:'USD',
+            total:{label:'PCBAForge',type:'final',amount:_total},
+          };
+          const session=new ApplePaySession(4,req);
+          session.onvalidatemerchant=(ev)=>{
+            paypal.Applepay().validateMerchant({validationUrl:ev.validationURL,displayName:'PCBAForge'})
+              .then(r=>session.completeMerchantValidation(r.merchantSession))
+              .catch(e=>{console.error(e);session.abort();disableAll(false);});
+          };
+          session.onpaymentauthorized=async(ev)=>{
+            try{
+              const ppOrderId=await serverCreateOrder();
+              await paypal.Applepay().confirmOrder({orderId:ppOrderId,token:ev.payment.token,billingContact:ev.payment.billingContact});
+              session.completePayment(ApplePaySession.STATUS_SUCCESS);
+              await serverCapture(ppOrderId);
+            }catch(e){
+              session.completePayment(ApplePaySession.STATUS_FAILURE);
+              alert('Apple Pay error: '+e.message);
+              disableAll(false);showProcessing(false);
+            }
+          };
+          session.oncancel=()=>{disableAll(false);showProcessing(false);};
+          session.begin();
+        };
+        wrap.appendChild(btn);
+        btnCount++;
+      }catch(e){console.warn('[Apple Pay]',e.message);}
     }
 
-  } catch(e){
-    console.error('[Payment init error]',e);
-    const btnsEl2=document.getElementById('pay-btns');
-    if(btnsEl2) btnsEl2.innerHTML='<div style="color:var(--red);font-size:.78rem;padding:.5rem;text-align:center">Unable to load payment options. Please contact us directly.</div>';
+    if(btnCount===0){
+      wrap.innerHTML='<div style="color:var(--amber);font-size:.78rem;padding:.5rem;text-align:center">No payment methods available. Please contact us.</div>';
+    }
+
+  }catch(e){
+    console.error('[initPayment]',e);
+    const w=document.getElementById('pay-btns');
+    if(w)w.innerHTML='<div style="color:var(--red);font-size:.78rem;padding:.5rem;text-align:center">Unable to load payment options. Please contact us directly.</div>';
   }
 }
 
-// ── Auto-track from URL ───────────────────────────────────
-const p=new URLSearchParams(location.search);
-if(p.get('order')){
-  document.getElementById('orderInput').value=p.get('order');
-  if(p.get('email')) document.getElementById('emailInput').value=p.get('email');
-  if(p.get('order')&&document.getElementById('emailInput').value) doTrack();
+/* ══════════════════════════════════════════════════════════
+   AUTO TRACK FROM URL
+══════════════════════════════════════════════════════════ */
+const _p=new URLSearchParams(location.search);
+if(_p.get('order')){
+  document.getElementById('orderInput').value=_p.get('order');
+  if(_p.get('email'))document.getElementById('emailInput').value=_p.get('email');
+  if(_p.get('order')&&document.getElementById('emailInput').value)doTrack();
 }
 </script>
 <script>
 (function(){
-  var wafEl=document.querySelector('.waf');
-  var bwaEl=document.querySelector('.bwa');
+  var wafEl=document.querySelector('.waf'),bwaEl=document.querySelector('.bwa');
   var waLinks=document.querySelectorAll('[href^="https://wa.me"]');
-  if(wafEl) wafEl.style.display='none';
-  if(bwaEl) bwaEl.style.display='none';
-  fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
+  if(wafEl)wafEl.style.display='none';
+  if(bwaEl)bwaEl.style.display='none';
+  fetch('/api/settings/public').then(r=>r.json()).then(cfg=>{
     var wa=(cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
-    if(!wa) return;
-    waLinks.forEach(function(el){
-      var orig=el.href;
-      var text=orig.includes('?text=')?orig.split('?text=')[1]:'';
-      el.href='https://wa.me/'+wa+(text?'?text='+text:'');
-    });
-    if(wafEl) wafEl.style.display='';
-    if(bwaEl) bwaEl.style.display='';
-  }).catch(function(){});
+    if(!wa)return;
+    waLinks.forEach(el=>{var o=el.href,t=o.includes('?text=')?o.split('?text=')[1]:'';el.href='https://wa.me/'+wa+(t?'?text='+t:'');});
+    if(wafEl)wafEl.style.display='';
+    if(bwaEl)bwaEl.style.display='';
+  }).catch(()=>{});
 })();
 </script>
 </body>
