@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — PCBAForge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:760px}
+:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#1A1A1A;--green2:#000000;--green3:#9AA0A8;--text:#2B2F36;--muted:#7A828D;--white:#15181D;--amber:#B7791F;--red:#D14343;--wa:#25D366;--max:760px}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh}
 a{color:inherit;text-decoration:none}
-nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
-.nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.nav-logo{font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
 .ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(26,26,26,.25)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(26,26,26,0)}}
 .nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
-.nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
+.nav-cta{background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
 .wrap{max-width:var(--max);margin:0 auto;padding:3rem 5%}
 .page-label{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
-.page-title{font-family:'Orbitron',monospace;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.5rem}
+.page-title{font-family:'Inter',sans-serif;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.5rem}
 .page-sub{font-size:.88rem;color:var(--muted);margin-bottom:2.5rem}
 .search-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:2rem}
 .search-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
@@ -29,22 +29,22 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .search-row input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.65rem 1rem;font-size:.95rem;font-family:'Share Tech Mono',monospace;letter-spacing:.06em;outline:none;transition:border-color .2s}
 .search-row input:focus{border-color:var(--green3)}
 .search-row input::placeholder{color:var(--muted);letter-spacing:.04em}
-.search-btn{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.6rem;border:none;cursor:pointer;transition:opacity .2s;white-space:nowrap}
+.search-btn{background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.6rem;border:none;cursor:pointer;transition:opacity .2s;white-space:nowrap}
 .search-btn:hover{opacity:.85}
 .search-btn:disabled{opacity:.4;cursor:not-allowed}
 .search-hint{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted);margin-top:.75rem;letter-spacing:.04em}
 .result{display:none}.result.show{display:block}
 .order-top{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
 .order-top-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
-.order-no{font-family:'Orbitron',monospace;font-size:1rem;color:var(--white);letter-spacing:.1em}
+.order-no{font-family:'Inter',sans-serif;font-size:1rem;color:var(--white);letter-spacing:.1em}
 .status-pill{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.1em;padding:.25rem .8rem;border:1px solid}
-.s-pending{color:var(--amber);border-color:var(--amber);background:rgba(255,179,0,.08)}
-.s-quoted{color:#64B5F6;border-color:#1565C0;background:rgba(21,101,192,.1)}
-.s-paid{color:var(--green);border-color:var(--green3);background:rgba(0,255,65,.07)}
-.s-production{color:#FF8A65;border-color:#BF360C;background:rgba(191,54,12,.1)}
-.s-shipped{color:#CE93D8;border-color:#6A1B9A;background:rgba(106,27,154,.1)}
-.s-completed{color:var(--green);border-color:var(--green3);background:rgba(0,255,65,.07)}
-.s-cancelled{color:var(--red);border-color:var(--red);background:rgba(255,68,68,.08)}
+.s-pending{color:var(--amber);border-color:var(--amber);background:rgba(183,121,31,.08)}
+.s-quoted{color:#5A6270;border-color:#9AA0A8;background:#F2F3F5}
+.s-paid{color:var(--green);border-color:var(--green3);background:rgba(26,26,26,.07)}
+.s-production{color:#B7791F;border-color:#E5D3A8;background:#FBF4E6}
+.s-shipped{color:#3A3F47;border-color:#9AA0A8;background:#ECEEF0}
+.s-completed{color:var(--green);border-color:var(--green3);background:rgba(26,26,26,.07)}
+.s-cancelled{color:var(--red);border-color:var(--red);background:rgba(209,67,67,.08)}
 .order-top-body{padding:1.2rem}
 .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
 .ig-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.3rem}
@@ -59,7 +59,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
 .tl-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);background:var(--bg);flex-shrink:0;position:relative;z-index:1}
 .tl-step.done .tl-dot{background:var(--green3);border-color:var(--green)}
-.tl-step.active .tl-dot{background:var(--green);border-color:var(--green);box-shadow:0 0 0 4px rgba(0,255,65,.15)}
+.tl-step.active .tl-dot{background:var(--green);border-color:var(--green);box-shadow:0 0 0 4px rgba(26,26,26,.15)}
 .tl-line{flex:1;width:2px;background:var(--border);margin-top:2px}
 .tl-step.done .tl-line{background:var(--green3)}
 .tl-step:last-child .tl-line{display:none}
@@ -74,23 +74,23 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .note-body{padding:1rem 1.2rem;font-size:.85rem;color:var(--text);line-height:1.7}
 .msg-box{background:var(--bg2);border:1px solid var(--border);padding:3rem;text-align:center}
 .msg-icon{font-size:2.5rem;margin-bottom:1rem}
-.msg-title{font-family:'Orbitron',monospace;font-size:1rem;color:var(--white);margin-bottom:.5rem}
+.msg-title{font-family:'Inter',sans-serif;font-size:1rem;color:var(--white);margin-bottom:.5rem}
 .msg-sub{font-size:.82rem;color:var(--muted)}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
-.spinner.light{border-color:rgba(0,255,65,.2);border-top-color:var(--green)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.15);border-top-color:#1A1A1A;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
+.spinner.light{border-color:rgba(26,26,26,.2);border-top-color:var(--green)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .actions{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
-.act-btn{display:inline-block;font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.4rem;cursor:pointer;border:1px solid var(--green3);color:var(--green);background:transparent;transition:all .2s}
-.act-btn:hover{background:rgba(0,255,65,.07)}
-.act-btn.primary{background:var(--green);color:#000;border-color:var(--green)}
+.act-btn{display:inline-block;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.4rem;cursor:pointer;border:1px solid var(--green3);color:var(--green);background:transparent;transition:all .2s}
+.act-btn:hover{background:rgba(26,26,26,.07)}
+.act-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
 .act-btn.primary:hover{background:var(--green2)}
 
 /* ── 支付区域 ── */
 .pay-card{background:var(--bg2);border:2px solid var(--green3);margin-bottom:1rem}
-.pay-hdr{background:rgba(0,255,65,.08);padding:.8rem 1.2rem;border-bottom:1px solid var(--green3);display:flex;align-items:center;gap:.6rem}
+.pay-hdr{background:rgba(26,26,26,.08);padding:.8rem 1.2rem;border-bottom:1px solid var(--green3);display:flex;align-items:center;gap:.6rem}
 .pay-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
 .pay-body{padding:1.5rem;text-align:center}
-.pay-amount{font-family:'Orbitron',monospace;font-size:2.2rem;color:var(--green);margin-bottom:.3rem}
+.pay-amount{font-family:'Inter',sans-serif;font-size:2.2rem;color:var(--green);margin-bottom:.3rem}
 .pay-amount-sub{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem}
 .pay-breakdown{display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem;flex-wrap:wrap}
 .pay-item{text-align:center}
@@ -110,11 +110,11 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .pay-btn:disabled{opacity:.38;cursor:not-allowed;pointer-events:none}
 .pay-btn svg{flex-shrink:0}
 
-/* PayPal — 黑底 + 绿边 + Orbitron */
+/* PayPal — 白底 + 深边 + Inter */
 .pay-btn-paypal{
-  background:var(--bg3);border:1px solid var(--green3);color:var(--green);
+  background:#FFFFFF;border:1px solid #D5D8DD;color:#1A1A1A;
 }
-.pay-btn-paypal .lbl{font-family:'Orbitron',monospace;font-weight:700;font-size:.76rem;letter-spacing:.14em}
+.pay-btn-paypal .lbl{font-family:'Inter',sans-serif;font-weight:700;font-size:.76rem;letter-spacing:.14em}
 
 /* Google Pay — 深灰底 白字 */
 .pay-btn-google{background:#1c1c1c;border:1px solid #2e2e2e;color:#fff}
@@ -138,13 +138,13 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 }
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
 .fi{max-width:var(--max);margin:0 auto;text-align:center}
-.flogo{font-family:'Orbitron',monospace;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
+.flogo{font-family:'Inter',sans-serif;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
 .flinks{display:flex;justify-content:center;gap:1.5rem;margin-bottom:.6rem;flex-wrap:wrap}
 .flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
 .flinks2{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
 .flinks2 a{font-size:.75rem;color:var(--muted)}.flinks2 a:hover{color:var(--green)}
 .fcopy{font-size:.75rem;color:var(--muted)}
-.waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
+.waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.18);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
 @media(max-width:768px){.nav-links{display:none}}
 </style>
 <link rel="stylesheet" href="/theme-business.css">
@@ -272,7 +272,7 @@ function renderResult(d){
 
   let extras='';
   if(d.admin_note)extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM PCBAForge TEAM</span></div><div class="note-body">${esc(d.admin_note)}</div></div>`;
-  if(d.tracking_no)extras+=`<div class="note-card" style="border-color:#1565C0"><div class="note-hdr" style="background:rgba(21,101,192,.15)"><span class="note-ht" style="color:#64B5F6">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
+  if(d.tracking_no)extras+=`<div class="note-card" style="border-color:var(--green3)"><div class="note-hdr" style="background:var(--dim)"><span class="note-ht" style="color:var(--green)">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
 
   const total=(parseFloat(d.quoted_price||0)+parseFloat(d.shipping_fee||0)).toFixed(2);
   const secLine=IS_APPLE?'🔒 PayPal · Apple Pay · Google Pay · SSL':'🔒 PayPal · Google Pay · SSL Encrypted';
