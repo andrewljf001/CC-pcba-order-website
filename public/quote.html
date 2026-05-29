@@ -1020,6 +1020,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
   checkAuth();
   updateSummary();
+
+  // Pre-fill from homepage calculator URL params
+  var qp = new URLSearchParams(location.search);
+  var services = (qp.get('services') || '').split(',').filter(Boolean);
+  if (services.length) {
+    services.forEach(function(s) {
+      if (s === 'pcb')  { svc.pcb  = true; document.getElementById('chk-pcb').checked  = true; document.getElementById('card-pcb').classList.add('selected');  }
+      if (s === 'assy') { svc.assy = true; document.getElementById('chk-assy').checked = true; document.getElementById('card-assy').classList.add('selected'); }
+      if (s === 'test') { svc.test = true; document.getElementById('chk-test').checked = true; document.getElementById('card-test').classList.add('selected'); }
+    });
+    onSvcChange();
+    // fill PCB params
+    if (svc.pcb) {
+      ['pcb_material','pcb_qty','pcb_w','pcb_h','pcb_drill','pcb_impedance','pcb_finish','pcb_color'].forEach(function(k) {
+        var v = qp.get(k); if (v) { var el = document.getElementById(k.replace('_','-')); if (el) el.value = v; }
+      });
+    }
+    // fill assy params
+    if (svc.assy) {
+      var smtQty = qp.get('smt_qty');   if (smtQty)   { var el = document.getElementById('assy-qty');   if (el) el.value = smtQty; }
+      var smtSides = qp.get('smt_sides'); if (smtSides) { var el = document.getElementById('assy-sides'); if (el) el.value = smtSides; }
+      var smtParts = qp.get('smt_parts'); if (smtParts) { var el = document.getElementById('smt-pads');   if (el) el.value = smtParts; }
+      var smtDip   = qp.get('smt_dip');   if (smtDip)   { var el = document.getElementById('dip-pins');   if (el) el.value = smtDip; }
+      var smtIc    = qp.get('smt_ic');    if (smtIc)    { var el = document.getElementById('smt-ic');      if (el) el.value = smtIc; }
+      var smtSup   = qp.get('smt_supply');
+      if (smtSup) {
+        document.querySelectorAll('[name="comp-supply"]').forEach(function(r) { r.checked = (r.value === smtSup); });
+      }
+    }
+    calcPrice();
+  }
 });
 </script>
 
