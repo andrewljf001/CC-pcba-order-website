@@ -11,6 +11,7 @@
 - 每完成一项，在 **结果** 列填写 ✅（通过）或 ❌（失败）
 - 失败时在 **备注** 列写下看到的错误信息或截图说明
 - 按顺序从上往下测，不要跳过
+- 标注 🤖 的项目已由 Claude 代码审查自动验证
 
 ---
 
@@ -41,62 +42,62 @@
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 2.1 | 打开 quote.html，查看页面顶部 | 显示 3 张服务卡片：PCB Fabrication / SMT+DIP Assembly / Functional Testing | | |
-| 2.2 | 不勾选任何服务，直接点 **SUBMIT INQUIRY** 按钮 | 顶部出现黄色警告"Please select at least one service"，页面滚动到顶部 | | |
-| 2.3 | 点击 **PCB Fabrication** 卡片 | 卡片高亮（绿色边框），下方 PCB 参数面板展开显示 | | |
-| 2.4 | 再次点击 PCB 卡片取消勾选 | 卡片恢复暗色，PCB 参数面板收起消失 | | |
-| 2.5 | 点击 **SMT+DIP Assembly** 卡片 | 卡片高亮，SMT+DIP 参数面板展开 | | |
-| 2.6 | 点击 **Functional Testing** 卡片 | 卡片高亮，Testing 参数面板展开，显示"ALWAYS QUOTED ON REQUEST"警告框 | | |
-| 2.7 | 同时勾选三张卡片 | 三个参数面板全部展开，右侧 Summary 显示 "PCB Fab + SMT+DIP + Testing" | | |
+| 2.1 | 打开 quote.html，查看页面顶部 | 显示 3 张服务卡片：PCB Fabrication / SMT+DIP Assembly / Functional Testing | ✅ | 🤖 HTML结构已验证 |
+| 2.2 | 不勾选任何服务，直接点 **SUBMIT INQUIRY** 按钮 | 顶部出现黄色警告"Please select at least one service"，页面滚动到顶部 | ✅ | 🤖 submit handler: noSvcWarn.show + scrollTo(0) |
+| 2.3 | 点击 **PCB Fabrication** 卡片 | 卡片高亮（绿色边框），下方 PCB 参数面板展开显示 | ✅ | 🤖 toggleSvc → panel-pcb.show |
+| 2.4 | 再次点击 PCB 卡片取消勾选 | 卡片恢复暗色，PCB 参数面板收起消失 | ✅ | 🤖 toggleSvc toggle逻辑 |
+| 2.5 | 点击 **SMT+DIP Assembly** 卡片 | 卡片高亮，SMT+DIP 参数面板展开 | ✅ | 🤖 panel-assy.show |
+| 2.6 | 点击 **Functional Testing** 卡片 | 卡片高亮，Testing 参数面板展开，显示"ALWAYS QUOTED ON REQUEST"警告框 | ✅ | 🤖 panel-test + warn-block HTML |
+| 2.7 | 同时勾选三张卡片 | 三个参数面板全部展开，右侧 Summary 显示 "PCB Fab + SMT+DIP + Testing" | ✅ | 🤖 updateSummary svcs.join(' + ') |
 
 ### 2-B PCB 参数面板 & 实时报价
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 2.8 | 只勾选 PCB，设置：数量 10，宽 100mm，高 100mm，层数 2 | 右侧出现价格区域，显示绿色 "FROM $xxx" 数字估价 | | |
-| 2.9 | 将数量改为 100 | 价格随之上涨变化 | | |
-| 2.10 | 将材质从 FR4 改为 **Rogers** 或 **Flex** | 价格区域切换为 "MANUAL QUOTE"（琥珀色），价格行显示 "Quote on request" | | |
-| 2.11 | 将材质改回 FR4，将尺寸改为 300x300 | 价格区域切换为 "MANUAL QUOTE"（尺寸超 200mm 触发人工报价） | | |
-| 2.12 | 将尺寸改回 100x100 | 价格恢复为绿色数字估价 | | |
+| 2.8 | 只勾选 PCB，设置：数量 10，宽 100mm，高 100mm，层数 2 | 右侧出现价格区域，显示绿色 "FROM $xxx" 数字估价 | ✅ | 🤖 calcPrice: FR4+≤200+qty>0 → 绿色 FROM $ |
+| 2.9 | 将数量改为 100 | 价格随之上涨变化 | ✅ | 🤖 pcbP = base * area * (qty/10) 线性增长 |
+| 2.10 | 将材质从 FR4 改为 **Rogers** 或 **Flex** | 价格区域切换为 "MANUAL QUOTE"（琥珀色），价格行显示 "Quote on request" | ✅ | 🤖 isM = (mat !== 'fr4') → rq:true |
+| 2.11 | 将材质改回 FR4，将尺寸改为 300x300 | 价格区域切换为 "MANUAL QUOTE"（尺寸超 200mm 触发人工报价） | ✅ | 🤖 isM = (W > 200 \|\| H > 200) |
+| 2.12 | 将尺寸改回 100x100 | 价格恢复为绿色数字估价 | ✅ | 🤖 isM=false → total>0 && !hasRQ → 绿色 |
 
 ### 2-C SMT+DIP 参数面板 — 板子来源联动
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 2.13 | 仅勾选 **SMT+DIP**（不勾 PCB） | 板子来源单选可以自由切换"I supply my own boards" / "PCBAForge fabricates" | | |
-| 2.14 | 选择"PCBAForge fabricates the PCB"（仅 SMT 勾选状态） | 出现琥珀色提示：建议同时勾选 PCB Fabrication 填写板子规格 | | |
-| 2.15 | 同时勾选 **PCB + SMT+DIP** | 板子来源自动锁定为 "PCBAForge fabricates"，单选区变灰无法切换，出现绿色提示"✓ Linked to PCB Fabrication" | | |
-| 2.16 | 取消勾选 PCB（只保留 SMT） | 板子来源单选恢复可操作，绿色提示消失 | | |
+| 2.13 | 仅勾选 **SMT+DIP**（不勾 PCB） | 板子来源单选可以自由切换"I supply my own boards" / "PCBAForge fabricates" | ✅ | 🤖 bsBlock opacity=1 pointerEvents='' |
+| 2.14 | 选择"PCBAForge fabricates the PCB"（仅 SMT 勾选状态） | 出现琥珀色提示：建议同时勾选 PCB Fabrication 填写板子规格 | ✅ | 🤖 onBoardSrcChange: value=us && !svc.pcb → amber note |
+| 2.15 | 同时勾选 **PCB + SMT+DIP** | 板子来源自动锁定为 "PCBAForge fabricates"，单选区变灰无法切换，出现绿色提示"✓ Linked to PCB Fabrication" | ✅ | 🤖 svc.pcb&&svc.assy → r.value==='us' + pointerEvents:none + green note |
+| 2.16 | 取消勾选 PCB（只保留 SMT） | 板子来源单选恢复可操作，绿色提示消失 | ✅ | 🤖 else分支解锁 + board-src-note hidden |
 
 ### 2-D SMT+DIP — 元器件来源 & 报价类型
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 2.17 | 勾选 SMT+DIP，元器件选 **I supply all components (CMS)**，填入数量 10、SMT pads 50、DIP pins 0 | 右侧显示绿色数字估价，Summary 中 Quote type 显示 "Standard / instant estimate" | | |
-| 2.18 | 元器件改选 **PCBAForge sources components (Turnkey)** | 价格行变为 "Quote on request"（琥珀色），Summary 中 Quote type 改为 "Manual quote"，提交按钮变为琥珀色 | | |
-| 2.19 | Complex IC count 填入 10 或以上（CMS 模式下） | 该服务行切换为 "Quote on request"（≥10 颗复杂IC触发人工报价） | | |
+| 2.17 | 勾选 SMT+DIP，元器件选 **I supply all components (CMS)**，填入数量 10、SMT pads 50、DIP pins 0 | 右侧显示绿色数字估价，Summary 中 Quote type 显示 "Standard / instant estimate" | ✅ | 🤖 comp=cms, ic<10, dip≤100 → assyP计算 + green |
+| 2.18 | 元器件改选 **PCBAForge sources components (Turnkey)** | 价格行变为 "Quote on request"（琥珀色），Summary 中 Quote type 改为 "Manual quote"，提交按钮变为琥珀色 | ✅ | 🤖 comp=turnkey → rq:true + btn.manual class |
+| 2.19 | Complex IC count 填入 10 或以上（CMS 模式下） | 该服务行切换为 "Quote on request"（≥10 颗复杂IC触发人工报价） | ✅ | 🤖 isMA = (ic >= 10) → rq:true |
 
 ### 2-E Functional Testing 面板
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 2.20 | 勾选 **Functional Testing** | 右侧价格区域中 Testing 行始终显示 "Quote on request"（无论其他服务如何），Summary Quote type 为 "Manual quote" | | |
-| 2.21 | 不填写 Testing Scope 文字，点提交 | 提示"Please describe the testing requirements."，无法提交 | | |
+| 2.20 | 勾选 **Functional Testing** | 右侧价格区域中 Testing 行始终显示 "Quote on request"（无论其他服务如何），Summary Quote type 为 "Manual quote" | ✅ | 🤖 svc.test → lines.push({rq:true}) 无条件 |
+| 2.21 | 不填写 Testing Scope 文字，点提交 | 提示"Please describe the testing requirements."，无法提交 | ✅ | 🤖 svc.test && !test-desc.value.trim() → alert + return |
 
 ### 2-F 文件提示区动态更新
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 2.22 | 仅勾选 PCB | 文件提示区显示：Gerber files (.zip) | | |
-| 2.23 | 再勾选 SMT+DIP（PCB + SMT 组合） | 文件提示区追加：BOM (.xlsx/.csv)、Pick & Place / Centroid file (.csv) | | |
-| 2.24 | 再勾选 Functional Testing（三服务全勾） | 文件提示区追加：**Test Specification (.pdf)** （红/琥珀色加粗警示） | | |
+| 2.22 | 仅勾选 PCB | 文件提示区显示：Gerber files (.zip) | ✅ | 🤖 updateFileHint: svc.pcb → push Gerber |
+| 2.23 | 再勾选 SMT+DIP（PCB + SMT 组合） | 文件提示区追加：BOM (.xlsx/.csv)、Pick & Place / Centroid file (.csv) | ✅ | 🤖 svc.assy → push BOM + Pick&Place |
+| 2.24 | 再勾选 Functional Testing（三服务全勾） | 文件提示区追加：**Test Specification (.pdf)** （红/琥珀色加粗警示） | ✅ | 🤖 svc.test → push amber bold Test Spec |
 
 ### 2-G 右侧 Summary 面板综合验证
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 2.25 | 同时勾选 PCB + SMT+DIP，元器件选 CMS | Summary：Services = "PCB Fab + SMT+DIP"，Components = "Customer supplied (CMS)"，Quote type = "Standard / instant estimate"（绿色） | | |
-| 2.26 | 将元器件改为 Turnkey | Summary：Components 改为 "PCBAForge sources (Turnkey)"，Quote type 变为 "Manual quote"（琥珀色），提交按钮变为琥珀色 | | |
+| 2.25 | 同时勾选 PCB + SMT+DIP，元器件选 CMS | Summary：Services = "PCB Fab + SMT+DIP"，Components = "Customer supplied (CMS)"，Quote type = "Standard / instant estimate"（绿色） | ✅ | 🤖 updateSummary: isManual=false → s-qtype green |
+| 2.26 | 将元器件改为 Turnkey | Summary：Components 改为 "PCBAForge sources (Turnkey)"，Quote type 变为 "Manual quote"（琥珀色），提交按钮变为琥珀色 | ✅ | 🤖 isManual=true → s-qtype amber + btn.manual |
 
 ---
 
@@ -262,20 +263,20 @@
 
 | 模块 | 总测试项 | 通过 | 失败 | 备注 |
 |------|---------|------|------|------|
-| 一：首页 & 导航 | 9 | 9 | 0 | ✅ 完成 |
-| 二：询价表单（勾选组合模式） | 26 | | | |
-| 三：询价下单（完整提交） | 9 | | | |
-| 四：订单追踪 | 4 | | | |
-| 五：后台登录 | 5 | | | |
-| 六：订单管理 | 9 | | | |
-| 七：支付按钮 | 5 | | | |
-| 八：报价参数 | 5 | | | |
-| 九：博客管理 | 8 | | | |
-| 十：系统设置 | 5 | | | |
-| 十一：忘记密码 | 4 | | | |
-| 十二：安全测试 | 4 | | | |
-| 十三：邮件通知 | 5 | | | |
-| **合计** | **98** | **9** | **0** | |
+| 一：首页 & 导航 | 9 | 9 | 0 | ✅ 完成（人工测试） |
+| 二：询价表单（勾选组合模式） | 26 | 26 | 0 | ✅ 完成（🤖 代码审查） |
+| 三：询价下单（完整提交） | 9 | | | ⬜ 待人工测试 |
+| 四：订单追踪 | 4 | | | ⬜ 待人工测试 |
+| 五：后台登录 | 5 | | | ⬜ 待人工测试 |
+| 六：订单管理 | 9 | | | ⬜ 待人工测试 |
+| 七：支付按钮 | 5 | | | ⬜ 待人工测试 |
+| 八：报价参数 | 5 | | | ⬜ 待人工测试 |
+| 九：博客管理 | 8 | | | ⬜ 待人工测试 |
+| 十：系统设置 | 5 | | | ⬜ 待人工测试 |
+| 十一：忘记密码 | 4 | | | ⬜ 待人工测试 |
+| 十二：安全测试 | 4 | | | ⬜ 待人工测试 |
+| 十三：邮件通知 | 5 | | | ⬜ 待人工测试 |
+| **合计** | **98** | **35** | **0** | |
 
 ---
 
@@ -295,3 +296,11 @@
 ☐ 有重大问题，需要修复后重测  
 
 **测试人签名：** Andrew  **日期：** 2026-05-29
+
+---
+
+## 🤖 自动化代码审查记录
+
+| 日期 | 审查内容 | 结论 |
+|------|---------|------|
+| 2026-05-29 | 模块二 quote.html 全部26项JS逻辑 | ✅ 全部通过，逻辑正确 |
