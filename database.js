@@ -46,6 +46,8 @@ async function initDB() {
       verify_token TEXT,
       reset_token TEXT,
       reset_token_expires TEXT,
+      deletion_requested_at TEXT,
+      deletion_reason TEXT,
       last_login_at TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -154,9 +156,11 @@ async function initDB() {
     );
   }
 
-  // Migrations
+  // Migrations — safe to run repeatedly
   try { await query(`ALTER TABLE users ADD COLUMN reset_token TEXT`); } catch(e) {}
   try { await query(`ALTER TABLE users ADD COLUMN reset_token_expires TEXT`); } catch(e) {}
+  try { await query(`ALTER TABLE users ADD COLUMN deletion_requested_at TEXT`); } catch(e) {}
+  try { await query(`ALTER TABLE users ADD COLUMN deletion_reason TEXT`); } catch(e) {}
 
   const { rows } = await query('SELECT COUNT(*) as cnt FROM admin_users');
   if (!rows[0] || rows[0].cnt === 0) {
