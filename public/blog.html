@@ -6,37 +6,37 @@
 <title>PCBAForge Blog — PCBA Engineering Insights & Guides</title>
 <meta name="description" content="Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#1A1A1A;--green2:#000000;--green3:#9AA0A8;--text:#2B2F36;--muted:#7A828D;--white:#15181D;--amber:#B7791F;--red:#D14343;--wa:#25D366;--max:1200px}
+:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#16A34A;--green2:#15803D;--green3:#7CC79A;--text:#2B2F36;--muted:#7A828D;--white:#15181D;--amber:#B7791F;--red:#D14343;--wa:#25D366;--max:1200px}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px);box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .nav-logo{font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
 .ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(26,26,26,.25)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(26,26,26,0)}}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(22,163,74,.25)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(22,163,74,0)}}
 .nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--green)}
 .nav-cta{background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
 .sec{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:4rem 5%}
-.slabel{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
+.slabel{font-family:'Inter',sans-serif;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
 .stitle{font-family:'Inter',sans-serif;font-size:clamp(1.2rem,2.5vw,1.6rem);color:var(--white);margin-bottom:.75rem}
 .stitle-sub{font-size:.88rem;color:var(--muted);margin-bottom:2rem}
 .tag-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}
-.tag-btn{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.08em;color:var(--muted);border:1px solid var(--border);background:transparent;padding:.3rem .8rem;cursor:pointer;transition:all .2s}
-.tag-btn:hover,.tag-btn.active{color:var(--green);border-color:var(--green);background:rgba(26,26,26,.06)}
+.tag-btn{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.08em;color:var(--muted);border:1px solid var(--border);background:transparent;padding:.3rem .8rem;cursor:pointer;transition:all .2s}
+.tag-btn:hover,.tag-btn.active{color:var(--green);border-color:var(--green);background:rgba(22,163,74,.06)}
 .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
 .post-card{background:var(--bg2);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s}
 .post-card:hover{border-color:var(--green);transform:translateY(-4px)}
 .post-cover{width:100%;height:160px;object-fit:cover;display:block;filter:brightness(.65) saturate(1.1);transition:filter .3s}
 .post-card:hover .post-cover{filter:brightness(.8) saturate(1.3)}
-.post-cover-ph{width:100%;height:160px;background:var(--dim);display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.1em}
+.post-cover-ph{width:100%;height:160px;background:var(--dim);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:.7rem;color:var(--muted);letter-spacing:.1em}
 .post-body{padding:1.2rem}
 .post-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.6rem}
-.post-tag{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.08em;color:var(--green);border:1px solid var(--green3);padding:.15rem .5rem}
+.post-tag{font-family:'Inter',sans-serif;font-size:.6rem;letter-spacing:.08em;color:var(--green);border:1px solid var(--green3);padding:.15rem .5rem}
 .post-title{font-size:.95rem;color:var(--white);font-weight:600;line-height:1.4;margin-bottom:.5rem}
 .post-excerpt{font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.post-meta{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted)}
+.post-meta{display:flex;justify-content:space-between;font-family:'Inter',sans-serif;font-size:.65rem;color:var(--muted)}
 .empty-state{text-align:center;padding:4rem 0;grid-column:1/-1}
 .empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.3}
 .empty-t{font-family:'Inter',sans-serif;font-size:1rem;color:var(--muted);margin-bottom:.5rem}
@@ -46,8 +46,8 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .ldot2:nth-child(2){animation-delay:.2s}.ldot2:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,80%,100%{opacity:.15}40%{opacity:1}}
 .pagination{display:flex;justify-content:center;gap:.5rem;margin-top:3rem}
-.page-btn{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--muted);border:1px solid var(--border);background:transparent;padding:.4rem .9rem;cursor:pointer;transition:all .2s}
-.page-btn:hover,.page-btn.active{color:var(--green);border-color:var(--green);background:rgba(26,26,26,.06)}
+.page-btn{font-family:'Inter',sans-serif;font-size:.75rem;color:var(--muted);border:1px solid var(--border);background:transparent;padding:.4rem .9rem;cursor:pointer;transition:all .2s}
+.page-btn:hover,.page-btn.active{color:var(--green);border-color:var(--green);background:rgba(22,163,74,.06)}
 .page-btn:disabled{opacity:.3;cursor:not-allowed}
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
 .fi{max-width:var(--max);margin:0 auto;text-align:center}
@@ -60,6 +60,23 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.18);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
 @media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:768px){.nav-links{display:none}.blog-grid{grid-template-columns:1fr}}
+
+/* ===== white-business v2: rounded + shadow + green ===== */
+.nav-cta,.bp,.bg,.obtn,.bwa,.bem,.search-btn,.act-btn,.track-btn,
+button[type=submit],.pay-btn{border-radius:8px}
+.fg select,.fg input,.fg textarea,.search-row input,
+input,select,textarea{border-radius:6px}
+.sc,.qform,.qres,.card,.pay-card,.wc,.svc-card,.search-card,.order-top,
+.timeline-card,.note-card,.price-block,.msg-box,.success-box,.detail-panel .sub-body,
+.info-block,.warn-block,.radio-block,.manual-notice,.pay-card,.hero-img-wrap,
+.hpanel .fbody{border-radius:12px}
+.sc,.card,.pay-card,.wc,.search-card,.order-top,.timeline-card,
+.price-block{box-shadow:0 1px 3px rgba(16,24,40,.04),0 1px 2px rgba(16,24,40,.06)}
+.sptbl{border-radius:12px;overflow:hidden}
+.svc-card{border-radius:10px}
+.pn,.tl-dot{border-radius:50%}
+.status-pill{border-radius:999px}
+.stag,.svc-badge,.pay-tag,.badge-std,.badge-rq{border-radius:6px}
 </style>
 <link rel="stylesheet" href="/theme-business.css">
 </head>
