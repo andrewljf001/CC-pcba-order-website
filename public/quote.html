@@ -5,36 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Submit Inquiry — PCBAForge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:1200px}
+:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#1A1A1A;--green2:#000000;--green3:#9AA0A8;--text:#2B2F36;--muted:#7A828D;--white:#15181D;--amber:#B7791F;--red:#D14343;--wa:#25D366;--max:1200px}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
-.nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
+nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.nav-logo{font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
 .ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,65,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,255,65,0)}}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(26,26,26,.25)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(26,26,26,0)}}
 .nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
-.nav-cta{background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
+.nav-cta{background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
 .page-wrap{max-width:var(--max);margin:0 auto;padding:3rem 5%}
 .slabel{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
-.page-title{font-family:'Orbitron',monospace;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.5rem}
+.page-title{font-family:'Inter',sans-serif;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.5rem}
 .page-sub{font-size:.88rem;color:var(--muted);margin-bottom:2rem;line-height:1.7}
 
 /* ── SERVICE SELECTOR ── */
 .service-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:2rem}
 .svc-card{border:1.5px solid var(--border);padding:1.1rem;cursor:pointer;transition:all .2s;position:relative;background:var(--bg2)}
-.svc-card:hover{border-color:var(--green3);background:rgba(0,255,65,.04)}
-.svc-card.selected{border-color:var(--green);background:rgba(0,255,65,.06)}
+.svc-card:hover{border-color:var(--green3);background:rgba(26,26,26,.04)}
+.svc-card.selected{border-color:var(--green);background:rgba(26,26,26,.06)}
 .svc-card input[type=checkbox]{position:absolute;top:.85rem;right:.85rem;width:15px;height:15px;accent-color:var(--green);cursor:pointer}
 .svc-icon{font-size:1.3rem;margin-bottom:.45rem}
-.svc-name{font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem;padding-right:1.5rem}
+.svc-name{font-family:'Inter',sans-serif;font-size:.68rem;font-weight:700;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem;padding-right:1.5rem}
 .svc-desc{font-size:.78rem;color:var(--muted);line-height:1.5}
 .svc-badge{display:inline-block;margin-top:.45rem;padding:.12rem .4rem;font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.5px}
-.badge-std{background:#002A00;color:var(--green);border:1px solid var(--green3)}
-.badge-rq{background:#1A1200;color:var(--amber);border:1px solid #443300}
-.no-svc-warn{display:none;background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.25);padding:.75rem 1rem;font-size:.82rem;color:var(--amber);margin-bottom:1.5rem}
+.badge-std{background:#EEF2EE;color:var(--green);border:1px solid var(--green3)}
+.badge-rq{background:#FBF4E6;color:var(--amber);border:1px solid #E5D3A8}
+.no-svc-warn{display:none;background:rgba(183,121,31,.06);border:1px solid rgba(183,121,31,.25);padding:.75rem 1rem;font-size:.82rem;color:var(--amber);margin-bottom:1.5rem}
 .no-svc-warn.show{display:block}
 
 /* ── MAIN LAYOUT ── */
@@ -67,7 +67,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .sub-body{border:1px solid var(--border);padding:1rem}
 
 /* ── RADIO BLOCK ── */
-.radio-block{background:rgba(0,255,65,.03);border:1px solid var(--border);padding:.8rem 1rem;margin-bottom:.8rem}
+.radio-block{background:rgba(26,26,26,.03);border:1px solid var(--border);padding:.8rem 1rem;margin-bottom:.8rem}
 .radio-block-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.5rem}
 .radio-row{display:flex;gap:1.5rem;flex-wrap:wrap}
 .radio-row label{display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--text);cursor:pointer}
@@ -78,12 +78,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .info-block{background:var(--bg3);border:1px solid var(--border);padding:.9rem 1rem;margin-bottom:.8rem}
 .info-block-title{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.1em;margin-bottom:.5rem}
 .info-block-body{font-size:.82rem;color:var(--text);line-height:1.75}
-.warn-block{background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.25);padding:.8rem 1rem;margin-bottom:.8rem;font-size:.8rem;color:var(--amber);line-height:1.6}
+.warn-block{background:rgba(183,121,31,.06);border:1px solid rgba(183,121,31,.25);padding:.8rem 1rem;margin-bottom:.8rem;font-size:.8rem;color:var(--amber);line-height:1.6}
 .warn-block strong{display:block;font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.1em;margin-bottom:.3rem}
 
 /* ── FILE UPLOAD ── */
 .upload-zone{border:2px dashed var(--border);padding:1.8rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--green3);background:rgba(0,255,65,.03)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--green3);background:rgba(26,26,26,.03)}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .upload-icon{font-size:1.8rem;margin-bottom:.4rem;color:var(--green3)}
 .upload-title{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--white);letter-spacing:.08em;margin-bottom:.25rem}
@@ -98,15 +98,15 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .rrows{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1.2rem}
 .rrow{display:flex;justify-content:space-between;font-size:.82rem}
 .rl{color:var(--muted)}.rv{color:var(--text);font-weight:500}.rv.g{color:var(--green)}.rv.a{color:var(--amber)}
-.price-block{background:rgba(0,255,65,.05);border:1px solid var(--green3);padding:1rem 1.2rem;margin-bottom:1.2rem}
+.price-block{background:rgba(26,26,26,.05);border:1px solid var(--green3);padding:1rem 1.2rem;margin-bottom:1.2rem}
 .pb-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.12em;margin-bottom:.3rem}
-.pb-value{font-family:'Orbitron',monospace;font-size:1.8rem;color:var(--green);font-weight:700;line-height:1}
+.pb-value{font-family:'Inter',sans-serif;font-size:1.8rem;color:var(--green);font-weight:700;line-height:1}
 .pb-sub{font-size:.7rem;color:var(--muted);margin-top:.3rem}
 .pb-rows{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);line-height:1.9}
 .pb-rows .pri-line{display:flex;justify-content:space-between}
 .pb-rows .pri-line .pv{color:var(--green)}.pb-rows .pri-line .pa{color:var(--amber)}
 .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 0 1.5rem}
-.obtn{width:100%;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;letter-spacing:.1em;padding:.9rem;border:none;cursor:pointer;transition:opacity .2s;margin-bottom:.8rem}
+.obtn{width:100%;background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.1em;padding:.9rem;border:none;cursor:pointer;transition:opacity .2s;margin-bottom:.8rem}
 .obtn:hover{opacity:.85}
 .obtn:disabled{opacity:.4;cursor:not-allowed}
 .obtn.manual{background:var(--amber)}
@@ -118,18 +118,18 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .success-box{display:none;background:var(--bg2);border:1px solid var(--green3);padding:3rem;text-align:center;margin-top:2rem}
 .success-box.show{display:block}
 .success-icon{font-size:3rem;margin-bottom:1rem}
-.success-title{font-family:'Orbitron',monospace;font-size:1.4rem;color:var(--green);margin-bottom:.5rem}
+.success-title{font-family:'Inter',sans-serif;font-size:1.4rem;color:var(--green);margin-bottom:.5rem}
 .success-order{font-family:'Share Tech Mono',monospace;font-size:1rem;color:var(--white);margin-bottom:.5rem}
 .success-sub{font-size:.85rem;color:var(--muted);margin-bottom:2rem;line-height:1.7}
-.track-btn{display:inline-block;background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.8rem;font-weight:700;letter-spacing:.1em;padding:.8rem 2rem}
+.track-btn{display:inline-block;background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.1em;padding:.8rem 2rem}
 
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
 .fi{max-width:var(--max);margin:0 auto;text-align:center}
-.flogo{font-family:'Orbitron',monospace;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
+.flogo{font-family:'Inter',sans-serif;font-size:1rem;color:var(--green);letter-spacing:.12em;margin-bottom:.8rem}
 .flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
 .flinks a{font-size:.82rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--green)}
 .fcopy{font-size:.75rem;color:var(--muted)}
-.waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.35);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
+.waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.18);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
 
 @media(max-width:1024px){.qwrap{grid-template-columns:1fr}.right-panel{position:static}}
 @media(max-width:768px){.nav-links{display:none}.frow,.frow.cols3{grid-template-columns:1fr}.service-selector{grid-template-columns:1fr}}
@@ -501,7 +501,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
               <div class="rrow"><span class="rl">Payment</span><span class="rv a">After engineer confirmation</span></div>
             </div>
             <div class="divider"></div>
-            <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="dark" style="margin:1rem 0"></div>
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="light" style="margin:1rem 0"></div>
             <button type="submit" class="obtn" id="submit-btn">SUBMIT INQUIRY →</button>
             <p class="submit-note">Engineer confirms within 24h · Payment link sent after review · No charge until you approve the quote</p>
           </div>
@@ -511,7 +511,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div class="card-hdr"><span class="card-ht">// NEED HELP?</span></div>
           <div class="card-body">
             <div style="font-size:.82rem;color:var(--muted);line-height:1.7;margin-bottom:1rem">Complex project or urgent timeline? Chat with our engineers directly.</div>
-            <a href="https://wa.me/" target="_blank" style="display:flex;align-items:center;gap:.6rem;background:var(--wa);color:#000;font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;letter-spacing:.08em;padding:.65rem 1rem;text-decoration:none">
+            <a href="https://wa.me/" target="_blank" style="display:flex;align-items:center;gap:.6rem;background:var(--wa);color:#000;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.08em;padding:.65rem 1rem;text-decoration:none">
               <svg width="16" height="16" viewBox="0 0 32 32" fill="black"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
               WHATSAPP US
             </a>
@@ -1065,7 +1065,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div style="padding:1.2rem">
       <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">Create an account to track your order history and manage your profile.</p>
       <div style="display:flex;border:1px solid var(--border);margin-bottom:1.2rem">
-        <div class="modal-tab active" data-tab="register" style="flex:1;padding:.6rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;cursor:pointer;background:var(--green);color:#000;font-weight:700">REGISTER</div>
+        <div class="modal-tab active" data-tab="register" style="flex:1;padding:.6rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;cursor:pointer;background:var(--green);color:#fff;font-weight:700">REGISTER</div>
         <div class="modal-tab" data-tab="login" style="flex:1;padding:.6rem;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;cursor:pointer;color:var(--muted)">SIGN IN</div>
       </div>
       <div id="modal-panel-register" class="modal-panel active">
@@ -1083,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <input id="modal-password" type="password" required minlength="8" placeholder="••••••••" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;outline:none">
           </div>
           <div id="modal-register-error" style="font-size:.75rem;color:var(--red);min-height:1rem"></div>
-          <button type="submit" style="background:var(--green);color:#000;font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.8rem;border:none;cursor:pointer">REGISTER & SUBMIT →</button>
+          <button type="submit" style="background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.8rem;border:none;cursor:pointer">REGISTER & SUBMIT →</button>
         </form>
         <p style="font-size:.72rem;color:var(--muted);margin-top:.8rem;text-align:center">Already have an account? <span style="color:var(--green);cursor:pointer" onclick="document.querySelector('[data-tab=login]').click()">Sign in</span></p>
       </div>
@@ -1098,7 +1098,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <input id="modal-login-password" type="password" required placeholder="••••••••" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;outline:none">
           </div>
           <div id="modal-login-error" style="font-size:.75rem;color:var(--red);min-height:1rem"></div>
-          <button type="submit" style="background:var(--amber);color:#000;font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.8rem;border:none;cursor:pointer">SIGN IN & SUBMIT →</button>
+          <button type="submit" style="background:var(--amber);color:#000;font-family:'Inter',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.8rem;border:none;cursor:pointer">SIGN IN & SUBMIT →</button>
         </form>
         <p style="font-size:.72rem;color:var(--muted);margin-top:.8rem;text-align:center">No account? <span style="color:var(--green);cursor:pointer" onclick="document.querySelector('[data-tab=register]').click()">Register free</span></p>
       </div>
