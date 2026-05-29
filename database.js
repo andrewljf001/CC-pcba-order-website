@@ -161,6 +161,7 @@ async function initDB() {
   try { await query(`ALTER TABLE users ADD COLUMN reset_token_expires TEXT`); } catch(e) {}
   try { await query(`ALTER TABLE users ADD COLUMN deletion_requested_at TEXT`); } catch(e) {}
   try { await query(`ALTER TABLE users ADD COLUMN deletion_reason TEXT`); } catch(e) {}
+  try { await query(`ALTER TABLE orders ADD COLUMN payment_intent TEXT`); } catch(e) {}
 
   const { rows } = await query('SELECT COUNT(*) as cnt FROM admin_users');
   if (!rows[0] || rows[0].cnt === 0) {

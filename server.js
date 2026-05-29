@@ -52,6 +52,7 @@ if (!JWT_SECRET || !JWT_ADMIN_SECRET) {
 
 // ── Turnstile 人机验证 ────────────────────────────────────
 async function verifyTurnstile(token) {
+  if (process.env.E2E_BYPASS_TURNSTILE === '1') return true;
   if (!token) return false;
   const secret = process.env.TURNSTILE_SECRET;
   if (!secret) return true;
@@ -452,8 +453,8 @@ app.post('/api/payment/create', async (req, res) => {
     const { rows } = await pool.query(
       `SELECT o.*, COALESCE(u.email, o.guest_email) as cust_email
        FROM orders o LEFT JOIN users u ON o.user_id = u.id
-       WHERE o.order_no=$1 AND (o.guest_email=$2 OR u.email=$2)`,
-      [order_no.toUpperCase(), email.toLowerCase()]
+       WHERE o.order_no=$1 AND (o.guest_email=$2 OR u.email=$3)`,
+      [order_no.toUpperCase(), email.toLowerCase(), email.toLowerCase()]
     );
     if (!rows.length) return res.status(404).json({ error: 'Order not found' });
     const order = rows[0];
@@ -933,8 +934,8 @@ app.put('/api/admin/orders/:id', adminAuth, async (req, res) => {
        status=COALESCE($1,status), quoted_price=COALESCE($2,quoted_price),
        shipping_fee=COALESCE($3,shipping_fee), tracking_no=COALESCE($4,tracking_no),
        admin_note=COALESCE($5,admin_note), updated_at=datetime('now')
-       WHERE id=$6 OR order_no=$6`,
-      [status, quoted_price, shipping_fee, tracking_no, admin_note, req.params.id]
+       WHERE id=$6 OR order_no=$7`,
+      [status, quoted_price, shipping_fee, tracking_no, admin_note, req.params.id, req.params.id]
     );
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
