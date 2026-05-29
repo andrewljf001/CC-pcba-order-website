@@ -70,36 +70,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/admin', express.static('admin'));
 
-// ── Apple Pay 域名验证文件（PayPal Apple Pay 必须）────────
-// 需要将 Apple Developer 提供的验证文件内容存入环境变量 APPLE_PAY_DOMAIN_ASSOCIATION
-// 或放置于 public/.well-known/ 目录中（推荐）
-// 此路由作为后备，从 DB settings 或环境变量动态返回
+// ── Apple Pay 域名验证文件 ────────────────────────────────
 app.get('/.well-known/apple-developer-merchantid-domain-association', async (req, res) => {
   try {
-    // 优先从文件系统读取（放于 public/.well-known/ 时 express.static 已处理，此处为后备）
     const filePath = path.join(__dirname, 'public', '.well-known', 'apple-developer-merchantid-domain-association');
-    if (fs.existsSync(filePath)) {
-      return res.sendFile(filePath);
-    }
-    // 从环境变量读取
+    if (fs.existsSync(filePath)) return res.sendFile(filePath);
     const content = process.env.APPLE_PAY_DOMAIN_ASSOCIATION;
-    if (content) {
-      res.setHeader('Content-Type', 'text/plain');
-      return res.send(content);
-    }
-    // 从数据库 settings 读取
-    const { rows } = await pool.query(
-      `SELECT value FROM settings WHERE key='apple_pay_domain_association'`
-    );
-    if (rows[0]?.value) {
-      res.setHeader('Content-Type', 'text/plain');
-      return res.send(rows[0].value);
-    }
-    // 未配置时返回 404（Apple Pay 不可用，但不影响其他支付方式）
+    if (content) { res.setHeader('Content-Type', 'text/plain'); return res.send(content); }
+    const { rows } = await pool.query(`SELECT value FROM settings WHERE key='apple_pay_domain_association'`);
+    if (rows[0]?.value) { res.setHeader('Content-Type', 'text/plain'); return res.send(rows[0].value); }
     res.status(404).end();
-  } catch (err) {
-    res.status(500).end();
-  }
+  } catch { res.status(500).end(); }
 });
 
 // ── Cloudflare R2 客户端 ─────────────────────────────────
@@ -124,7 +105,7 @@ async function uploadToR2(buffer, filename, mimetype) {
   return { key, url: `${process.env.R2_PUBLIC_URL || 'https://static.pcbaforge.com'}/${key}` };
 }
 
-// ── 文件上传（内存缓存，上传到 R2）──────────────────────────
+// ── 文件上传 ──────────────────────────────────────────────
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 },
@@ -350,10 +331,119 @@ app.post('/api/order/lookup', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════════════════
+// GDPR APIs (7.9)
+// ═══════════════════════════════════════════════════════
+
+// 公开接口：提交数据删除申请（发邮件通知管理员，软删除标记）
+app.post('/api/gdpr/delete-request', async (req, res) => {
+  try {
+    const { email, reason } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    // 查找用户
+    const { rows } = await pool.query('SELECT id, name FROM users WHERE email=$1', [email.toLowerCase()]);
+
+    // 无论用户存不存在都返回成功（防止邮箱枚举攻击）
+    if (rows.length) {
+      const user = rows[0];
+      // 标记待删除
+      await pool.query(
+        `UPDATE users SET deletion_requested_at=datetime('now'), deletion_reason=$1 WHERE id=$2`,
+        [reason || '', user.id]
+      );
+
+      // 通知管理员
+      const { rows: adminCfg } = await pool.query(`SELECT value FROM settings WHERE key='contact_email'`);
+      if (adminCfg[0]?.value) {
+        await sendMail({
+          to: adminCfg[0].value,
+          subject: `[PCBAForge] GDPR Delete Request — ${email}`,
+          html: `<h2>GDPR Data Deletion Request</h2>
+            <p><b>Email:</b> ${email}</p>
+            <p><b>Name:</b> ${user.name || '—'}</p>
+            <p><b>Reason:</b> ${reason || '—'}</p>
+            <p><b>Requested at:</b> ${new Date().toISOString()}</p>
+            <hr>
+            <p>To delete this user, run in admin panel or DB:</p>
+            <code>DELETE FROM users WHERE email='${email}';</code>
+            <p>Also delete associated orders if required by your retention policy.</p>`
+        });
+      }
+
+      // 确认邮件给用户
+      await sendMail({
+        to: email,
+        subject: '[PCBAForge] Data Deletion Request Received',
+        html: `<h2>We received your request</h2>
+          <p>Hi ${user.name || 'there'},</p>
+          <p>We have received your request to delete your personal data from PCBAForge.</p>
+          <p>We will process your request within <strong>30 days</strong> and send a confirmation email once complete.</p>
+          <p>If you have active orders in production or shipment, those records may be retained for legal/accounting purposes as outlined in our <a href="${process.env.SITE_URL || 'https://pcbaforge.com'}/privacy.html">Privacy Policy</a>.</p>
+          <p style="color:#999;font-size:12px">Requested at: ${new Date().toISOString()}</p>`
+      });
+    }
+
+    res.json({ success: true, message: 'Your deletion request has been received. We will process it within 30 days and notify you by email.' });
+  } catch (err) {
+    console.error('[GDPR DELETE REQUEST]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 管理员接口：执行实际删除
+app.delete('/api/admin/gdpr/delete-user', adminAuth, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required' });
+
+    const { rows } = await pool.query('SELECT id, name FROM users WHERE email=$1', [email.toLowerCase()]);
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+
+    const userId = rows[0].id;
+
+    // 匿名化 orders（保留订单记录用于财务，但移除个人信息）
+    await pool.query(
+      `UPDATE orders SET guest_email='[deleted]', user_id=NULL, notes='[deleted]', admin_note=COALESCE(admin_note,'') WHERE user_id=$1`,
+      [userId]
+    );
+    // 删除地址
+    await pool.query('DELETE FROM addresses WHERE user_id=$1', [userId]);
+    // 删除用户
+    await pool.query('DELETE FROM users WHERE id=$1', [userId]);
+
+    // 通知用户（如果邮件还能送达）
+    await sendMail({
+      to: email,
+      subject: '[PCBAForge] Your Data Has Been Deleted',
+      html: `<h2>Data Deletion Complete</h2>
+        <p>Your personal data has been permanently deleted from PCBAForge systems.</p>
+        <p>Order records have been anonymized for accounting purposes.</p>
+        <p style="color:#999;font-size:12px">Completed at: ${new Date().toISOString()}</p>`
+    });
+
+    res.json({ success: true, message: `User ${email} deleted and orders anonymized.` });
+  } catch (err) {
+    console.error('[GDPR ADMIN DELETE]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 管理员接口：查看待删除申请列表
+app.get('/api/admin/gdpr/pending', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, email, name, deletion_requested_at, deletion_reason
+       FROM users WHERE deletion_requested_at IS NOT NULL
+       ORDER BY deletion_requested_at ASC`
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ═══════════════════════════════════════════════════════
 // PAYPAL APIs
 // ═══════════════════════════════════════════════════════
 
-// 创建 PayPal 订单（PayPal 标准 & Apple Pay 共用）
 app.post('/api/payment/create', async (req, res) => {
   try {
     const { order_no, email } = req.body;
@@ -396,7 +486,6 @@ app.post('/api/payment/create', async (req, res) => {
     const ppData = await ppRes.json();
     if (!ppRes.ok) throw new Error(ppData.message || 'PayPal order creation failed');
 
-    // 存储 PayPal order ID
     await pool.query(
       `UPDATE orders SET payment_intent=$1, updated_at=datetime('now') WHERE order_no=$2`,
       [ppData.id, order.order_no]
@@ -410,25 +499,17 @@ app.post('/api/payment/create', async (req, res) => {
   }
 });
 
-// 捕获付款（PayPal 标准 & Apple Pay 共用）
 app.post('/api/payment/capture', async (req, res) => {
   try {
     const { order_no, token: paypalOrderId } = req.body;
     if (!order_no || !paypalOrderId) return res.status(400).json({ error: 'order_no and token required' });
 
-    const { rows } = await pool.query(
-      `SELECT * FROM orders WHERE order_no=$1`,
-      [order_no.toUpperCase()]
-    );
+    const { rows } = await pool.query(`SELECT * FROM orders WHERE order_no=$1`, [order_no.toUpperCase()]);
     if (!rows.length) return res.status(404).json({ error: 'Order not found' });
     const order = rows[0];
 
-    // 防止重复捕获
-    if (order.status === 'paid' || order.status === 'production') {
-      return res.json({ success: true, order });
-    }
+    if (order.status === 'paid' || order.status === 'production') return res.json({ success: true, order });
 
-    // 强校验 payment_intent
     if (order.payment_intent && order.payment_intent !== paypalOrderId) {
       console.error('[SECURITY] payment_intent mismatch', order.order_no, order.payment_intent, paypalOrderId);
       return res.status(400).json({ error: 'Invalid payment token' });
@@ -448,7 +529,6 @@ app.post('/api/payment/capture', async (req, res) => {
       captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || 0
     );
 
-    // 更新订单状态
     await pool.query(
       `UPDATE orders SET status='production', total_paid=$1, updated_at=datetime('now') WHERE order_no=$2`,
       [amountPaid, order.order_no]
@@ -456,7 +536,6 @@ app.post('/api/payment/capture', async (req, res) => {
 
     const updatedOrder = { ...order, status: 'production', total_paid: amountPaid };
 
-    // 发送确认邮件给客户
     const custEmail = order.guest_email || (await pool.query('SELECT email FROM users WHERE id=$1', [order.user_id])).rows[0]?.email;
     if (custEmail) {
       await sendMail({
@@ -469,7 +548,6 @@ app.post('/api/payment/capture', async (req, res) => {
       });
     }
 
-    // 通知管理员
     const { rows: adminCfg } = await pool.query(`SELECT value FROM settings WHERE key='contact_email'`);
     if (adminCfg[0]?.value) {
       await sendMail({
@@ -490,7 +568,6 @@ app.post('/api/payment/capture', async (req, res) => {
   }
 });
 
-// 获取订单的 PayPal Client ID（前端用）
 app.get('/api/payment/config', async (req, res) => {
   try {
     const cfg = await getPayPalConfig();
