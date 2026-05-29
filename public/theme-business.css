@@ -1,0 +1,387 @@
+/*
+ * PCBAForge — Business White Theme
+ * Branch: theme/business-white
+ * Overrides the default dark/green geek theme with a clean,
+ * professional white-and-navy business aesthetic.
+ * All layout / logic / structure unchanged.
+ */
+
+/* ── 1. CSS Variable Overrides ─────────────────────────────────────── */
+:root {
+  --bg:     #FFFFFF;
+  --bg2:    #F8F9FA;
+  --bg3:    #F0F4F8;
+  --dim:    #EEF2F7;
+  --border: #D8E0EA;
+  --green:  #1A6DB5;      /* accent — professional navy-blue */
+  --green2: #1558A0;
+  --green3: #C5D7EE;
+  --text:   #2D3748;
+  --muted:  #718096;
+  --white:  #1A202C;      /* "white" var is used for headings — keep dark */
+  --amber:  #D97706;
+  --red:    #DC2626;
+  --wa:     #25D366;
+  --max:    1200px;
+}
+
+/* ── 2. Base ────────────────────────────────────────────────────────── */
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'DM Sans', sans-serif;
+}
+
+/* Remove circuit-board SVG background */
+.cbg { display: none !important; }
+
+/* ── 3. Navigation ─────────────────────────────────────────────────── */
+nav {
+  background: rgba(255,255,255,0.97) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+
+.nav-logo {
+  font-family: 'Inter', 'DM Sans', sans-serif !important;
+  font-size: 1.05rem !important;
+  color: var(--green) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Remove the pulsing green dot — replace with subtle square accent */
+.ldot {
+  background: var(--green) !important;
+  border-radius: 2px !important;
+  animation: none !important;
+  box-shadow: none !important;
+}
+
+.nav-links a { color: var(--muted) !important; }
+.nav-links a:hover { color: var(--green) !important; }
+
+.nav-cta {
+  background: var(--green) !important;
+  color: #fff !important;
+  font-family: 'Inter', 'DM Sans', sans-serif !important;
+  letter-spacing: 0.04em !important;
+  border-radius: 4px !important;
+}
+.nav-cta:hover { background: var(--green2) !important; opacity: 1 !important; }
+
+/* ── 4. Ticker bar ─────────────────────────────────────────────────── */
+.ticker {
+  background: var(--dim) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.ti { font-family: 'DM Sans', sans-serif !important; color: var(--muted) !important; letter-spacing: 0.04em !important; }
+.ti em { color: var(--green) !important; }
+
+/* ── 5. Hero ───────────────────────────────────────────────────────── */
+.hero-badge {
+  background: rgba(26,109,181,0.06) !important;
+  border: 1px solid rgba(26,109,181,0.2) !important;
+  color: var(--green) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  letter-spacing: 0.06em !important;
+}
+
+.hero h1 {
+  font-family: 'Inter', 'DM Sans', sans-serif !important;
+  color: var(--white) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+}
+.acc { color: var(--green) !important; }
+
+.hero-sub { color: var(--muted) !important; }
+
+.hstats .snum {
+  font-family: 'Inter', 'DM Sans', sans-serif !important;
+  color: var(--green) !important;
+}
+.hstats .slbl {
+  font-family: 'DM Sans', sans-serif !important;
+  color: var(--muted) !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* Hero image — remove harsh filter */
+.hero-img-wrap {
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10) !important;
+  overflow: hidden !important;
+}
+.hero-img-wrap img { filter: brightness(0.95) saturate(0.9) !important; }
+.hero-img-overlay { background: linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 60%) !important; }
+.hero-img-badge {
+  background: rgba(255,255,255,0.92) !important;
+  border-top: 1px solid var(--border) !important;
+  backdrop-filter: blur(6px) !important;
+}
+.hib-item .hib-val { font-family: 'DM Sans', sans-serif !important; color: var(--green) !important; }
+.hib-item .hib-lbl { font-family: 'DM Sans', sans-serif !important; color: var(--muted) !important; }
+
+/* ── 6. Primary / Ghost Buttons ────────────────────────────────────── */
+.bp {
+  background: var(--green) !important;
+  color: #fff !important;
+  font-family: 'Inter', 'DM Sans', sans-serif !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.03em !important;
+}
+.bp:hover { background: var(--green2) !important; }
+
+.bg {
+  color: var(--green) !important;
+  border: 1.5px solid var(--green3) !important;
+  border-radius: 4px !important;
+}
+.bg:hover {
+  background: rgba(26,109,181,0.05) !important;
+  border-color: var(--green) !important;
+}
+
+/* ── 7. Section Labels & Titles ────────────────────────────────────── */
+.slabel {
+  font-family: 'DM Sans', sans-serif !important;
+  color: var(--green) !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  font-size: .72rem !important;
+  font-weight: 600 !important;
+}
+
+.stitle {
+  font-family: 'Inter', 'DM Sans', sans-serif !important;
+  color: var(--white) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.divider { background: linear-gradient(90deg, transparent, var(--border), transparent) !important; }
+
+/* ── 8. Service Cards ──────────────────────────────────────────────── */
+.sc {
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+.sc:hover {
+  border-color: var(--green) !important;
+  box-shadow: 0 8px 24px rgba(26,109,181,0.10) !important;
+  transform: translateY(-4px) !important;
+}
+.sc-img { filter: brightness(0.95) saturate(0.8) !important; }
+.sc:hover .sc-img { filter: brightness(1.0) saturate(0.9) !important; }
+
+.sn { color: var(--white) !important; font-family: 'DM Sans', sans-serif !important; font-weight: 600 !important; letter-spacing: 0 !important; }
+.sd { color: var(--muted) !important; }
+.stag {
+  background: rgba(26,109,181,0.06) !important;
+  border: 1px solid var(--green3) !important;
+  color: var(--green) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  border-radius: 3px !important;
+}
+
+/* ── 9. Quote Calculator / Mode Tabs ───────────────────────────────── */
+.mode-tabs { border: 1px solid var(--border) !important; border-radius: 6px !important; overflow: hidden !important; }
+.mtab {
+  font-family: 'DM Sans', sans-serif !important;
+  color: var(--muted) !important;
+  border-right: 1px solid var(--border) !important;
+  background: var(--bg2) !important;
+}
+.mtab.active {
+  background: var(--green) !important;
+  color: #fff !important;
+}
+.mtab:hover:not(.active) {
+  background: var(--dim) !important;
+  color: var(--white) !important;
+}
+
+/* ── 10. Form Inputs (quote/track) ─────────────────────────────────── */
+input, select, textarea {
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  border-radius: 4px !important;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--green) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(26,109,181,0.08) !important;
+}
+input::placeholder, textarea::placeholder { color: #A0AEC0 !important; }
+label { color: var(--text) !important; font-weight: 500 !important; }
+
+/* ── 11. Quote Result / Summary Box ────────────────────────────────── */
+.qresult, .q-result, .price-box, .quote-result, [class*="result"],
+.calc-result, .total-box {
+  background: #F0F6FF !important;
+  border: 1.5px solid rgba(26,109,181,0.25) !important;
+  border-radius: 8px !important;
+}
+.price-val, .q-price, .total-price, [class*="price-val"], .result-price {
+  color: var(--green) !important;
+  font-family: 'Inter', 'DM Sans', sans-serif !important;
+}
+
+/* ── 12. Tables ────────────────────────────────────────────────────── */
+table { background: #fff !important; }
+th {
+  background: var(--dim) !important;
+  color: var(--white) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+}
+td { color: var(--text) !important; border-color: var(--border) !important; }
+tr:hover td { background: rgba(26,109,181,0.04) !important; }
+
+/* ── 13. Process Steps / Info Boxes ────────────────────────────────── */
+.step-num, .step-icon, [class*="step-n"] {
+  background: rgba(26,109,181,0.10) !important;
+  color: var(--green) !important;
+  border-color: var(--green3) !important;
+}
+
+/* ── 14. Capability / Spec Table ───────────────────────────────────── */
+.cap-table td:first-child, .spec-label {
+  color: var(--muted) !important;
+  font-weight: 500 !important;
+}
+.cap-table td:last-child, .spec-value {
+  color: var(--green) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* ── 15. Trust / Why-Us Badges ─────────────────────────────────────── */
+.trust-item, .why-item, .feature-card {
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+.trust-icon, .why-icon {
+  color: var(--green) !important;
+}
+
+/* ── 16. Footer ─────────────────────────────────────────────────────── */
+footer, .footer {
+  background: #1A202C !important;
+  border-top: 1px solid #2D3748 !important;
+  color: #A0AEC0 !important;
+}
+footer a, .footer a { color: #CBD5E0 !important; }
+footer a:hover, .footer a:hover { color: #fff !important; }
+.footer-logo { color: #fff !important; }
+.footer-heading { color: #fff !important; font-family: 'DM Sans', sans-serif !important; }
+
+/* ── 17. Track Page — Order Status Steps ───────────────────────────── */
+.status-step.active .step-dot,
+.status-step.done .step-dot {
+  background: var(--green) !important;
+  box-shadow: 0 0 0 4px rgba(26,109,181,0.15) !important;
+}
+.status-step .step-dot { border-color: var(--border) !important; }
+.order-card, .status-card {
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important;
+}
+.status-label.active { color: var(--green) !important; font-weight: 600 !important; }
+
+/* ── 18. Admin Panel overrides ──────────────────────────────────────── */
+.admin-sidebar {
+  background: #1A202C !important;
+  border-right: 1px solid #2D3748 !important;
+}
+.admin-sidebar .nav-item.active {
+  background: rgba(26,109,181,0.15) !important;
+  border-left: 3px solid var(--green) !important;
+  color: #fff !important;
+}
+.admin-sidebar .nav-item:hover {
+  background: rgba(255,255,255,0.06) !important;
+}
+.admin-main {
+  background: var(--bg2) !important;
+}
+.admin-header {
+  background: rgba(255,255,255,0.97) !important;
+  border-bottom: 1px solid var(--border) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+.stat-card {
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+.stat-card .stat-num { color: var(--green) !important; font-family: 'DM Sans', sans-serif !important; }
+.btn-primary, .btn-action {
+  background: var(--green) !important;
+  color: #fff !important;
+  border-radius: 4px !important;
+}
+.btn-primary:hover, .btn-action:hover { background: var(--green2) !important; }
+
+/* ── 19. Alert / Toast messages ────────────────────────────────────── */
+.toast-success, .alert-success { background: #D1FAE5 !important; color: #065F46 !important; border: 1px solid #6EE7B7 !important; }
+.toast-error, .alert-error { background: #FEE2E2 !important; color: #991B1B !important; border: 1px solid #FCA5A5 !important; }
+.toast-info, .alert-info { background: #DBEAFE !important; color: #1E40AF !important; border: 1px solid #93C5FD !important; }
+
+/* ── 20. Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── 21. Section backgrounds ────────────────────────────────────────── */
+.sec-alt, section:nth-child(even) > .sec, .bg-alt {
+  background: var(--bg2) !important;
+}
+
+/* ── 22. Blog cards ─────────────────────────────────────────────────── */
+.blog-card {
+  background: #fff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+.blog-card:hover {
+  box-shadow: 0 8px 24px rgba(26,109,181,0.10) !important;
+  transform: translateY(-4px) !important;
+  border-color: var(--green) !important;
+}
+.blog-tag {
+  background: rgba(26,109,181,0.06) !important;
+  color: var(--green) !important;
+  border: 1px solid var(--green3) !important;
+  border-radius: 3px !important;
+}
+
+/* ── 23. Typography font swap (Inter for headings) ──────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+h1, h2, h3, h4, h5, h6,
+.nav-logo, .stitle, .hero h1, .snum {
+  font-family: 'Inter', 'DM Sans', sans-serif !important;
+}
+
+/* Keep DM Sans for body text, strip Orbitron/Share Tech Mono */
+.hero-badge, .slabel, .mtab, .ti,
+.hib-item .hib-val, .hib-item .hib-lbl,
+.step-label, .cap-table {
+  font-family: 'DM Sans', sans-serif !important;
+  letter-spacing: 0.03em !important;
+}
+
