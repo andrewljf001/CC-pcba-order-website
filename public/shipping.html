@@ -6,22 +6,22 @@
 <title>Shipping Policy — PCBAForge</title>
 <meta name="description" content="PCBAForge Shipping Policy — lead times, carriers, international shipping, and tracking.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#1A1A1A;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:860px}
+:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#16A34A;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--amber:#FFB300;--red:#FF4444;--wa:#25D366;--max:860px}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);backdrop-filter:blur(10px);box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .nav-logo{font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
 .ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(26,26,26,.25)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(26,26,26,0)}}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(22,163,74,.25)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(22,163,74,0)}}
 .nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
 .nav-cta{background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
 .wrap{max-width:var(--max);margin:0 auto;padding:3rem 5% 5rem}
-.page-label{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
+.page-label{font-family:'Inter',sans-serif;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
 .page-title{font-family:'Inter',sans-serif;font-size:clamp(1.3rem,2.5vw,1.8rem);color:var(--white);margin-bottom:.5rem}
-.page-date{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);margin-bottom:2.5rem}
+.page-date{font-family:'Inter',sans-serif;font-size:.7rem;color:var(--muted);margin-bottom:2.5rem}
 .doc h2{font-family:'Inter',sans-serif;font-size:1rem;color:var(--white);margin:2rem 0 .6rem;padding-left:.8rem;border-left:3px solid var(--green3)}
 .doc p{font-size:.9rem;color:var(--text);line-height:1.8;margin-bottom:1rem}
 .doc ul{margin:.5rem 0 1rem 1.5rem}
@@ -31,7 +31,7 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .info-box{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--green3);padding:1rem 1.2rem;margin-bottom:1.5rem}
 .info-box p{margin-bottom:0}
 .tbl{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.88rem}
-.tbl th{background:var(--dim);padding:.6rem .9rem;text-align:left;font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--green);letter-spacing:.08em;border:1px solid var(--border)}
+.tbl th{background:var(--dim);padding:.6rem .9rem;text-align:left;font-family:'Inter',sans-serif;font-size:.7rem;color:var(--green);letter-spacing:.08em;border:1px solid var(--border)}
 .tbl td{padding:.55rem .9rem;border:1px solid var(--border);color:var(--text)}
 .tbl tr:nth-child(even) td{background:rgba(0,0,0,.018)}
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.5rem 5%}
@@ -44,6 +44,23 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.18);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
 @media(max-width:768px){.nav-links{display:none}}
+
+/* ===== white-business v2: rounded + shadow + green ===== */
+.nav-cta,.bp,.bg,.obtn,.bwa,.bem,.search-btn,.act-btn,.track-btn,
+button[type=submit],.pay-btn{border-radius:8px}
+.fg select,.fg input,.fg textarea,.search-row input,
+input,select,textarea{border-radius:6px}
+.sc,.qform,.qres,.card,.pay-card,.wc,.svc-card,.search-card,.order-top,
+.timeline-card,.note-card,.price-block,.msg-box,.success-box,.detail-panel .sub-body,
+.info-block,.warn-block,.radio-block,.manual-notice,.pay-card,.hero-img-wrap,
+.hpanel .fbody{border-radius:12px}
+.sc,.card,.pay-card,.wc,.search-card,.order-top,.timeline-card,
+.price-block{box-shadow:0 1px 3px rgba(16,24,40,.04),0 1px 2px rgba(16,24,40,.06)}
+.sptbl{border-radius:12px;overflow:hidden}
+.svc-card{border-radius:10px}
+.pn,.tl-dot{border-radius:50%}
+.status-pill{border-radius:999px}
+.stag,.svc-badge,.pay-tag,.badge-std,.badge-rq{border-radius:6px}
 </style>
 <link rel="stylesheet" href="/theme-business.css">
 </head>
