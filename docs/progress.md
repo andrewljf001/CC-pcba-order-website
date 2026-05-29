@@ -8,7 +8,7 @@
 
 ## 📌 当前阶段
 
-🟡 **Phase 7 进行中 — 下一步：7.20 D1 备份 → 7.2 SEO**
+🟡 **Phase 7 进行中 — 下一步：7.20 D1 备份 → 7.2 SEO → 7.4 GA4（等待 G-ID）**
 
 ---
 
@@ -51,12 +51,12 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 | 7.1 | 正式域名 & HTTPS | ✅ 完成 | pcbaforge.com 上线 |
 | 7.2 | SEO 优化 | ⬜ 待开始 | meta tags、sitemap.xml、robots.txt |
 | 7.3 | 多语言支持 | ⬜ 待开始 | |
-| 7.4 | 访客统计 | ⬜ 待开始 | Cloudflare Analytics 或 umami |
-| 7.5 | 图片迁移到 R2 | ⬜ 待开始 | |
+| 7.4 | 访客统计 GA4 | ⬜ 待 G-ID | 等待 G-XXXXXXXXXX，接口已预留 |
+| 7.5 | 图片迁移到 VPS 本地 | ✅ 完成 | public/images/ 本地存储 |
 | 7.6 | privacy.html 隐私政策 | ✅ 完成 | |
 | 7.7 | terms.html 服务条款 | ✅ 完成 | |
-| 7.8 | Cookie 同意横幅（GDPR） | ⬜ 待开始 | |
-| 7.9 | GDPR 数据删除流程 | ⬜ 待开始 | |
+| 7.8 | Cookie 同意横幅（GDPR） | ✅ 完成 | cookie-consent.js，GA4 consent mode 预留 |
+| 7.9 | GDPR 数据删除流程 | ✅ 完成 | gdpr-delete.html + /api/gdpr/delete-request + /api/admin/gdpr/delete-user |
 | 7.10 | shipping.html 货运政策 | ✅ 完成 | |
 | 7.11 | blog.html 博客列表页 | ✅ 完成 | |
 | 7.12 | blog-post.html 文章详情页 | ✅ 完成 | |
@@ -141,14 +141,12 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 
 ### 2026-05-29
 - **支付三合一升级完成**
-- PayPal 升级至 v6 SDK（`/web-sdk/v6/core`），用 `createPayPalOneTimePaymentSession`
-- Google Pay 接入：PayPal APM SDK (`components=googlepay`) + Google Pay JS SDK，`paypal.Googlepay().config()` 标准流程
-- Apple Pay 接入：PayPal APM SDK (`components=applepay`) + Apple Pay JS SDK，`ApplePaySession` 标准流程
-- 三个 SDK 完全独立加载，互不干扰
-- Apple Pay 双层过滤：UA 检测 + `ApplePaySession.canMakePayments()`，非苹果设备零加载
-- 按钮风格统一：PayPal 黑底绿边 Orbitron，Google Pay 深灰白字，Apple Pay 纯黑白字
-- server.js：`/.well-known/apple-developer-merchantid-domain-association` 域名验证路由（三路读取）
-- Apple Pay 域名激活步骤已记录（待部署后手动执行）
+- PayPal 升级至 v6 SDK，Google Pay + Apple Pay 接入
+- quote.html 表单逻辑重构（勾选组合模式）
+- 图片迁移到 VPS 本地 public/images/（7.5 ✅）
+- **7.8 Cookie 同意横幅完成**：cookie-consent.js，GA4 consent mode 预留接口
+- **7.9 GDPR 数据删除完成**：gdpr-delete.html 前台页面 + /api/gdpr/delete-request 公开接口 + /api/admin/gdpr/delete-user 管理员执行删除 + /api/admin/gdpr/pending 查看待删除列表
+- database.js 新增 deletion_requested_at / deletion_reason 字段 migration
 
 ---
 
@@ -166,12 +164,20 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 ## ⚙️ Apple Pay 激活步骤（部署后执行）
 
 1. 登录 [PayPal Developer Dashboard](https://developer.paypal.com) → 应用 PCBAForge → 勾选启用 **Apple Pay**
-2. 下载 Live 域名验证文件：https://paypalobjects.com/devdoc/apple-pay/well-known/apple-developer-merchantid-domain-association
-3. 上传到 VPS：`public/.well-known/apple-developer-merchantid-domain-association`（无扩展名，`Content-Type: application/octet-stream`）
-4. PayPal 后台 → Features → Apple Pay → Manage → **Add Domain** → 输入 `pcbaforge.com` → **Register Domain**
+2. 下载 Live 域名验证文件
+3. 上传到 VPS：`public/.well-known/apple-developer-merchantid-domain-association`
+4. PayPal 后台 → Features → Apple Pay → Manage → **Add Domain** → 输入 `pcbaforge.com`
 5. 验证通过 → Safari/iOS 用户付款页自动出现 Apple Pay 按钮
 
-**注意：** 验证文件必须通过 HTTPS 且不能有 3XX 重定向，不能放在防火墙后面。
+---
+
+## 🍪 Cookie Banner 使用说明（7.8）
+
+在所有前台 HTML 页面 `</body>` 前加一行：
+```html
+<script src="/cookie-consent.js"></script>
+```
+GA4 装好后在 `<head>` 最顶部加 gtag 初始化代码，banner 会自动联动 consent mode。
 
 ---
 
@@ -179,21 +185,7 @@ Phase 7  上线优化 & 运营功能                   🟡 进行中
 
 1. **7.20** D1 数据定期备份到 R2（数据安全，最高优先）
 2. **7.2** SEO 优化（sitemap.xml、robots.txt、全站 meta）
-3. **7.8** Cookie 同意横幅（GDPR 合规）
-4. **7.4** 访客统计接入
+3. **7.4** GA4 访客统计（等待 G-XXXXXXXXXX Measurement ID）
+4. **7.3** 多语言支持
 
 *每次开工前更新当前阶段，完成一项打 ✅，工作日志按日期追加。*
-
-### 2026-05-29（下午）
-- **quote.html 表单逻辑重构完成**
-- 原版 Tab 切换模式（PCB / SMT+DIP / Turnkey 三个独立 Tab）改为**勾选组合模式**
-- 三个服务（PCB制板 / SMT+DIP焊接 / 功能测试）可任意勾选组合
-- SMT 和 DIP 永远捆绑，不拆分（跨国物流不合理分开）
-- 板子来源单选：自带板 or 我们制板（勾了PCB时自动联动锁定）
-- 元器件单选：CMS（客户自备）or Turnkey（我们采购→自动转询价）
-- DIP pins 填 0 表示无插件，不需要单独档位
-- 功能测试永远转询价，必须上传测试文档才能评估
-- 实时价格估算：按模块累加，有询价项显示 TBD
-- 右侧 Summary 动态显示已选服务组合 + 报价类型
-- 文件提示区根据所选服务动态更新所需文件列表
-- 完整保留：auth modal、WhatsApp 动态配置、Cloudflare Turnstile、footer、guest提交
