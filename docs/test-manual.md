@@ -32,40 +32,89 @@
 
 ---
 
-## 模块二：报价计算器
+## 模块二：询价表单 — 服务勾选与报价逻辑
 
-**在首页找到报价计算器区域（Calculator）**
+> ⚠️ 2026-05-29 重构：原 Tab 切换模式已改为**勾选组合模式**，以下步骤基于新版 quote.html  
+> **打开浏览器，访问 https://pcbaforge.com/quote.html**
+
+### 2-A 服务勾选卡片基础交互
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 2.1 | 找到计算器 Tab，点击 **PCB Only** | 显示 PCB 相关参数输入框 | | |
-| 2.2 | 输入：数量 10，层数 2，尺寸 100x100 | 实时显示报价金额 | | |
-| 2.3 | 修改数量为 100 | 报价金额随之变化 | | |
-| 2.4 | 点击 **SMT Assembly** Tab | 切换显示 SMT 参数 | | |
-| 2.5 | 输入 SMT 参数（数量、元件数等） | 实时显示 SMT 报价 | | |
-| 2.6 | 点击 **Through-Hole** Tab | 切换到插件焊接 | | |
-| 2.7 | 点击 **Turnkey PCBA** Tab | 切换到全工序，显示综合报价 | | |
-| 2.8 | 不填任何内容，直接点 **Get Quote / Submit** | 提示需要填写必填项（不能直接提交空表单） | | |
+| 2.1 | 打开 quote.html，查看页面顶部 | 显示 3 张服务卡片：PCB Fabrication / SMT+DIP Assembly / Functional Testing | | |
+| 2.2 | 不勾选任何服务，直接点 **SUBMIT INQUIRY** 按钮 | 顶部出现黄色警告"Please select at least one service"，页面滚动到顶部 | | |
+| 2.3 | 点击 **PCB Fabrication** 卡片 | 卡片高亮（绿色边框），下方 PCB 参数面板展开显示 | | |
+| 2.4 | 再次点击 PCB 卡片取消勾选 | 卡片恢复暗色，PCB 参数面板收起消失 | | |
+| 2.5 | 点击 **SMT+DIP Assembly** 卡片 | 卡片高亮，SMT+DIP 参数面板展开 | | |
+| 2.6 | 点击 **Functional Testing** 卡片 | 卡片高亮，Testing 参数面板展开，显示"ALWAYS QUOTED ON REQUEST"警告框 | | |
+| 2.7 | 同时勾选三张卡片 | 三个参数面板全部展开，右侧 Summary 显示 "PCB Fab + SMT+DIP + Testing" | | |
+
+### 2-B PCB 参数面板 & 实时报价
+
+| # | 测试步骤 | 预期结果 | 结果 | 备注 |
+|---|---------|---------|------|------|
+| 2.8 | 只勾选 PCB，设置：数量 10，宽 100mm，高 100mm，层数 2 | 右侧出现价格区域，显示绿色 "FROM $xxx" 数字估价 | | |
+| 2.9 | 将数量改为 100 | 价格随之上涨变化 | | |
+| 2.10 | 将材质从 FR4 改为 **Rogers** 或 **Flex** | 价格区域切换为 "MANUAL QUOTE"（琥珀色），价格行显示 "Quote on request" | | |
+| 2.11 | 将材质改回 FR4，将尺寸改为 300x300 | 价格区域切换为 "MANUAL QUOTE"（尺寸超 200mm 触发人工报价） | | |
+| 2.12 | 将尺寸改回 100x100 | 价格恢复为绿色数字估价 | | |
+
+### 2-C SMT+DIP 参数面板 — 板子来源联动
+
+| # | 测试步骤 | 预期结果 | 结果 | 备注 |
+|---|---------|---------|------|------|
+| 2.13 | 仅勾选 **SMT+DIP**（不勾 PCB） | 板子来源单选可以自由切换"I supply my own boards" / "PCBAForge fabricates" | | |
+| 2.14 | 选择"PCBAForge fabricates the PCB"（仅 SMT 勾选状态） | 出现琥珀色提示：建议同时勾选 PCB Fabrication 填写板子规格 | | |
+| 2.15 | 同时勾选 **PCB + SMT+DIP** | 板子来源自动锁定为 "PCBAForge fabricates"，单选区变灰无法切换，出现绿色提示"✓ Linked to PCB Fabrication" | | |
+| 2.16 | 取消勾选 PCB（只保留 SMT） | 板子来源单选恢复可操作，绿色提示消失 | | |
+
+### 2-D SMT+DIP — 元器件来源 & 报价类型
+
+| # | 测试步骤 | 预期结果 | 结果 | 备注 |
+|---|---------|---------|------|------|
+| 2.17 | 勾选 SMT+DIP，元器件选 **I supply all components (CMS)**，填入数量 10、SMT pads 50、DIP pins 0 | 右侧显示绿色数字估价，Summary 中 Quote type 显示 "Standard / instant estimate" | | |
+| 2.18 | 元器件改选 **PCBAForge sources components (Turnkey)** | 价格行变为 "Quote on request"（琥珀色），Summary 中 Quote type 改为 "Manual quote"，提交按钮变为琥珀色 | | |
+| 2.19 | Complex IC count 填入 10 或以上（CMS 模式下） | 该服务行切换为 "Quote on request"（≥10 颗复杂IC触发人工报价） | | |
+
+### 2-E Functional Testing 面板
+
+| # | 测试步骤 | 预期结果 | 结果 | 备注 |
+|---|---------|---------|------|------|
+| 2.20 | 勾选 **Functional Testing** | 右侧价格区域中 Testing 行始终显示 "Quote on request"（无论其他服务如何），Summary Quote type 为 "Manual quote" | | |
+| 2.21 | 不填写 Testing Scope 文字，点提交 | 提示"Please describe the testing requirements."，无法提交 | | |
+
+### 2-F 文件提示区动态更新
+
+| # | 测试步骤 | 预期结果 | 结果 | 备注 |
+|---|---------|---------|------|------|
+| 2.22 | 仅勾选 PCB | 文件提示区显示：Gerber files (.zip) | | |
+| 2.23 | 再勾选 SMT+DIP（PCB + SMT 组合） | 文件提示区追加：BOM (.xlsx/.csv)、Pick & Place / Centroid file (.csv) | | |
+| 2.24 | 再勾选 Functional Testing（三服务全勾） | 文件提示区追加：**Test Specification (.pdf)** （红/琥珀色加粗警示） | | |
+
+### 2-G 右侧 Summary 面板综合验证
+
+| # | 测试步骤 | 预期结果 | 结果 | 备注 |
+|---|---------|---------|------|------|
+| 2.25 | 同时勾选 PCB + SMT+DIP，元器件选 CMS | Summary：Services = "PCB Fab + SMT+DIP"，Components = "Customer supplied (CMS)"，Quote type = "Standard / instant estimate"（绿色） | | |
+| 2.26 | 将元器件改为 Turnkey | Summary：Components 改为 "PCBAForge sources (Turnkey)"，Quote type 变为 "Manual quote"（琥珀色），提交按钮变为琥珀色 | | |
 
 ---
 
-## 模块三：询价下单（Quote 页面）
+## 模块三：询价下单（完整提交流程）
 
-**点击导航栏 Quote 或首页的 Get Quote 按钮**
+**继续在 quote.html 操作**
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 3.1 | 打开 Quote 页面 | 页面正常，有询价表单 | | |
-| 3.2 | 不填任何内容点提交 | 提示必填项未填 | | |
-| 3.3 | 填写姓名：`Test User` | 输入框正常接受 | | |
-| 3.4 | 填写邮箱：`testuser@mailinator.com` | 输入框正常 | | |
-| 3.5 | 填写 WhatsApp：`+1234567890` | 输入框正常 | | |
-| 3.6 | 选择服务类型：**Turnkey PCBA** | 下拉选择正常 | | |
-| 3.7 | 填写数量：`5` | 输入框正常 | | |
-| 3.8 | 上传一个文件（随便一个 .zip 或 .pdf 文件） | 显示上传成功或文件名 | | |
-| 3.9 | 完成 Turnstile 人机验证（点击勾选框） | 验证通过，显示绿色勾 | | |
-| 3.10 | 点击提交 | 显示"提交成功"或"订单号 CC..."提示 | | |
-| 3.11 | 记录下返回的订单号（格式 CC+数字） | 复制保存，后续测试用 | | |
+| 3.1 | 勾选 PCB + SMT+DIP，保持 CMS 模式 | 两个参数面板展开 | | |
+| 3.2 | PCB 填写：数量 5，宽 100，高 80，层数 2 | 输入框正常 | | |
+| 3.3 | SMT 填写：数量 5，SMT pads 40，DIP pins 0 | 输入框正常 | | |
+| 3.4 | 联系信息：姓名 `Test User`，邮箱 `testuser@mailinator.com`，WhatsApp `+1234567890` | 输入框正常 | | |
+| 3.5 | 上传一个测试文件（.zip 或 .pdf） | 文件列表显示文件名和大小，有 ✕ 删除按钮 | | |
+| 3.6 | 完成 Cloudflare Turnstile 人机验证 | 验证通过（绿色勾） | | |
+| 3.7 | 点击提交，未登录时 | 弹出 Auth Modal，有 Register / Sign In / Continue as Guest 三个选项 | | |
+| 3.8 | 点击 **CONTINUE AS GUEST** | 直接提交，显示成功页面，含订单号 CC+数字 | | |
+| 3.9 | 记录订单号 | 复制保存，后续模块用 | | |
 
 > 💾 **记录订单号：** ______________________
 
@@ -139,7 +188,7 @@
 | 8.1 | 进入报价参数页面 | 显示 PCB / SMT / DIP / 运费参数列表 | | |
 | 8.2 | 找到某个参数，修改其数值 | 输入框可以编辑 | | |
 | 8.3 | 点击保存 | 显示保存成功 | | |
-| 8.4 | 回到前台报价计算器，重新计算 | 报价数值应反映刚才的修改 | | |
+| 8.4 | 回到前台 quote.html，勾选对应服务重新计算 | 报价数值应反映刚才的修改 | | |
 | 8.5 | 将参数改回原来的值 | 恢复原始数据 | | |
 
 ---
@@ -201,7 +250,7 @@
 
 | # | 测试步骤 | 预期结果 | 结果 | 备注 |
 |---|---------|---------|------|------|
-| 13.1 | 测试 3.10 提交询价后 | 检查 mailinator testuser 收件箱 | | |
+| 13.1 | 测试 3.8 提交询价后 | 检查 mailinator testuser 收件箱 | | |
 | 13.2 | 看到询价确认邮件，含订单号 | 邮件内容正确 | | |
 | 13.3 | 在后台将订单更新为 Quoted 后 | 检查是否收到报价通知邮件 | | |
 | 13.4 | 查看邮件发件人地址 | 应为 admin@pcbaforge.com | | |
@@ -214,8 +263,8 @@
 | 模块 | 总测试项 | 通过 | 失败 | 备注 |
 |------|---------|------|------|------|
 | 一：首页 & 导航 | 9 | 9 | 0 | ✅ 完成 |
-| 二：报价计算器 | 8 | | | |
-| 三：询价下单 | 11 | | | |
+| 二：询价表单（勾选组合模式） | 26 | | | |
+| 三：询价下单（完整提交） | 9 | | | |
 | 四：订单追踪 | 4 | | | |
 | 五：后台登录 | 5 | | | |
 | 六：订单管理 | 9 | | | |
@@ -226,7 +275,7 @@
 | 十一：忘记密码 | 4 | | | |
 | 十二：安全测试 | 4 | | | |
 | 十三：邮件通知 | 5 | | | |
-| **合计** | **82** | **9** | **0** | |
+| **合计** | **98** | **9** | **0** | |
 
 ---
 
