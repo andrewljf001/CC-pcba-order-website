@@ -11,6 +11,14 @@ Phase 7 基本收尾 — 剩余项已暂缓/取消/等待
 - 7.4 GA4 等待用户提供 G-XXXXXXXXXX
 - 下一个大方向：Phase 6 本地同步工具（Mac），视用户意愿启动
 
+## 分支说明
+- **main**：默认绿黑科技极客风
+- **theme/business-white**：白底商务风格分支（2026-05-30 新建）
+  - 新增 `public/theme-business.css`（CSS变量覆盖+商务白配色）
+  - 全站 HTML 注入主题 CSS，逻辑/结构/内容完全不变
+  - 配色：白底 `#FFFFFF`，主色 Navy Blue `#1A6DB5`，字体 Inter+DM Sans
+  - 如需上线：把 main 合并 theme/business-white，或在服务器切换分支即可
+
 ## 阶段总览
 Phase 1-5 全部完成（业务架构/报价计算器/后端用户体系/运营后台/支付接入）
 Phase 6 本地同步工具（Mac）待开始
@@ -32,6 +40,7 @@ Phase 7 上线优化 基本完成（剩余暂缓/取消/等待）
 - 7.15-7.19 安全加固 完成
 - 7.20 D1备份到R2 完成（backup.js+restore.js+cron每日3点+保留30天+邮件）
 - 7.21-7.27 PM2自启/安全手册/R2上传/Zoho邮件/忘记密码/重置密码/nav统一 完成
+- 7.28 商务白色主题分支 完成（theme/business-white）
 
 ## 已修复Bug（2026-05-29 E2E测试发现）
 - 首页报价逻辑与报价页不一致 → 已对齐（$50/$75/$100、$200/$400）
@@ -53,10 +62,12 @@ Phase 7 上线优化 基本完成（剩余暂缓/取消/等待）
 ## 工作日志
 2026-05-25~28 Phase1-5完成，域名上线，D1+R2，Nginx，PM2，安全加固，Zoho邮件，PayPal+GooglePay+ApplePay
 2026-05-29 7.5图片本地化/7.8Cookie横幅/7.9GDPR删除/7.20备份恢复/运维文档/修首页报价bug/E2E测试发现并修3个真bug/决策7.3取消7.2暂缓7.4等G-ID
+2026-05-30 新建 theme/business-white 分支；创建 public/theme-business.css；全站HTML注入主题CSS（11个文件）；配色白底navy蓝商务风，逻辑结构完全不变
 待办：4条测试订单（@pcbaforge-test.com）待人工跑测后清理
 
 ## 下一步（视用户意愿）
 - 待恢复：7.4 GA4（给G-ID后一步到位）、7.2 SEO（暂缓）
+- 主题选择：main（绿黑）vs theme/business-white（白蓝），确认后可合并或保持双分支
 - 大方向：Phase 6 本地同步工具（对接嘉立创、订单状态同步、Mac菜单栏APP）
 - 零散收尾：人工完整跑一遍真实下单；清理测试数据
 
@@ -72,3 +83,4 @@ Phase 7 上线优化 基本完成（剩余暂缓/取消/等待）
 8. track页点支付 → PayPal按钮出现、能起单（重点验证今天修的bug）
 重点：第6、8步是今天修的两个真bug，人工确认真实环境也好使。
 测完清理：4条@pcbaforge-test.com测试订单 + 人工测试产生的订单。
+
