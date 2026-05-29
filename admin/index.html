@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCBAForge — Admin</title>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#1A1A1A;--green2:#000000;--green3:#9AA0A8;--text:#2B2F36;--muted:#7A828D;--white:#15181D;--amber:#B7791F;--red:#D14343;--max:1400px}
+:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#16A34A;--green2:#15803D;--green3:#7CC79A;--text:#2B2F36;--muted:#7A828D;--white:#15181D;--amber:#B7791F;--red:#D14343;--max:1400px}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 a{color:inherit;text-decoration:none}
@@ -17,13 +17,13 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 #login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg)}
 .login-box{width:100%;max-width:400px;padding:1rem}
 .login-logo{font-family:'Inter',sans-serif;font-size:1.4rem;color:var(--green);letter-spacing:.15em;text-align:center;margin-bottom:.3rem}
-.login-sub{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:.15em;text-align:center;margin-bottom:2rem}
+.login-sub{font-family:'Inter',sans-serif;font-size:.7rem;color:var(--muted);letter-spacing:.15em;text-align:center;margin-bottom:2rem}
 .login-card{background:var(--bg2);border:1px solid var(--green3)}
 .login-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
-.login-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.login-ht{font-family:'Inter',sans-serif;font-size:.75rem;color:var(--green);letter-spacing:.12em}
 .login-body{padding:1.5rem}
 .fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem}
-.fg label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em}
+.fg label{font-family:'Inter',sans-serif;font-size:.65rem;color:var(--muted);letter-spacing:.1em}
 .fg input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.6rem .8rem;font-size:.88rem;outline:none;transition:border-color .2s;width:100%}
 .fg input:focus{border-color:var(--green3)}
 .login-btn{width:100%;background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.85rem;border:none;margin-top:.5rem;transition:opacity .2s}
@@ -38,25 +38,25 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 .sb-logo{padding:1.2rem 1rem;border-bottom:1px solid var(--border)}
 .sb-logo-text{font-family:'Inter',sans-serif;font-size:.95rem;color:var(--green);letter-spacing:.1em;display:flex;align-items:center;gap:8px}
 .ldot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(26,26,26,.25)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(26,26,26,0)}}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(22,163,74,.25)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(22,163,74,0)}}
 .sb-admin{padding:.6rem 1rem;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--muted)}
-.sb-admin span{color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.7rem}
+.sb-admin span{color:var(--green);font-family:'Inter',sans-serif;font-size:.7rem}
 .sb-nav{flex:1;padding:.5rem 0;overflow-y:auto}
-.sb-section{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.15em;padding:.6rem 1rem .3rem;opacity:.6}
+.sb-section{font-family:'Inter',sans-serif;font-size:.58rem;color:var(--muted);letter-spacing:.15em;padding:.6rem 1rem .3rem;opacity:.6}
 .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem 1rem;font-size:.83rem;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent}
-.nav-item:hover{color:var(--text);background:rgba(26,26,26,.04)}
-.nav-item.active{color:var(--green);background:rgba(26,26,26,.06);border-left-color:var(--green)}
+.nav-item:hover{color:var(--text);background:rgba(22,163,74,.04)}
+.nav-item.active{color:var(--green);background:rgba(22,163,74,.06);border-left-color:var(--green)}
 .nav-item .ni{font-size:1rem;width:18px;text-align:center;flex-shrink:0}
-.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;font-family:'Share Tech Mono',monospace;padding:.1rem .4rem;border-radius:2px;min-width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;font-family:'Inter',sans-serif;padding:.1rem .4rem;border-radius:2px;min-width:18px;text-align:center}
 .sb-footer{padding:.8rem 1rem;border-top:1px solid var(--border)}
-.sb-logout{width:100%;background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;font-family:'Share Tech Mono',monospace;letter-spacing:.08em;padding:.5rem;transition:all .2s}
+.sb-logout{width:100%;background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;font-family:'Inter',sans-serif;letter-spacing:.08em;padding:.5rem;transition:all .2s}
 .sb-logout:hover{border-color:var(--red);color:var(--red)}
 
 /* MAIN CONTENT */
 .main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
 .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:.7rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .tb-title{font-family:'Inter',sans-serif;font-size:.9rem;color:var(--white);letter-spacing:.08em}
-.tb-time{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted)}
+.tb-time{font-family:'Inter',sans-serif;font-size:.68rem;color:var(--muted)}
 .content{padding:1.5rem;flex:1}
 
 /* PAGES */
@@ -65,13 +65,13 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 /* CARDS */
 .card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1.2rem}
 .card-hdr{background:var(--dim);padding:.7rem 1.2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-ht{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--green);letter-spacing:.12em}
+.card-ht{font-family:'Inter',sans-serif;font-size:.72rem;color:var(--green);letter-spacing:.12em}
 .card-body{padding:1.2rem}
 
 /* STAT GRID */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--green3);padding:1.1rem}
-.stat-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.12em;margin-bottom:.4rem}
+.stat-label{font-family:'Inter',sans-serif;font-size:.62rem;color:var(--muted);letter-spacing:.12em;margin-bottom:.4rem}
 .stat-value{font-family:'Inter',sans-serif;font-size:1.6rem;color:var(--green);font-weight:700;line-height:1}
 .stat-sub{font-size:.72rem;color:var(--muted);margin-top:.3rem}
 .stat-card.amber{border-top-color:var(--amber)}.stat-card.amber .stat-value{color:var(--amber)}
@@ -82,16 +82,16 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead tr{background:var(--dim)}
-th{padding:.6rem 1rem;text-align:left;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.1em;border-bottom:1px solid var(--border);white-space:nowrap}
+th{padding:.6rem 1rem;text-align:left;font-family:'Inter',sans-serif;font-size:.65rem;color:var(--green);letter-spacing:.1em;border-bottom:1px solid var(--border);white-space:nowrap}
 td{padding:.6rem 1rem;border-bottom:1px solid rgba(30,58,30,.5);color:var(--text);vertical-align:middle}
-tr:hover td{background:rgba(26,26,26,.025)}
-.mono{font-family:'Share Tech Mono',monospace;font-size:.78rem}
+tr:hover td{background:rgba(22,163,74,.025)}
+.mono{font-family:'Inter',sans-serif;font-size:.78rem}
 
 /* STATUS BADGES */
-.badge{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:.62rem;letter-spacing:.08em;padding:.2rem .5rem;border:1px solid}
+.badge{display:inline-block;font-family:'Inter',sans-serif;font-size:.62rem;letter-spacing:.08em;padding:.2rem .5rem;border:1px solid}
 .badge-pending{color:var(--amber);border-color:rgba(183,121,31,.3);background:rgba(183,121,31,.07)}
 .badge-quoted{color:#64B5F6;border-color:rgba(100,181,246,.3);background:rgba(100,181,246,.07)}
-.badge-paid{color:var(--green);border-color:rgba(26,26,26,.3);background:rgba(26,26,26,.07)}
+.badge-paid{color:var(--green);border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.07)}
 .badge-production{color:#CE93D8;border-color:rgba(206,147,216,.3);background:rgba(206,147,216,.07)}
 .badge-shipped{color:#80CBC4;border-color:rgba(128,203,196,.3);background:rgba(128,203,196,.07)}
 .badge-completed{color:var(--green2);border-color:rgba(0,200,50,.3);background:rgba(0,200,50,.07)}
@@ -99,13 +99,13 @@ tr:hover td{background:rgba(26,26,26,.025)}
 .badge-normal{color:var(--text);border-color:var(--border);background:transparent}
 .badge-vip{color:var(--amber);border-color:rgba(183,121,31,.3);background:rgba(183,121,31,.07)}
 .badge-blacklist{color:var(--red);border-color:rgba(209,67,67,.3);background:rgba(209,67,67,.07)}
-.badge-published{color:var(--green);border-color:rgba(26,26,26,.3);background:rgba(26,26,26,.07)}
+.badge-published{color:var(--green);border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.07)}
 .badge-draft{color:var(--muted);border-color:var(--border);background:transparent}
 
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;padding:.4rem .9rem;border:1px solid;cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:.06em;transition:all .2s}
+.btn{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;padding:.4rem .9rem;border:1px solid;cursor:pointer;font-family:'Inter',sans-serif;letter-spacing:.06em;transition:all .2s}
 .btn-green{background:var(--green);color:#fff;border-color:var(--green)}.btn-green:hover{opacity:.85}
-.btn-outline{background:none;color:var(--green);border-color:var(--green3)}.btn-outline:hover{background:rgba(26,26,26,.07)}
+.btn-outline{background:none;color:var(--green);border-color:var(--green3)}.btn-outline:hover{background:rgba(22,163,74,.07)}
 .btn-amber{background:none;color:var(--amber);border-color:rgba(183,121,31,.4)}.btn-amber:hover{background:rgba(183,121,31,.07)}
 .btn-red{background:none;color:var(--red);border-color:rgba(209,67,67,.4)}.btn-red:hover{background:rgba(209,67,67,.07)}
 .btn-sm{font-size:.7rem;padding:.3rem .7rem}
@@ -115,13 +115,13 @@ tr:hover td{background:rgba(26,26,26,.025)}
 .search-box{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--border);padding:.4rem .8rem;gap:.5rem;flex:1;max-width:320px}
 .search-box input{background:none;border:none;color:var(--text);font-size:.83rem;outline:none;width:100%}
 .search-box input::placeholder{color:var(--muted)}
-.filter-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.4rem .8rem;font-size:.78rem;font-family:'Share Tech Mono',monospace;outline:none;-webkit-appearance:none}
+.filter-select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.4rem .8rem;font-size:.78rem;font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none}
 
 /* DETAIL PANEL */
 .detail-panel{position:fixed;top:0;right:-500px;width:480px;height:100vh;background:var(--bg2);border-left:1px solid var(--green3);z-index:500;display:flex;flex-direction:column;transition:right .3s}
 .detail-panel.open{right:0}
 .dp-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.dp-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.1em}
+.dp-ht{font-family:'Inter',sans-serif;font-size:.75rem;color:var(--green);letter-spacing:.1em}
 .dp-close{background:none;border:none;color:var(--muted);font-size:1.2rem;padding:.2rem .5rem}
 .dp-close:hover{color:var(--red)}
 .dp-body{flex:1;overflow-y:auto;padding:1.2rem}
@@ -131,12 +131,12 @@ tr:hover td{background:rgba(26,26,26,.025)}
 .info-row:last-child{border-bottom:none}
 .ir-label{color:var(--muted);flex-shrink:0;margin-right:1rem}
 .ir-value{color:var(--text);text-align:right;word-break:break-all}
-.ir-value.g{color:var(--green);font-family:'Share Tech Mono',monospace}
-.section-title{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.12em;margin:1rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)}
+.ir-value.g{color:var(--green);font-family:'Inter',sans-serif}
+.section-title{font-family:'Inter',sans-serif;font-size:.68rem;color:var(--green);letter-spacing:.12em;margin:1rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)}
 
 /* FORM ELEMENTS */
 .form-group{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.8rem}
-.form-group label{font-family:'Share Tech Mono',monospace;font-size:.63rem;color:var(--muted);letter-spacing:.1em}
+.form-group label{font-family:'Inter',sans-serif;font-size:.63rem;color:var(--muted);letter-spacing:.1em}
 .form-group input,.form-group select,.form-group textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.5rem .75rem;font-size:.83rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;width:100%;-webkit-appearance:none}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green3)}
 .form-group select option{background:var(--bg)}
@@ -146,11 +146,11 @@ tr:hover td{background:rgba(26,26,26,.025)}
 .blog-editor{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.75rem;font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;width:100%;min-height:300px;resize:vertical;line-height:1.7}
 .blog-editor:focus{border-color:var(--green3)}
 .editor-toolbar{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem;padding:.5rem;background:var(--dim);border:1px solid var(--border);border-bottom:none}
-.editor-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:.25rem .6rem;font-family:'Share Tech Mono',monospace;transition:all .2s}
+.editor-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:.25rem .6rem;font-family:'Inter',sans-serif;transition:all .2s}
 .editor-btn:hover{color:var(--green);border-color:var(--green3)}
 .tags-input{display:flex;flex-wrap:wrap;gap:.4rem;background:var(--bg3);border:1px solid var(--border);padding:.4rem .6rem;min-height:38px;align-items:center}
 .tags-input input{background:none;border:none;color:var(--text);font-size:.83rem;outline:none;min-width:80px;flex:1}
-.tag-chip{background:rgba(26,26,26,.08);border:1px solid var(--green3);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.65rem;padding:.15rem .5rem;display:flex;align-items:center;gap:.3rem}
+.tag-chip{background:rgba(22,163,74,.08);border:1px solid var(--green3);color:var(--green);font-family:'Inter',sans-serif;font-size:.65rem;padding:.15rem .5rem;display:flex;align-items:center;gap:.3rem}
 .tag-chip button{background:none;border:none;color:var(--muted);font-size:.8rem;padding:0;line-height:1}
 .tag-chip button:hover{color:var(--red)}
 
@@ -161,23 +161,23 @@ tr:hover td{background:rgba(26,26,26,.025)}
 
 /* PAGINATION */
 .pagination{display:flex;gap:.4rem;align-items:center;margin-top:1rem;justify-content:flex-end}
-.pg-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;font-family:'Share Tech Mono',monospace;padding:.3rem .7rem}
-.pg-btn:hover,.pg-btn.active{border-color:var(--green3);color:var(--green);background:rgba(26,26,26,.05)}
-.pg-info{font-size:.72rem;color:var(--muted);font-family:'Share Tech Mono',monospace}
+.pg-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:.75rem;font-family:'Inter',sans-serif;padding:.3rem .7rem}
+.pg-btn:hover,.pg-btn.active{border-color:var(--green3);color:var(--green);background:rgba(22,163,74,.05)}
+.pg-info{font-size:.72rem;color:var(--muted);font-family:'Inter',sans-serif}
 
 /* SPINNER */
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(26,26,26,.2);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(22,163,74,.2);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* EMPTY STATE */
 .empty{text-align:center;padding:3rem;color:var(--muted)}
 .empty-icon{font-size:2.5rem;margin-bottom:.8rem;opacity:.4}
-.empty-text{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.1em}
+.empty-text{font-family:'Inter',sans-serif;font-size:.75rem;letter-spacing:.1em}
 
 /* SETTINGS GRID */
 .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .setting-item{background:var(--bg3);border:1px solid var(--border);padding:1rem}
-.setting-key{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.1em;margin-bottom:.3rem}
+.setting-key{font-family:'Inter',sans-serif;font-size:.65rem;color:var(--green);letter-spacing:.1em;margin-bottom:.3rem}
 .setting-desc{font-size:.72rem;color:var(--muted);margin-bottom:.5rem}
 .setting-input-wrap{display:flex;gap:.5rem}
 .setting-input-wrap input,.setting-input-wrap select{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.4rem .6rem;font-size:.82rem;outline:none}
@@ -185,6 +185,23 @@ tr:hover td{background:rgba(26,26,26,.025)}
 
 @media(max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr)}.settings-grid{grid-template-columns:1fr}.detail-panel{width:100%}}
 @media(max-width:600px){.stat-grid{grid-template-columns:1fr}.sidebar{display:none}}
+
+/* ===== white-business v2: rounded + shadow + green ===== */
+.nav-cta,.bp,.bg,.obtn,.bwa,.bem,.search-btn,.act-btn,.track-btn,
+button[type=submit],.pay-btn{border-radius:8px}
+.fg select,.fg input,.fg textarea,.search-row input,
+input,select,textarea{border-radius:6px}
+.sc,.qform,.qres,.card,.pay-card,.wc,.svc-card,.search-card,.order-top,
+.timeline-card,.note-card,.price-block,.msg-box,.success-box,.detail-panel .sub-body,
+.info-block,.warn-block,.radio-block,.manual-notice,.pay-card,.hero-img-wrap,
+.hpanel .fbody{border-radius:12px}
+.sc,.card,.pay-card,.wc,.search-card,.order-top,.timeline-card,
+.price-block{box-shadow:0 1px 3px rgba(16,24,40,.04),0 1px 2px rgba(16,24,40,.06)}
+.sptbl{border-radius:12px;overflow:hidden}
+.svc-card{border-radius:10px}
+.pn,.tl-dot{border-radius:50%}
+.status-pill{border-radius:999px}
+.stag,.svc-badge,.pay-tag,.badge-std,.badge-rq{border-radius:6px}
 </style>
 <link rel="stylesheet" href="/theme-business.css">
 </head>
@@ -406,7 +423,7 @@ tr:hover td{background:rgba(26,26,26,.025)}
               </div>
             </div>
             <div id="smtp-fields">
-              <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin:1rem 0 .5rem;padding-top:.8rem;border-top:1px solid var(--border)">// SMTP SETTINGS</div>
+              <div style="font-family:'Inter',sans-serif;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin:1rem 0 .5rem;padding-top:.8rem;border-top:1px solid var(--border)">// SMTP SETTINGS</div>
               <div class="settings-grid">
                 <div class="setting-item"><div class="setting-key">smtp_host</div><div class="setting-desc">SMTP server</div><div class="setting-input-wrap"><input type="text" id="setting-smtp_host" placeholder="smtp.gmail.com"><button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_host')">SAVE</button></div></div>
                 <div class="setting-item"><div class="setting-key">smtp_port</div><div class="setting-desc">Port (587=TLS)</div><div class="setting-input-wrap"><input type="text" id="setting-smtp_port" placeholder="587"><button class="btn btn-outline btn-sm" onclick="saveSetting('smtp_port')">SAVE</button></div></div>
@@ -419,7 +436,7 @@ tr:hover td{background:rgba(26,26,26,.025)}
               </div>
             </div>
             <div id="resend-fields" style="display:none">
-              <div style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin:1rem 0 .5rem;padding-top:.8rem;border-top:1px solid var(--border)">// RESEND API SETTINGS</div>
+              <div style="font-family:'Inter',sans-serif;font-size:.65rem;color:var(--green);letter-spacing:.15em;margin:1rem 0 .5rem;padding-top:.8rem;border-top:1px solid var(--border)">// RESEND API SETTINGS</div>
               <div class="settings-grid">
                 <div class="setting-item" style="grid-column:1/-1">
                   <div class="setting-key">resend_api_key_enc</div><div class="setting-desc">Resend API Key — <span style="color:var(--green)">encrypted</span></div>
@@ -710,7 +727,7 @@ async function loadOrders() {
       <tr>
         <td class="mono" style="color:var(--white)">${r.order_no}</td>
         <td><div>${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
-        <td><span style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${modeBadge(r.mode)}</span></td>
+        <td><span style="font-family:'Inter',sans-serif;font-size:.72rem">${modeBadge(r.mode)}</span></td>
         <td class="mono">${fmtMoney(r.estimate)}</td>
         <td class="mono" style="color:var(--green)">${fmtMoney(r.quoted_price)}</td>
         <td>${badge(r.status)}</td>
@@ -887,7 +904,7 @@ async function loadPosts() {
       return `<tr>
         <td style="color:var(--white);max-width:200px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</div></td>
         <td class="mono" style="font-size:.72rem;color:var(--muted)">${esc(p.slug)}</td>
-        <td style="max-width:150px"><div style="display:flex;gap:.3rem;flex-wrap:wrap">${tags.map(t=>`<span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--green);border:1px solid var(--green3);padding:.1rem .4rem">${esc(t)}</span>`).join('')}</div></td>
+        <td style="max-width:150px"><div style="display:flex;gap:.3rem;flex-wrap:wrap">${tags.map(t=>`<span style="font-family:'Inter',sans-serif;font-size:.6rem;color:var(--green);border:1px solid var(--green3);padding:.1rem .4rem">${esc(t)}</span>`).join('')}</div></td>
         <td>${badge(p.status)}</td>
         <td class="mono" style="text-align:center">${p.views||0}</td>
         <td style="color:var(--muted);font-size:.78rem">${fmtDate(p.published_at)}</td>
@@ -1059,7 +1076,7 @@ async function loadPayments() {
       <tr>
         <td class="mono" style="color:var(--white)">${r.order_no}</td>
         <td><div>${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
-        <td><span style="font-family:'Share Tech Mono',monospace;font-size:.72rem">${modeBadge(r.mode)}</span></td>
+        <td><span style="font-family:'Inter',sans-serif;font-size:.72rem">${modeBadge(r.mode)}</span></td>
         <td class="mono" style="color:var(--green)">${fmtMoney(r.quoted_price)}</td>
         <td>${badge(r.status)}</td>
         <td style="color:var(--muted);font-size:.78rem">${fmtDate(r.created_at)}</td>
@@ -1166,7 +1183,7 @@ async function loadAdmins() {
       <tr>
         <td style="color:var(--white)">${a.name}</td>
         <td class="mono" style="font-size:.78rem">${a.email}</td>
-        <td><span style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:${a.role==='superadmin'?'var(--green)':'var(--muted)'}">${a.role.toUpperCase()}</span></td>
+        <td><span style="font-family:'Inter',sans-serif;font-size:.7rem;color:${a.role==='superadmin'?'var(--green)':'var(--muted)'}">${a.role.toUpperCase()}</span></td>
         <td style="color:var(--muted);font-size:.78rem">${fmtDate(a.last_login_at)}</td>
         <td><button class="btn btn-outline btn-sm" onclick="changeAdminPwd('${a.id}')">CHANGE PWD</button></td>
       </tr>`).join('');
