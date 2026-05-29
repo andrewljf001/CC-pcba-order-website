@@ -5,53 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Order — PCBAForge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#1A1A1A;--green2:#000000;--green3:#9AA0A8;--text:#2B2F36;--muted:#7A828D;--white:#15181D;--amber:#B7791F;--red:#D14343;--wa:#25D366;--max:760px}
+:root{--bg:#FFFFFF;--bg2:#FFFFFF;--bg3:#F7F8FA;--dim:#F2F3F5;--border:#E3E5E9;--green:#16A34A;--green2:#15803D;--green3:#7CC79A;--text:#2B2F36;--muted:#7A828D;--white:#15181D;--amber:#B7791F;--red:#D14343;--wa:#25D366;--max:760px}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.65;min-height:100vh}
 a{color:inherit;text-decoration:none}
 nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .nav-logo{font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px}
 .ldot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(26,26,26,.25)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(26,26,26,0)}}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(22,163,74,.25)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(22,163,74,0)}}
 .nav-links{list-style:none;display:flex;gap:2rem}.nav-links a{font-size:.84rem;letter-spacing:.06em;color:var(--muted);transition:color .2s}.nav-links a:hover{color:var(--green)}
 .nav-cta{background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.45rem 1.2rem;transition:opacity .2s}.nav-cta:hover{opacity:.85}
 .wrap{max-width:var(--max);margin:0 auto;padding:3rem 5%}
-.page-label{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
+.page-label{font-family:'Inter',sans-serif;font-size:.68rem;color:var(--green);letter-spacing:.2em;margin-bottom:.5rem}
 .page-title{font-family:'Inter',sans-serif;font-size:clamp(1.4rem,3vw,2rem);color:var(--white);margin-bottom:.5rem}
 .page-sub{font-size:.88rem;color:var(--muted);margin-bottom:2.5rem}
 .search-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:2rem}
 .search-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
-.search-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.search-ht{font-family:'Inter',sans-serif;font-size:.75rem;color:var(--green);letter-spacing:.12em}
 .search-body{padding:1.5rem}
 .search-row{display:flex;gap:.75rem}
-.search-row input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.65rem 1rem;font-size:.95rem;font-family:'Share Tech Mono',monospace;letter-spacing:.06em;outline:none;transition:border-color .2s}
+.search-row input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.65rem 1rem;font-size:.95rem;font-family:'Inter',sans-serif;letter-spacing:.06em;outline:none;transition:border-color .2s}
 .search-row input:focus{border-color:var(--green3)}
 .search-row input::placeholder{color:var(--muted);letter-spacing:.04em}
 .search-btn{background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.6rem;border:none;cursor:pointer;transition:opacity .2s;white-space:nowrap}
 .search-btn:hover{opacity:.85}
 .search-btn:disabled{opacity:.4;cursor:not-allowed}
-.search-hint{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--muted);margin-top:.75rem;letter-spacing:.04em}
+.search-hint{font-family:'Inter',sans-serif;font-size:.68rem;color:var(--muted);margin-top:.75rem;letter-spacing:.04em}
 .result{display:none}.result.show{display:block}
 .order-top{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
 .order-top-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
 .order-no{font-family:'Inter',sans-serif;font-size:1rem;color:var(--white);letter-spacing:.1em}
-.status-pill{font-family:'Share Tech Mono',monospace;font-size:.68rem;letter-spacing:.1em;padding:.25rem .8rem;border:1px solid}
+.status-pill{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.1em;padding:.25rem .8rem;border:1px solid}
 .s-pending{color:var(--amber);border-color:var(--amber);background:rgba(183,121,31,.08)}
 .s-quoted{color:#5A6270;border-color:#9AA0A8;background:#F2F3F5}
-.s-paid{color:var(--green);border-color:var(--green3);background:rgba(26,26,26,.07)}
+.s-paid{color:var(--green);border-color:var(--green3);background:rgba(22,163,74,.07)}
 .s-production{color:#B7791F;border-color:#E5D3A8;background:#FBF4E6}
 .s-shipped{color:#3A3F47;border-color:#9AA0A8;background:#ECEEF0}
-.s-completed{color:var(--green);border-color:var(--green3);background:rgba(26,26,26,.07)}
+.s-completed{color:var(--green);border-color:var(--green3);background:rgba(22,163,74,.07)}
 .s-cancelled{color:var(--red);border-color:var(--red);background:rgba(209,67,67,.08)}
 .order-top-body{padding:1.2rem}
 .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-.ig-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.3rem}
+.ig-label{font-family:'Inter',sans-serif;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.3rem}
 .ig-val{font-size:.88rem;color:var(--white)}
 .timeline-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
 .timeline-hdr{background:var(--dim);padding:.8rem 1.2rem;border-bottom:1px solid var(--border)}
-.timeline-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.timeline-ht{font-family:'Inter',sans-serif;font-size:.75rem;color:var(--green);letter-spacing:.12em}
 .timeline-body{padding:1.5rem 1.2rem}
 .tl{position:relative;display:flex;flex-direction:column;gap:0}
 .tl-step{display:flex;gap:1rem;position:relative;padding-bottom:1.5rem}
@@ -59,42 +59,42 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
 .tl-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);background:var(--bg);flex-shrink:0;position:relative;z-index:1}
 .tl-step.done .tl-dot{background:var(--green3);border-color:var(--green)}
-.tl-step.active .tl-dot{background:var(--green);border-color:var(--green);box-shadow:0 0 0 4px rgba(26,26,26,.15)}
+.tl-step.active .tl-dot{background:var(--green);border-color:var(--green);box-shadow:0 0 0 4px rgba(22,163,74,.15)}
 .tl-line{flex:1;width:2px;background:var(--border);margin-top:2px}
 .tl-step.done .tl-line{background:var(--green3)}
 .tl-step:last-child .tl-line{display:none}
 .tl-content{padding-top:0}
-.tl-name{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:var(--muted);letter-spacing:.08em}
+.tl-name{font-family:'Inter',sans-serif;font-size:.78rem;color:var(--muted);letter-spacing:.08em}
 .tl-step.done .tl-name,.tl-step.active .tl-name{color:var(--white)}
 .tl-desc{font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.5}
 .tl-step.active .tl-desc{color:var(--text)}
 .note-card{background:var(--bg2);border:1px solid var(--border);margin-bottom:1rem}
 .note-hdr{background:var(--dim);padding:.7rem 1.2rem;border-bottom:1px solid var(--border)}
-.note-ht{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--green);letter-spacing:.12em}
+.note-ht{font-family:'Inter',sans-serif;font-size:.72rem;color:var(--green);letter-spacing:.12em}
 .note-body{padding:1rem 1.2rem;font-size:.85rem;color:var(--text);line-height:1.7}
 .msg-box{background:var(--bg2);border:1px solid var(--border);padding:3rem;text-align:center}
 .msg-icon{font-size:2.5rem;margin-bottom:1rem}
 .msg-title{font-family:'Inter',sans-serif;font-size:1rem;color:var(--white);margin-bottom:.5rem}
 .msg-sub{font-size:.82rem;color:var(--muted)}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.15);border-top-color:#1A1A1A;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:.4rem}
-.spinner.light{border-color:rgba(26,26,26,.2);border-top-color:var(--green)}
+.spinner.light{border-color:rgba(22,163,74,.2);border-top-color:var(--green)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .actions{display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
 .act-btn{display:inline-block;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;padding:.65rem 1.4rem;cursor:pointer;border:1px solid var(--green3);color:var(--green);background:transparent;transition:all .2s}
-.act-btn:hover{background:rgba(26,26,26,.07)}
+.act-btn:hover{background:rgba(22,163,74,.07)}
 .act-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
 .act-btn.primary:hover{background:var(--green2)}
 
 /* ── 支付区域 ── */
 .pay-card{background:var(--bg2);border:2px solid var(--green3);margin-bottom:1rem}
-.pay-hdr{background:rgba(26,26,26,.08);padding:.8rem 1.2rem;border-bottom:1px solid var(--green3);display:flex;align-items:center;gap:.6rem}
-.pay-ht{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--green);letter-spacing:.12em}
+.pay-hdr{background:rgba(22,163,74,.08);padding:.8rem 1.2rem;border-bottom:1px solid var(--green3);display:flex;align-items:center;gap:.6rem}
+.pay-ht{font-family:'Inter',sans-serif;font-size:.75rem;color:var(--green);letter-spacing:.12em}
 .pay-body{padding:1.5rem;text-align:center}
 .pay-amount{font-family:'Inter',sans-serif;font-size:2.2rem;color:var(--green);margin-bottom:.3rem}
 .pay-amount-sub{font-size:.78rem;color:var(--muted);margin-bottom:1.5rem}
 .pay-breakdown{display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem;flex-wrap:wrap}
 .pay-item{text-align:center}
-.pay-item-label{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.2rem}
+.pay-item-label{font-family:'Inter',sans-serif;font-size:.62rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.2rem}
 .pay-item-val{font-size:.9rem;color:var(--white)}
 
 /* ── 支付按钮 ── */
@@ -125,10 +125,10 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .pay-btn-apple .lbl{font-family:-apple-system,'SF Pro Text','Helvetica Neue',sans-serif;font-weight:500;font-size:.85rem;letter-spacing:.01em}
 
 /* OR 分隔线 */
-.pay-or{display:flex;align-items:center;gap:.5rem;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.14em}
+.pay-or{display:flex;align-items:center;gap:.5rem;font-family:'Inter',sans-serif;font-size:.6rem;color:var(--muted);letter-spacing:.14em}
 .pay-or::before,.pay-or::after{content:'';flex:1;height:1px;background:var(--border)}
 
-.pay-processing{display:none;text-align:center;padding:1rem;color:var(--green);font-family:'Share Tech Mono',monospace;font-size:.8rem}
+.pay-processing{display:none;text-align:center;padding:1rem;color:var(--green);font-family:'Inter',sans-serif;font-size:.8rem}
 .pay-secure{font-size:.7rem;color:var(--muted);margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:.35rem;flex-wrap:wrap}
 
 @media(max-width:560px){
@@ -146,6 +146,23 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.18);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.1)}
 @media(max-width:768px){.nav-links{display:none}}
+
+/* ===== white-business v2: rounded + shadow + green ===== */
+.nav-cta,.bp,.bg,.obtn,.bwa,.bem,.search-btn,.act-btn,.track-btn,
+button[type=submit],.pay-btn{border-radius:8px}
+.fg select,.fg input,.fg textarea,.search-row input,
+input,select,textarea{border-radius:6px}
+.sc,.qform,.qres,.card,.pay-card,.wc,.svc-card,.search-card,.order-top,
+.timeline-card,.note-card,.price-block,.msg-box,.success-box,.detail-panel .sub-body,
+.info-block,.warn-block,.radio-block,.manual-notice,.pay-card,.hero-img-wrap,
+.hpanel .fbody{border-radius:12px}
+.sc,.card,.pay-card,.wc,.search-card,.order-top,.timeline-card,
+.price-block{box-shadow:0 1px 3px rgba(16,24,40,.04),0 1px 2px rgba(16,24,40,.06)}
+.sptbl{border-radius:12px;overflow:hidden}
+.svc-card{border-radius:10px}
+.pn,.tl-dot{border-radius:50%}
+.status-pill{border-radius:999px}
+.stag,.svc-badge,.pay-tag,.badge-std,.badge-rq{border-radius:6px}
 </style>
 <link rel="stylesheet" href="/theme-business.css">
 </head>
@@ -272,7 +289,7 @@ function renderResult(d){
 
   let extras='';
   if(d.admin_note)extras+=`<div class="note-card"><div class="note-hdr"><span class="note-ht">// MESSAGE FROM PCBAForge TEAM</span></div><div class="note-body">${esc(d.admin_note)}</div></div>`;
-  if(d.tracking_no)extras+=`<div class="note-card" style="border-color:var(--green3)"><div class="note-hdr" style="background:var(--dim)"><span class="note-ht" style="color:var(--green)">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
+  if(d.tracking_no)extras+=`<div class="note-card" style="border-color:var(--green3)"><div class="note-hdr" style="background:var(--dim)"><span class="note-ht" style="color:var(--green)">// SHIPPING TRACKING NUMBER</span></div><div class="note-body" style="font-family:'Inter',sans-serif;font-size:.9rem;color:var(--white);letter-spacing:.08em">${esc(d.tracking_no)}</div></div>`;
 
   const total=(parseFloat(d.quoted_price||0)+parseFloat(d.shipping_fee||0)).toFixed(2);
   const secLine=IS_APPLE?'🔒 PayPal · Apple Pay · Google Pay · SSL':'🔒 PayPal · Google Pay · SSL Encrypted';
@@ -310,7 +327,7 @@ function renderResult(d){
           ${d.shipping_fee?`<div class="pay-item"><div class="pay-item-label">SHIPPING</div><div class="pay-item-val">$${Number(d.shipping_fee).toFixed(2)}</div></div>`:''}
         </div>
         <div class="pay-btns" id="pay-btns">
-          <div style="text-align:center;padding:.8rem;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:.75rem">
+          <div style="text-align:center;padding:.8rem;color:var(--muted);font-family:'Inter',sans-serif;font-size:.75rem">
             <span class="spinner light"></span> Loading payment options...
           </div>
         </div>
