@@ -370,9 +370,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
             </div>
             <div class="frow">
               <div class="fg">
-                <label>COMPLEX IC COUNT <span class="hint">(BGA / QFN / LGA)</span></label>
+                <label>COMPLEX IC / BOARD <span class="hint">(BGA / QFN / LGA / BTC)</span></label>
                 <input type="number" id="smt-ic" value="0" min="0" oninput="calcPrice()">
-                <span class="hint-text">≥ 10 pcs triggers manual quote</span>
+                <span class="hint-text">per board · ≥ 10 triggers manual quote</span>
               </div>
               <div class="fg">
                 <label>ASSEMBLY SIDES</label>
@@ -641,7 +641,7 @@ function calcPrice() {
     var qty    = parseInt(document.getElementById('pcb-qty').value) || 0;
     var drill  = document.getElementById('pcb-drill').value;
     var imp    = document.getElementById('pcb-impedance').value;
-    var pcbManual = (mat !== 'fr4' || layers > 4 || W > 200 || H > 200 || qty > 10 || qty === 0 || drill === '0.15');
+    var pcbManual = (mat !== 'fr4' || layers > 4 || W > 200 || H > 200 || qty > 20 || qty === 0 || drill === '0.15');
     if (!pcbManual) {
       var pcbPrice;
       if (drill === '0.3' && imp === 'no') {
@@ -675,7 +675,7 @@ function calcPrice() {
       var dip   = parseInt(document.getElementById('dip-pins').value) || 0;
       var ic    = parseInt(document.getElementById('smt-ic').value)   || 0;
       var sides = document.getElementById('assy-sides').value;
-      var assyManual = (aqty > 10 || aqty === 0 || smt > 200 || ic >= 10 || dip > 100);
+      var assyManual = (aqty > 20 || aqty === 0 || smt > 200 || ic >= 10 || dip > 100);
       if (!assyManual) {
         var assyPrice = (sides === 'double') ? 400 : 200;
         lines.push({ label: 'SMT+DIP Assy (' + aqty + 'pcs, ' + (sides==='double'?'double':'single') + ', CMS)', val: assyPrice });
