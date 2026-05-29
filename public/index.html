@@ -258,13 +258,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
   <div class="stitle">Configure Your Order</div>
 
   <div class="qwrap">
-    <!-- LEFT: service selector + quick params -->
     <div class="qform">
-
-      <!-- SERVICE CARDS -->
       <div class="fhdr"><span class="fht">SELECT SERVICES</span><span class="fhs">Choose one or more</span></div>
       <div class="svc-selector">
-
         <div class="svc-card" id="hcard-pcb" onclick="toggleHSvc('pcb')">
           <input type="checkbox" id="hchk-pcb">
           <div class="svc-icon">🔲</div>
@@ -272,7 +268,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div class="svc-desc">Board manufacturing from Gerber files. FR4, multi-layer.</div>
           <span class="svc-badge badge-std">INSTANT QUOTE</span>
         </div>
-
         <div class="svc-card" id="hcard-assy" onclick="toggleHSvc('assy')">
           <input type="checkbox" id="hchk-assy">
           <div class="svc-icon">⚡</div>
@@ -280,7 +275,6 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div class="svc-desc">Surface mount and through-hole soldering. Enter 0 for DIP if not needed.</div>
           <span class="svc-badge badge-std">INSTANT QUOTE (CMS)</span>
         </div>
-
         <div class="svc-card" id="hcard-test" onclick="toggleHSvc('test')">
           <input type="checkbox" id="hchk-test">
           <div class="svc-icon">🔬</div>
@@ -288,10 +282,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           <div class="svc-desc">Power-on and functional verification per your test spec document.</div>
           <span class="svc-badge badge-rq">QUOTE ON REQUEST</span>
         </div>
-
       </div>
 
-      <!-- QUICK PARAMS (shown based on selection) -->
       <div id="hpanel-pcb" class="hpanel" style="display:none">
         <div class="fhdr" style="margin-top:1rem"><span class="fht">PCB PARAMETERS</span><span class="fhs">Prices in USD</span></div>
         <div class="fbody">
@@ -407,10 +399,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
           </div>
         </div>
       </div>
-
     </div>
 
-    <!-- RIGHT: live quote result -->
     <div class="qres">
       <div class="rhdr"><span class="rht">// LIVE QUOTE</span></div>
       <div class="rbody">
@@ -583,7 +573,6 @@ function hCalc() {
   obtn.disabled = false;
   var total = 0, isManual = false, reason = '', hasRQ = false;
 
-  // PCB calc
   if (hSvc.pcb) {
     var mat   = document.getElementById('pcb-material').value;
     var qty   = document.getElementById('pcb-qty').value;
@@ -601,7 +590,6 @@ function hCalc() {
     }
   }
 
-  // Assembly calc
   if (hSvc.assy) {
     var supply = document.getElementById('smt-supply').value;
     var qty2   = document.getElementById('smt-qty').value;
@@ -620,7 +608,6 @@ function hCalc() {
     document.getElementById('r-comp').textContent = '—';
   }
 
-  // Testing always manual
   if (hSvc.test) { hasRQ = true; }
 
   var finalManual = isManual || (hasRQ && total === 0);
@@ -714,5 +701,6 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
   }).catch(function(){});
 })();
 </script>
+<script src="/cookie-consent.js"></script>
 </body>
 </html>
