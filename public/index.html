@@ -299,12 +299,24 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:2.
               </select>
             </div>
             <div class="fg"><label>QUANTITY</label>
-              <select id="pcb-qty">
+              <select id="pcb-qty" onchange="hCalc()">
                 <option value="5">5 pcs</option>
                 <option value="10" selected>10 pcs</option>
                 <option value="manual">More than 10 pcs</option>
               </select>
             </div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label>LAYERS</label>
+              <select id="pcb-layers" onchange="hCalc()">
+                <option value="1">1 Layer</option>
+                <option value="2" selected>2 Layers</option>
+                <option value="4">4 Layers</option>
+                <option value="6">6 Layers</option>
+                <option value="8">8 Layers</option>
+              </select>
+            </div>
+            <div class="fg"></div>
           </div>
           <div class="frow">
             <div class="fg"><label>WIDTH (mm)</label><input type="number" id="pcb-w" value="100" min="1" max="500" oninput="hCalc()"></div>
@@ -574,19 +586,20 @@ function hCalc() {
   var total = 0, isManual = false, reason = '', hasRQ = false;
 
   if (hSvc.pcb) {
-    var mat   = document.getElementById('pcb-material').value;
-    var qty   = document.getElementById('pcb-qty').value;
-    var W     = parseFloat(document.getElementById('pcb-w').value) || 0;
-    var H     = parseFloat(document.getElementById('pcb-h').value) || 0;
-    var drill = document.getElementById('pcb-drill').value;
-    var imp   = document.getElementById('pcb-impedance').value;
-    if (mat !== 'fr4' || qty === 'manual' || W > 200 || H > 200) {
+    var mat    = document.getElementById('pcb-material').value;
+    var qty     = document.getElementById('pcb-qty').value;
+    var layers = parseInt(document.getElementById('pcb-layers').value) || 2;
+    var W      = parseFloat(document.getElementById('pcb-w').value) || 0;
+    var H      = parseFloat(document.getElementById('pcb-h').value) || 0;
+    var drill  = document.getElementById('pcb-drill').value;
+    var imp    = document.getElementById('pcb-impedance').value;
+    var qtyNum = (qty === 'manual') ? 999 : parseInt(qty);
+    var pcbManual = (mat !== 'fr4' || layers > 4 || W > 200 || H > 200 || qtyNum > 20 || drill === '0.15');
+    if (pcbManual) {
       isManual = true; reason = 'Specs require manual review';
-    } else if (W && H) {
-      var tier = (drill === '0.3' && imp === 'no') ? 1 : (drill === '0.3' && imp === 'yes') ? 2 : 3;
-      var area = (W * H) / 10000;
-      var base = {1:50, 2:75, 3:100}[tier];
-      total += Math.round(base * Math.max(1, area) * (parseInt(qty) / 10));
+    } else {
+      var pcbPrice = (drill === '0.3' && imp === 'no') ? 50 : (drill === '0.3' && imp === 'yes') ? 75 : 100;
+      total += pcbPrice;
     }
   }
 
@@ -598,11 +611,11 @@ function hCalc() {
     var ic     = parseInt(document.getElementById('smt-ic').value)    || 0;
     var sides  = document.getElementById('smt-sides').value;
     document.getElementById('r-comp').textContent = supply === 'us' ? 'PCBAForge sources (Turnkey)' : 'Customer supplied (CMS)';
-    if (supply === 'us' || qty2 === 'manual' || ic >= 10 || dip > 100) {
+    var qty2Num = (qty2 === 'manual') ? 999 : parseInt(qty2);
+    if (supply === 'us' || qty2Num > 20 || parts > 200 || ic >= 10 || dip > 100) {
       hasRQ = true; reason = reason || 'Assembly requires manual quote';
     } else {
-      var base2 = sides === 'double' ? 400 : 200;
-      total += Math.round(base2 + parts * 0.012 * parseInt(qty2) + dip * 0.025 * parseInt(qty2));
+      total += sides === 'double' ? 400 : 200;
     }
   } else {
     document.getElementById('r-comp').textContent = '—';
