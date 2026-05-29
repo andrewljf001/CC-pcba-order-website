@@ -556,7 +556,6 @@ function toggleSvc(key) {
 }
 
 function onSvcChange() {
-  // sync checkboxes (in case user clicked checkbox directly)
   ['pcb','assy','test'].forEach(function(k) {
     svc[k] = document.getElementById('chk-' + k).checked;
     document.getElementById('card-' + k).classList.toggle('selected', svc[k]);
@@ -565,12 +564,10 @@ function onSvcChange() {
   var any = svc.pcb || svc.assy || svc.test;
   document.getElementById('noSvcWarn').classList.toggle('show', !any);
 
-  // show/hide detail panels
   document.getElementById('panel-pcb').classList.toggle('show', svc.pcb);
   document.getElementById('panel-assy').classList.toggle('show', svc.assy);
   document.getElementById('panel-test').classList.toggle('show', svc.test);
 
-  // if both pcb + assy selected, auto-lock board source to "us"
   var bsBlock = document.getElementById('boardSrcBlock');
   if (svc.pcb && svc.assy) {
     document.querySelectorAll('[name="board-source"]').forEach(function(r) {
@@ -583,7 +580,6 @@ function onSvcChange() {
     bsBlock.style.opacity = '1';
     bsBlock.style.pointerEvents = '';
     if (!svc.pcb && svc.assy) {
-      // reset to customer by default when only assy
       var bsChecked = document.querySelector('[name="board-source"]:checked');
       if (!bsChecked || bsChecked.value === 'us') {
         document.querySelector('[name="board-source"][value="customer"]').checked = true;
@@ -629,10 +625,6 @@ function calcPrice() {
   var total = 0;
   var hasRQ = false;
 
-  // PCB calc
-  // Tier 1 $50 : FR4, drill>=0.3mm, no impedance, layers<=4, <=200x200mm, qty<=10
-  // Tier 2 $75 : FR4, drill>=0.3mm, WITH impedance, layers<=4, <=200x200mm, qty<=10
-  // Tier 3 $100: FR4, drill 0.2/0.25mm, WITH impedance, layers<=4, <=200x200mm, qty<=10
   if (svc.pcb) {
     var mat    = document.getElementById('pcb-material').value;
     var layers = parseInt(document.getElementById('pcb-layers').value) || 2;
@@ -659,10 +651,6 @@ function calcPrice() {
     }
   }
 
-  // Assembly calc
-  // Single $200: qty<=10, SMT pads<=200, complex IC<10, single side, CMS
-  // Double $400: qty<=10, SMT pads<=200, complex IC<10, double side, CMS
-  // DIP <=100 pins included free
   if (svc.assy) {
     var compEl = document.querySelector('[name="comp-supply"]:checked');
     var comp   = compEl ? compEl.value : 'cms';
@@ -687,13 +675,11 @@ function calcPrice() {
     }
   }
 
-  // Testing
   if (svc.test) {
     lines.push({ label: 'Functional Testing', rq: true });
     hasRQ = true;
   }
 
-  // Render
   var html = lines.map(function(l) {
     return '<div class="pri-line"><span>' + l.label + '</span>' +
       (l.rq ? '<span class="pa">Quote on request</span>' : '<span class="pv">$' + l.val + '</span>') +
@@ -950,7 +936,6 @@ function hideAuthModal() {
    INIT
 ═══════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function() {
-  // attach change listeners to radio buttons
   document.querySelectorAll('[name="board-source"]').forEach(function(r) {
     r.addEventListener('change', function() { onBoardSrcChange(); updateFileHint(); });
   });
@@ -958,7 +943,6 @@ document.addEventListener('DOMContentLoaded', function() {
     r.addEventListener('change', function() { calcPrice(); updateSummary(); });
   });
 
-  // auth modal tabs
   document.querySelectorAll('.modal-tab').forEach(function(t) {
     t.addEventListener('click', function() {
       document.querySelectorAll('.modal-tab').forEach(function(x){ x.classList.remove('active'); });
@@ -973,7 +957,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target === this) hideAuthModal();
   });
 
-  // register form
   document.getElementById('modal-register-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     var email = document.getElementById('modal-email').value;
@@ -996,7 +979,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch(err) { errEl.textContent = 'Network error.'; }
   });
 
-  // login form
   document.getElementById('modal-login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     var email = document.getElementById('modal-login-email').value;
@@ -1014,7 +996,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch(err) { errEl.textContent = 'Network error.'; }
   });
 
-  // WhatsApp dynamic
   fetch('/api/settings/public').then(function(r){ return r.json(); }).then(function(cfg) {
     var wa = (cfg.whatsapp_number || '').replace(/[^0-9]/g,'');
     if (!wa) return;
@@ -1028,7 +1009,6 @@ document.addEventListener('DOMContentLoaded', function() {
   checkAuth();
   updateSummary();
 
-  // Pre-fill from homepage calculator URL params
   var qp = new URLSearchParams(location.search);
   var services = (qp.get('services') || '').split(',').filter(Boolean);
   if (services.length) {
@@ -1038,13 +1018,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if (s === 'test') { svc.test = true; document.getElementById('chk-test').checked = true; document.getElementById('card-test').classList.add('selected'); }
     });
     onSvcChange();
-    // fill PCB params
     if (svc.pcb) {
       ['pcb_material','pcb_qty','pcb_w','pcb_h','pcb_drill','pcb_impedance','pcb_finish','pcb_color'].forEach(function(k) {
         var v = qp.get(k); if (v) { var el = document.getElementById(k.replace('_','-')); if (el) el.value = v; }
       });
     }
-    // fill assy params
     if (svc.assy) {
       var smtQty = qp.get('smt_qty');   if (smtQty)   { var el = document.getElementById('assy-qty');   if (el) el.value = smtQty; }
       var smtSides = qp.get('smt_sides'); if (smtSides) { var el = document.getElementById('assy-sides'); if (el) el.value = smtSides; }
