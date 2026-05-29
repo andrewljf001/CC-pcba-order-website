@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delete My Data — PCBAForge</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0F0A;--bg2:#0F1A0F;--bg3:#162116;--dim:#1A2E1A;--border:#1E3A1E;--green:#00FF41;--green2:#00C832;--green3:#008F24;--text:#C8E6C9;--muted:#5A7A5A;--white:#E8F5E9;--red:#FF4444;--max:600px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
+nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:60px;background:rgba(10,15,10,.96);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--green);letter-spacing:.12em;display:flex;align-items:center;gap:8px;text-decoration:none;}
+.ldot{width:8px;height:8px;background:var(--green);border-radius:50%;}
+main{flex:1;max-width:var(--max);margin:3rem auto;padding:0 1.5rem;width:100%;}
+.page-title{font-family:'Orbitron',monospace;font-size:1.2rem;color:var(--white);margin-bottom:.5rem;}
+.page-sub{font-size:.85rem;color:var(--muted);margin-bottom:2rem;line-height:1.6;}
+.card{background:var(--bg2);border:1px solid var(--border);padding:1.5rem;}
+.card-hdr{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--green);letter-spacing:.12em;margin-bottom:1.2rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);}
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:1rem;}
+.fg label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em;}
+.fg input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.55rem .75rem;font-size:.85rem;outline:none;transition:border-color .2s;}
+.fg input:focus{border-color:var(--green3);}
+.warn-box{background:rgba(255,68,68,.06);border:1px solid rgba(255,68,68,.25);padding:.9rem 1rem;margin-bottom:1.2rem;font-size:.8rem;color:#FF8888;line-height:1.6;}
+.warn-box strong{display:block;font-family:'Share Tech Mono',monospace;font-size:.7rem;letter-spacing:.1em;color:var(--red);margin-bottom:.3rem;}
+.btn-delete{width:100%;background:var(--red);color:#fff;border:none;font-family:'Share Tech Mono',monospace;font-size:.82rem;font-weight:700;letter-spacing:.1em;padding:.85rem;cursor:pointer;transition:opacity .2s;margin-bottom:.8rem;}
+.btn-delete:hover{opacity:.85;}
+.btn-delete:disabled{opacity:.4;cursor:not-allowed;}
+.result{padding:.8rem 1rem;font-size:.82rem;margin-top:.8rem;display:none;}
+.result.success{background:rgba(0,255,65,.07);border:1px solid var(--green3);color:var(--green);}
+.result.error{background:rgba(255,68,68,.07);border:1px solid rgba(255,68,68,.3);color:#FF8888;}
+.back-link{display:inline-block;margin-top:1.5rem;font-size:.82rem;color:var(--muted);text-decoration:none;}
+.back-link:hover{color:var(--green);}
+footer{border-top:1px solid var(--border);padding:1.5rem 5%;text-align:center;font-size:.75rem;color:var(--muted);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
+</nav>
+<main>
+  <div class="page-title">Delete My Data</div>
+  <p class="page-sub">Under GDPR and applicable privacy laws, you have the right to request deletion of your personal data. Enter your email below — we will permanently delete your account and associated data within 30 days.</p>
+
+  <div class="card">
+    <div class="card-hdr">// DATA DELETION REQUEST</div>
+    <div class="warn-box">
+      <strong>⚠ THIS ACTION IS IRREVERSIBLE</strong>
+      Deleting your account will permanently remove your profile, order history, and all associated personal data from our systems. Active orders in production or shipment cannot be deleted until completed.
+    </div>
+    <div class="fg">
+      <label>YOUR EMAIL ADDRESS</label>
+      <input type="email" id="del-email" placeholder="you@example.com">
+    </div>
+    <div class="fg">
+      <label>CONFIRM EMAIL (type again)</label>
+      <input type="email" id="del-email2" placeholder="you@example.com">
+    </div>
+    <div class="fg">
+      <label>REASON (optional)</label>
+      <input type="text" id="del-reason" placeholder="e.g. No longer using the service">
+    </div>
+    <button class="btn-delete" id="del-btn" onclick="submitDelete()">🗑 REQUEST ACCOUNT DELETION</button>
+    <div class="result" id="del-result"></div>
+    <a href="/privacy.html" class="back-link">← Back to Privacy Policy</a>
+  </div>
+</main>
+<footer>© 2026 PCBAForge · <a href="/privacy.html" style="color:var(--muted)">Privacy Policy</a> · <a href="/terms.html" style="color:var(--muted)">Terms</a></footer>
+
+<script>
+async function submitDelete() {
+  var email  = document.getElementById('del-email').value.trim();
+  var email2 = document.getElementById('del-email2').value.trim();
+  var reason = document.getElementById('del-reason').value.trim();
+  var btn    = document.getElementById('del-btn');
+  var result = document.getElementById('del-result');
+
+  result.style.display = 'none';
+  if (!email) { showResult('error', 'Please enter your email address.'); return; }
+  if (email !== email2) { showResult('error', 'Email addresses do not match.'); return; }
+  if (!confirm('Are you sure you want to permanently delete all data for ' + email + '? This cannot be undone.')) return;
+
+  btn.disabled = true;
+  btn.textContent = 'SUBMITTING...';
+
+  try {
+    var r = await fetch('/api/gdpr/delete-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, reason })
+    });
+    var d = await r.json();
+    if (r.ok) {
+      showResult('success', '✅ ' + (d.message || 'Deletion request received. We will process it within 30 days and notify you by email.'));
+      btn.style.display = 'none';
+    } else {
+      showResult('error', d.error || 'Request failed. Please try again.');
+      btn.disabled = false;
+      btn.textContent = '🗑 REQUEST ACCOUNT DELETION';
+    }
+  } catch(e) {
+    showResult('error', 'Network error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = '🗑 REQUEST ACCOUNT DELETION';
+  }
+}
+
+function showResult(type, msg) {
+  var el = document.getElementById('del-result');
+  el.className = 'result ' + type;
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+</script>
+</body>
+</html>
