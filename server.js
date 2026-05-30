@@ -290,7 +290,8 @@ app.get('/api/settings/public', async (req, res) => {
                          'smt_single_price','smt_double_price','pcb_tier1_price',
                          'pcb_tier2_price','pcb_tier3_price','smt_max_parts',
                          'smt_max_ic','smt_max_dip','google_oauth_enabled','github_oauth_enabled',
-                         'paypal_client_id','paypal_mode'];
+                         'paypal_client_id','paypal_mode',
+                         'pcb_qty_split','pcb_qty_max','pcb_size_max','pcb_layer_max'];
     const placeholders = PUBLIC_KEYS.map((_,i) => `$${i+1}`).join(',');
     const { rows } = await pool.query(
       `SELECT key, value FROM settings WHERE key IN (${placeholders})`, PUBLIC_KEYS
