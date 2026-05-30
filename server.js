@@ -286,7 +286,7 @@ function adminAuth(req, res, next) {
 
 app.get('/api/settings/public', async (req, res) => {
   try {
-    const PUBLIC_KEYS = ['whatsapp_number','shipping_address','company_name',
+    const PUBLIC_KEYS = ['whatsapp_number','engineer_whatsapp','shipping_address','company_name',
                          'smt_single_price','smt_double_price','pcb_tier1_price',
                          'pcb_tier2_price','pcb_tier3_price','smt_max_parts',
                          'smt_max_ic','smt_max_dip','google_oauth_enabled','github_oauth_enabled',
