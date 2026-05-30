@@ -249,6 +249,8 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 .nav-blog-m{display:none;align-items:center;font-size:.8rem;font-weight:800;color:var(--green2);border:1px solid var(--green);border-radius:7px;padding:.5rem .9rem;transition:all .2s}
 .nav-blog-m:hover{background:#f0fdf4}
 .nav-blog-m:hover{color:var(--green2)}
+.nav-signin{display:inline-flex;align-items:center;font-size:.88rem;font-weight:700;color:var(--ink);transition:color .2s}
+.nav-signin:hover{color:var(--green2)}
 .nav-burger{display:none;background:none;border:none;font-size:1.5rem;line-height:1;color:var(--ink);cursor:pointer;padding:.2rem .3rem}
 .mobile-menu{display:none;position:fixed;top:68px;left:0;right:0;z-index:99;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 16px 30px rgba(20,32,51,.1);flex-direction:column;padding:.5rem 0}
 .mobile-menu.open{display:flex}
@@ -258,6 +260,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 @media(max-width:768px){
   .nav-links{display:none}
   .nav-blog-m{display:inline-flex;height:40px;padding:0 .9rem;font-size:.8rem}
+  .nav-signin{display:none}
   .nav-burger{display:inline-flex}
   .nav-cta{display:inline-flex;align-items:center;height:40px;padding:0 1rem;font-size:.8rem}
   .mobile-menu{top:60px}
@@ -294,6 +297,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   </ul>
   <div class="nav-right">
     <a href="blog.html" class="nav-blog-m">Blog</a>
+    <a href="account.html" class="nav-signin">Sign In</a>
     <a href="quote.html" class="nav-cta">GET QUOTE</a>
     <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
   </div>
@@ -306,7 +310,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   <a href="index.html#contact">Contact</a>
   <a href="blog.html">Blog</a>
   <a href="track.html">Track Order</a>
-  <a href="account.html">My Account</a>
+  <a href="account.html">Sign In</a>
 </div>
 
 <div class="ticker">
