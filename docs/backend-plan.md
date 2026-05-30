@@ -89,7 +89,7 @@ Nginx（80/443端口）
 | 反向代理 | Nginx | SSL终止 + 多站点 |
 | 进程管理 | PM2 | 自动重启、日志管理 |
 | 邮件服务 | SMTP / Resend | 后台可切换，密码加密存储 |
-| 支付 | PayPal / PingPong | Phase 5 接入 |
+| 支付 | PayPal / Apple Pay / Google Pay | Phase 5 接入 |
 
 ---
 
