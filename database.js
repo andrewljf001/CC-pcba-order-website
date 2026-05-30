@@ -118,6 +118,7 @@ async function initDB() {
 
   const defaultSettings = [
     ['whatsapp_number',    '',      'WhatsApp contact number'],
+    ['engineer_whatsapp',  '',      'Engineer direct WhatsApp (digits only, no + sign)'],
     ['shipping_address',  'Ligao Industrial Park, Longgang, Shenzhen, Guangdong, China', 'Factory shipping address'],
     ['contact_email',     '',      'Admin notification email'],
     ['company_name',      'PCBAForge', 'Company display name'],
