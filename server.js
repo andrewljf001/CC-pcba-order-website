@@ -78,7 +78,6 @@ app.get('/sitemap.xml', async (req, res) => {
       { loc: '/quote.html', priority: '0.9', freq: 'monthly' },
       { loc: '/track.html', priority: '0.7', freq: 'monthly' },
       { loc: '/blog.html', priority: '0.8', freq: 'weekly' },
-      { loc: '/account.html', priority: '0.5', freq: 'monthly' },
       { loc: '/shipping.html', priority: '0.4', freq: 'yearly' },
       { loc: '/privacy.html', priority: '0.3', freq: 'yearly' },
       { loc: '/terms.html', priority: '0.3', freq: 'yearly' }
@@ -105,6 +104,19 @@ app.get('/sitemap.xml', async (req, res) => {
   } catch (err) {
     res.status(500).send('sitemap error');
   }
+});
+
+// ── 敏感内容防缓存(账户页 + 所有API) ─────────────
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+app.get('/account.html', (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.sendFile(require('path').join(__dirname, 'public', 'account.html'));
 });
 
 app.use(express.static('public'));
