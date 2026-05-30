@@ -68,6 +68,45 @@ async function verifyTurnstile(token) {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ── 动态 Sitemap ─────────────────────────────────
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const base = (process.env.SITE_URL || 'https://pcbaforge.com').replace(/\/$/, '');
+    const staticPages = [
+      { loc: '/', priority: '1.0', freq: 'weekly' },
+      { loc: '/quote.html', priority: '0.9', freq: 'monthly' },
+      { loc: '/track.html', priority: '0.7', freq: 'monthly' },
+      { loc: '/blog.html', priority: '0.8', freq: 'weekly' },
+      { loc: '/account.html', priority: '0.5', freq: 'monthly' },
+      { loc: '/shipping.html', priority: '0.4', freq: 'yearly' },
+      { loc: '/privacy.html', priority: '0.3', freq: 'yearly' },
+      { loc: '/terms.html', priority: '0.3', freq: 'yearly' }
+    ];
+    let posts = [];
+    try {
+      const { rows } = await pool.query("SELECT slug, updated_at, published_at FROM posts WHERE status='published' ORDER BY published_at DESC");
+      posts = rows || [];
+    } catch (e) { posts = []; }
+    const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const fmt = (d) => { try { return new Date(d).toISOString().split('T')[0]; } catch(e){ return ''; } };
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    for (const p of staticPages) {
+      xml += `  <url><loc>${base}${p.loc}</loc><changefreq>${p.freq}</changefreq><priority>${p.priority}</priority></url>\n`;
+    }
+    for (const post of posts) {
+      const lm = fmt(post.updated_at || post.published_at);
+      xml += `  <url><loc>${base}/blog-post.html?slug=${esc(post.slug)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
+    }
+    xml += '</urlset>';
+    res.set('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    res.status(500).send('sitemap error');
+  }
+});
+
 app.use(express.static('public'));
 app.use('/admin', express.static('admin'));
 
