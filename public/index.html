@@ -267,6 +267,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 }
 
 </style>
+<script src="/pricing.js"></script>
 </head>
 <body>
 
@@ -438,12 +439,8 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
                 <option value="other">Other (Manual Quote)</option>
               </select>
             </div>
-            <div class="fg"><label>QUANTITY</label>
-              <select id="pcb-qty" onchange="hCalc()">
-                <option value="5">5 pcs</option>
-                <option value="10" selected>10 pcs</option>
-                <option value="manual">More than 10 pcs</option>
-              </select>
+            <div class="fg"><label>QUANTITY (pcs)</label>
+              <input type="number" id="pcb-qty" value="10" min="1" oninput="hCalc()">
             </div>
           </div>
           <div class="frow">
@@ -504,12 +501,8 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
         <div class="fhdr" style="margin-top:1rem"><span class="fht">ASSEMBLY PARAMETERS</span><span class="fhs">CMS = customer supplies parts</span></div>
         <div class="fbody">
           <div class="frow">
-            <div class="fg"><label>QUANTITY</label>
-              <select id="smt-qty" onchange="hCalc()">
-                <option value="5">5 pcs</option>
-                <option value="10" selected>10 pcs</option>
-                <option value="manual">More than 10 pcs</option>
-              </select>
+            <div class="fg"><label>QUANTITY (pcs)</label>
+              <input type="number" id="smt-qty" value="10" min="1" oninput="hCalc()">
             </div>
             <div class="fg"><label>ASSEMBLY SIDES</label>
               <select id="smt-sides" onchange="hCalc()">
@@ -722,36 +715,38 @@ function hCalc() {
   var total = 0, isManual = false, reason = '', hasRQ = false;
 
   if (hSvc.pcb) {
-    var mat    = document.getElementById('pcb-material').value;
-    var qty     = document.getElementById('pcb-qty').value;
-    var layers = parseInt(document.getElementById('pcb-layers').value) || 2;
-    var W      = parseFloat(document.getElementById('pcb-w').value) || 0;
-    var H      = parseFloat(document.getElementById('pcb-h').value) || 0;
-    var drill  = document.getElementById('pcb-drill').value;
-    var imp    = document.getElementById('pcb-impedance').value;
-    var qtyNum = (qty === 'manual') ? 999 : parseInt(qty);
-    var pcbManual = (mat !== 'fr4' || layers > 4 || W > 200 || H > 200 || qtyNum > 20 || drill === '0.15');
-    if (pcbManual) {
+    var pcbR = window.PCBAPricing.computePcb({
+      material:   document.getElementById('pcb-material').value,
+      layers:     document.getElementById('pcb-layers').value,
+      w:          document.getElementById('pcb-w').value,
+      h:          document.getElementById('pcb-h').value,
+      qty:        document.getElementById('pcb-qty').value,
+      drill:      document.getElementById('pcb-drill').value,
+      impedance:  document.getElementById('pcb-impedance').value,
+      finish:     document.getElementById('pcb-finish').value
+    });
+    if (pcbR.manual) {
       isManual = true; reason = 'Specs require manual review';
     } else {
-      var pcbPrice = (drill === '0.3' && imp === 'no') ? 50 : (drill === '0.3' && imp === 'yes') ? 75 : 100;
-      total += pcbPrice;
+      total += pcbR.price;
     }
   }
 
   if (hSvc.assy) {
     var supply = document.getElementById('smt-supply').value;
-    var qty2   = document.getElementById('smt-qty').value;
-    var parts  = parseInt(document.getElementById('smt-parts').value) || 0;
-    var dip    = parseInt(document.getElementById('smt-dip').value)   || 0;
-    var ic     = parseInt(document.getElementById('smt-ic').value)    || 0;
-    var sides  = document.getElementById('smt-sides').value;
-    document.getElementById('r-comp').textContent = supply === 'us' ? 'PCBAForge sources (Turnkey)' : 'Customer supplied (CMS)';
-    var qty2Num = (qty2 === 'manual') ? 999 : parseInt(qty2);
-    if (supply === 'us' || qty2Num > 20 || parts > 200 || ic >= 10 || dip > 100) {
+    document.getElementById('r-comp').textContent = (supply === 'us') ? 'PCBAForge sources (Turnkey)' : 'Customer supplied (CMS)';
+    var assyR = window.PCBAPricing.computeAssy({
+      supply:   supply,
+      qty:      document.getElementById('smt-qty').value,
+      smtPads:  document.getElementById('smt-parts').value,
+      dipPins:  document.getElementById('smt-dip').value,
+      ic:       document.getElementById('smt-ic').value,
+      sides:    document.getElementById('smt-sides').value
+    });
+    if (assyR.manual) {
       hasRQ = true; reason = reason || 'Assembly requires manual quote';
     } else {
-      total += sides === 'double' ? 400 : 200;
+      total += assyR.price;
     }
   } else {
     document.getElementById('r-comp').textContent = '—';
@@ -848,6 +843,8 @@ var ENGINEER_WHATSAPP = '';
   if(bwaEl) bwaEl.style.display='none';
 
   fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
+    // 载入报价参数(共享)，然后重算一次
+    if (window.PCBAPricing) { window.PCBAPricing.loadPricingFromConfig(cfg); if (typeof hCalc==='function') hCalc(); }
     var wa  = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
     var eng = (cfg.engineer_whatsapp||ENGINEER_WHATSAPP||'').replace(/[^0-9]/g,'');
     // 普通客服 WhatsApp 链接
