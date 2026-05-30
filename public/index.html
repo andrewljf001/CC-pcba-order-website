@@ -847,24 +847,21 @@ var ENGINEER_WHATSAPP = '';
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
 
-  // 工程师按钮：优先用工程师专线
-  var engNum = (ENGINEER_WHATSAPP||'').replace(/[^0-9]/g,'');
-  if(engBtn && engNum){
-    engBtn.href = 'https://wa.me/' + engNum + '?text=' + engMsg;
-    engBtn.target = '_blank';
-  }
-
   fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
-    var wa = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
-    if(!wa) return;
-    waLinks.forEach(function(el){
-      var orig = el.href;
-      var text = orig.includes('?text=') ? orig.split('?text=')[1] : '';
-      el.href = 'https://wa.me/' + wa + (text ? '?text='+text : '');
-    });
-    // 工程师专线没填时，按钮回退到客服号
-    if(engBtn && !engNum){
-      engBtn.href = 'https://wa.me/' + wa + '?text=' + engMsg;
+    var wa  = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
+    var eng = (cfg.engineer_whatsapp||ENGINEER_WHATSAPP||'').replace(/[^0-9]/g,'');
+    // 普通客服 WhatsApp 链接
+    if(wa){
+      waLinks.forEach(function(el){
+        var orig = el.href;
+        var text = orig.includes('?text=') ? orig.split('?text=')[1] : '';
+        el.href = 'https://wa.me/' + wa + (text ? '?text='+text : '');
+      });
+    }
+    // "Talk to an Engineer" 按钮：优先工程师专线，没填则回退客服号
+    var engTarget = eng || wa;
+    if(engBtn && engTarget){
+      engBtn.href = 'https://wa.me/' + engTarget + '?text=' + engMsg;
       engBtn.target = '_blank';
     }
     if(wafEl) wafEl.style.display='';
