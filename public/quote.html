@@ -344,7 +344,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
             <div class="frow">
               <div class="fg">
                 <label>SURFACE FINISH</label>
-                <select id="pcb-finish">
+                <select id="pcb-finish" onchange="calcPrice()">
                   <option value="hasl_free" selected>LeadFree HASL</option>
                   <option value="hasl_lead">HASL (with lead)</option>
                   <option value="enig">ENIG (Gold)</option>
@@ -612,6 +612,13 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
    STATE
 ═══════════════════════════════ */
 var svc = { pcb: false, assy: false, test: false };
+// 报价参数(从后台 /api/settings/public 读取，带默认值兜底)
+var PRICING = {
+  pcb_t1: 50, pcb_t2: 75, pcb_t3: 100,
+  pcb_qty_split: 10, pcb_qty_max: 20, pcb_size_max: 100, pcb_layer_max: 4,
+  smt_single: 200, smt_double: 400,
+  smt_max_parts: 200, smt_max_ic: 10, smt_max_dip: 100
+};
 var authToken   = localStorage.getItem('cc_token') || null;
 var currentUser = null;
 var selectedFiles = [];
@@ -704,15 +711,24 @@ function calcPrice() {
     var qty    = parseInt(document.getElementById('pcb-qty').value) || 0;
     var drill  = document.getElementById('pcb-drill').value;
     var imp    = document.getElementById('pcb-impedance').value;
-    var pcbManual = (mat !== 'fr4' || layers > 4 || W > 200 || H > 200 || qty > 20 || qty === 0 || drill === '0.15');
+    var finish = document.getElementById('pcb-finish').value;
+    // 人工报价条件: 非FR4 / 层数超限 / 尺寸超限 / 数量超限或为0 / 孔径<0.3(非0.3档) / 表面处理镀金(ENIG)
+    var pcbManual = (
+      mat !== 'fr4' ||
+      layers > PRICING.pcb_layer_max ||
+      W > PRICING.pcb_size_max || H > PRICING.pcb_size_max ||
+      qty > PRICING.pcb_qty_max || qty === 0 ||
+      drill !== '0.3' ||
+      finish === 'enig'
+    );
     if (!pcbManual) {
+      // 数量分档: 1~split 为低档, (split+1)~max 为高档
+      var lowBand = (qty <= PRICING.pcb_qty_split);
       var pcbPrice;
-      if (drill === '0.3' && imp === 'no') {
-        pcbPrice = 50;
-      } else if (drill === '0.3' && imp === 'yes') {
-        pcbPrice = 75;
+      if (imp === 'no') {
+        pcbPrice = lowBand ? PRICING.pcb_t1 : PRICING.pcb_t2;   // 无阻抗: 低档t1, 高档t2
       } else {
-        pcbPrice = 100;
+        pcbPrice = lowBand ? PRICING.pcb_t2 : PRICING.pcb_t3;   // 有阻抗: 低档t2, 高档t3
       }
       lines.push({ label: 'PCB Fab (' + qty + 'pcs, ' + layers + 'L)', val: pcbPrice });
       total += pcbPrice;
@@ -734,9 +750,9 @@ function calcPrice() {
       var dip   = parseInt(document.getElementById('dip-pins').value) || 0;
       var ic    = parseInt(document.getElementById('smt-ic').value)   || 0;
       var sides = document.getElementById('assy-sides').value;
-      var assyManual = (aqty > 20 || aqty === 0 || smt > 200 || ic >= 10 || dip > 100);
+      var assyManual = (aqty > PRICING.pcb_qty_max || aqty === 0 || smt > PRICING.smt_max_parts || ic >= PRICING.smt_max_ic || dip > PRICING.smt_max_dip);
       if (!assyManual) {
-        var assyPrice = (sides === 'double') ? 400 : 200;
+        var assyPrice = (sides === 'double') ? PRICING.smt_double : PRICING.smt_single;
         lines.push({ label: 'SMT+DIP Assy (' + aqty + 'pcs, ' + (sides==='double'?'double':'single') + ', CMS)', val: assyPrice });
         total += assyPrice;
       } else {
@@ -1068,13 +1084,30 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   fetch('/api/settings/public').then(function(r){ return r.json(); }).then(function(cfg) {
+    // 读取报价参数(后台可配),无值则保留默认
+    var num = function(v, d){ var n = parseFloat(v); return (isFinite(n) && n > 0) ? n : d; };
+    PRICING.pcb_t1        = num(cfg.pcb_tier1_price, PRICING.pcb_t1);
+    PRICING.pcb_t2        = num(cfg.pcb_tier2_price, PRICING.pcb_t2);
+    PRICING.pcb_t3        = num(cfg.pcb_tier3_price, PRICING.pcb_t3);
+    PRICING.pcb_qty_split = num(cfg.pcb_qty_split,   PRICING.pcb_qty_split);
+    PRICING.pcb_qty_max   = num(cfg.pcb_qty_max,     PRICING.pcb_qty_max);
+    PRICING.pcb_size_max  = num(cfg.pcb_size_max,    PRICING.pcb_size_max);
+    PRICING.pcb_layer_max = num(cfg.pcb_layer_max,   PRICING.pcb_layer_max);
+    PRICING.smt_single    = num(cfg.smt_single_price,PRICING.smt_single);
+    PRICING.smt_double    = num(cfg.smt_double_price,PRICING.smt_double);
+    PRICING.smt_max_parts = num(cfg.smt_max_parts,   PRICING.smt_max_parts);
+    PRICING.smt_max_ic    = num(cfg.smt_max_ic,      PRICING.smt_max_ic);
+    PRICING.smt_max_dip   = num(cfg.smt_max_dip,     PRICING.smt_max_dip);
+    calcPrice();  // 参数到位后重算一次
+
     var wa = (cfg.whatsapp_number || '').replace(/[^0-9]/g,'');
-    if (!wa) return;
-    document.querySelectorAll('[href^="https://wa.me"]').forEach(function(el) {
-      el.href = 'https://wa.me/' + wa;
-    });
-    var wafEl = document.querySelector('.waf');
-    if (wafEl) { wafEl.href = 'https://wa.me/' + wa; wafEl.style.display = ''; }
+    if (wa) {
+      document.querySelectorAll('[href^="https://wa.me"]').forEach(function(el) {
+        el.href = 'https://wa.me/' + wa;
+      });
+      var wafEl = document.querySelector('.waf');
+      if (wafEl) { wafEl.href = 'https://wa.me/' + wa; wafEl.style.display = ''; }
+    }
   }).catch(function(){});
 
   checkAuth();
