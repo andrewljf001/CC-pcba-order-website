@@ -1077,7 +1077,7 @@ async function loadSettings() {
   try {
     settingsData = await apiFetch('/api/admin/settings');
     const LABELS = {
-      whatsapp_number:'WhatsApp Number', shipping_address:'Shipping Address',
+      whatsapp_number:'WhatsApp Number (客服)', engineer_whatsapp:'Engineer WhatsApp (工程师专线·纯数字不带+)', shipping_address:'Shipping Address',
       contact_email:'Contact Email', company_name:'Company Name',
       google_oauth_enabled:'Google OAuth', github_oauth_enabled:'GitHub OAuth',
       pcb_tier1_price:'PCB Tier 1 Price ($)', pcb_tier2_price:'PCB Tier 2 Price ($)',
