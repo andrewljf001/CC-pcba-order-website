@@ -678,7 +678,7 @@ async function loadDashboard() {
 
     const statuses = ['pending','quoted','paid','production','shipped','completed','cancelled'];
     document.getElementById('status-breakdown').innerHTML = statuses.map(s =>
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid rgba(30,58,30,.4)">
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid #e3e8f0">
         <span>${badge(s)}</span>
         <span style="font-family:'Inter',sans-serif;font-size:1rem;color:var(--green)">${o[s]||0}</span>
       </div>`
@@ -686,7 +686,7 @@ async function loadDashboard() {
 
     const recent = await apiFetch('/api/admin/orders?limit=8');
     document.getElementById('recent-orders-list').innerHTML = recent.length ? recent.map(r =>
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.2rem;border-bottom:1px solid rgba(30,58,30,.4);cursor:pointer" onclick="openOrder('${r.id}')">
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.2rem;border-bottom:1px solid #e3e8f0;cursor:pointer" onclick="openOrder('${r.id}')">
         <div>
           <div class="mono" style="color:var(--white);font-size:.75rem">${r.order_no}</div>
           <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${r.customer_email||'—'}</div>
@@ -852,7 +852,7 @@ async function openCustomer(id) {
       </div>
       <div class="section-title">// ORDER HISTORY (${c.orders?.length||0})</div>
       ${c.orders?.length ? c.orders.map(o =>
-        `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(30,58,30,.4);cursor:pointer" onclick="openOrder('${o.order_no}')">
+        `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid #e3e8f0;cursor:pointer" onclick="openOrder('${o.order_no}')">
           <div><div class="mono" style="font-size:.75rem;color:var(--white)">${o.order_no}</div><div style="font-size:.7rem;color:var(--muted)">${modeBadge(o.mode)} · ${fmtDate(o.created_at)}</div></div>
           <div style="text-align:right">${badge(o.status)}<div style="font-size:.75rem;color:var(--green);margin-top:.2rem">${fmtMoney(o.quoted_price||o.estimate)}</div></div>
         </div>`
