@@ -92,14 +92,14 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .swap-wrap{display:block}
 
 /* ===== SERVICE CARDS ===== */
-.sgrd{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
-.sc{background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .2s}
+.sgrd{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;align-items:stretch}
+.sc{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:var(--shadow-sm);transition:all .2s}
 .sc:hover{border-color:#9edcb2;box-shadow:0 14px 28px rgba(22,163,74,.09);transform:translateY(-2px)}
 .sc-img{width:100%;height:150px;object-fit:cover;display:block;filter:brightness(1.05) saturate(1.02)}
-.sc-body{padding:1.3rem}
+.sc-body{display:flex;flex-direction:column;flex:1;padding:1.3rem}
 .sn{color:var(--ink);font-size:.95rem;font-weight:900;letter-spacing:-.015em;margin-bottom:.5rem}
-.sd{color:var(--muted);font-size:.84rem;line-height:1.6;margin-bottom:.8rem}
-.stag{display:inline-block;background:#dcfce7;border:1px solid #bbf7d0;color:var(--green2);border-radius:999px;
+.sd{color:var(--muted);font-size:.84rem;line-height:1.6;margin-bottom:.8rem;flex:1}
+.stag{display:inline-block;align-self:flex-start;margin-top:auto;background:#dcfce7;border:1px solid #bbf7d0;color:var(--green2);border-radius:999px;
   font-size:.66rem;font-weight:800;padding:.25rem .6rem}
 
 /* ===== QUOTE CALCULATOR ===== */
