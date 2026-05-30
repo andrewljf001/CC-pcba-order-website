@@ -166,6 +166,28 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   .frow,.frow.cols3{grid-template-columns:1fr}
   .service-selector{grid-template-columns:1fr}
 }
+
+/* ===== 移动导航(汉堡+常驻Blog+SignIn) ===== */
+.nav-right{display:flex;align-items:center;gap:.7rem}
+.nav-blog-m{display:none;align-items:center;font-size:.8rem;font-weight:800;color:var(--green2);border:1px solid var(--green);border-radius:7px;padding:.5rem .9rem;transition:all .2s}
+.nav-blog-m:hover{background:#f0fdf4}
+.nav-signin{display:inline-flex;align-items:center;font-size:.88rem;font-weight:700;color:var(--ink);transition:color .2s}
+.nav-signin:hover{color:var(--green2)}
+.nav-burger{display:none;background:none;border:none;font-size:1.5rem;line-height:1;color:var(--ink);cursor:pointer;padding:.2rem .3rem}
+.mobile-menu{display:none;position:fixed;top:68px;left:0;right:0;z-index:99;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 16px 30px rgba(20,32,51,.1);flex-direction:column;padding:.5rem 0}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:.85rem 5%;font-size:.95rem;font-weight:700;color:var(--text);border-bottom:1px solid #f1f5f9}
+.mobile-menu a:last-child{border-bottom:none}
+.mobile-menu a:hover{background:#f8fafc;color:var(--green2)}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-blog-m{display:inline-flex;height:40px;padding:0 .9rem;font-size:.8rem}
+  .nav-signin{display:none}
+  .nav-burger{display:inline-flex}
+  .nav-cta{display:inline-flex;align-items:center;height:40px;padding:0 1rem;font-size:.8rem}
+  .mobile-menu{top:60px}
+}
+
 </style>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
@@ -182,8 +204,23 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     <li><a href="index.html#contact">Contact</a></li>
     <li><a href="track.html">Track Order</a></li>
   </ul>
-  <a href="index.html" class="nav-cta">← BACK</a>
+  <div class="nav-right">
+    <a href="blog.html" class="nav-blog-m">Blog</a>
+    <a href="account.html" class="nav-signin">Sign In</a>
+    <a href="index.html" class="nav-cta">← BACK</a>
+    <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
+  </div>
 </nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#quote">Quote</a>
+  <a href="index.html#services">Services</a>
+  <a href="index.html#capabilities">Capabilities</a>
+  <a href="index.html#process">Process</a>
+  <a href="index.html#contact">Contact</a>
+  <a href="blog.html">Blog</a>
+  <a href="track.html">Track Order</a>
+  <a href="account.html">Sign In</a>
+</div>
 <div style="background:var(--dim);border-bottom:1px solid var(--border);padding:.35rem 5%;display:flex;justify-content:flex-end;align-items:center;gap:.8rem">
   <div id="auth-bar" style="font-family:'Inter',sans-serif;letter-spacing:.06em"></div>
 </div>
@@ -1149,6 +1186,16 @@ document.addEventListener('DOMContentLoaded', function() {
 .modal-panel.active{display:block}
 </style>
 
+<script>
+(function(){
+  var b=document.getElementById('navBurger'), m=document.getElementById('mobileMenu');
+  if(b&&m){
+    b.addEventListener('click',function(e){e.stopPropagation();m.classList.toggle('open');b.textContent=m.classList.contains('open')?'\u2715':'\u2630';});
+    document.addEventListener('click',function(e){if(m.classList.contains('open')&&!m.contains(e.target)&&e.target!==b){m.classList.remove('open');b.textContent='\u2630';}});
+    m.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){m.classList.remove('open');b.textContent='\u2630';});});
+  }
+})();
+</script>
 <script src="/cookie-consent.js"></script>
 </body>
 </html>
