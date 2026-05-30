@@ -430,7 +430,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
         <div class="fbody">
           <div class="frow">
             <div class="fg"><label>MATERIAL</label>
-              <select id="pcb-material">
+              <select id="pcb-material" onchange="hCalc()">
                 <option value="fr4">FR4</option>
                 <option value="flex">Flex</option>
                 <option value="aluminum">Aluminum</option>
@@ -477,7 +477,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
           </div>
           <div class="frow">
             <div class="fg"><label>SURFACE FINISH</label>
-              <select id="pcb-finish">
+              <select id="pcb-finish" onchange="hCalc()">
                 <option value="hasl_free" selected>LeadFree HASL</option>
                 <option value="hasl_lead">HASL (with lead)</option>
                 <option value="enig">ENIG</option>
