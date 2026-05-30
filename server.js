@@ -120,6 +120,11 @@ app.get('/account.html', (req, res) => {
 });
 
 app.use(express.static('public'));
+app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.sendFile(require('path').join(__dirname, 'admin', 'index.html'));
+});
 app.use('/admin', express.static('admin'));
 
 // ── Apple Pay 域名验证文件 ────────────────────────────────
