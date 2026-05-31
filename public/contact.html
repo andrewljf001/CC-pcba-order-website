@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us — PCBAForge | Get in Touch</title>
+<meta name="description" content="Contact PCBAForge for PCBA assembly quotes, technical questions, or order support. Reach us via WhatsApp, email, or submit an inquiry form.">
+
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{
+  --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
+  --border:#d9e2ee;--line:#d9e2ee;
+  --green:#16a34a;--green2:#11843d;--green3:#7fd69a;
+  --text:#334155;--muted:#64748b;--ink:#142033;
+  --amber:#b7791f;--red:#dc2626;--wa:#25d366;
+  --shadow:0 16px 44px rgba(20,32,51,.08);
+  --shadow-sm:0 8px 22px rgba(20,32,51,.06);
+  --max:1200px;
+  --font:'DM Sans',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{
+  font-family:var(--font);
+  background:radial-gradient(circle at 82% 4%,rgba(22,163,74,.1),transparent 28%),
+             linear-gradient(180deg,#fff 0,#f6f8fb 560px,#f6f8fb 100%);
+  color:var(--text);line-height:1.65;overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+
+/* ===== NAV ===== */
+nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;
+  padding:0 5%;height:68px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--line);
+  backdrop-filter:blur(10px);box-shadow:0 10px 28px rgba(20,32,51,.05)}
+.nav-logo{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:1.08rem;font-weight:900;letter-spacing:-.02em}
+.ldot{position:relative;width:30px;height:30px;border-radius:7px;
+  background:linear-gradient(135deg,#16a34a,#22c55e);box-shadow:0 8px 18px rgba(22,163,74,.25)}
+.ldot::after{content:"P";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:.84rem;font-weight:900;line-height:1}
+.nav-links{list-style:none;display:flex;gap:1.8rem}
+.nav-links a{font-size:.9rem;color:var(--muted);font-weight:700;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--ink)}
+.nav-cta{background:var(--green);color:#fff;border-radius:7px;font-size:.85rem;font-weight:800;
+  padding:.55rem 1.15rem;box-shadow:0 12px 22px rgba(22,163,74,.18);transition:background .2s}
+.nav-cta:hover{background:var(--green2)}
+.nav-right{display:flex;align-items:center;gap:.7rem}
+.nav-signin{display:inline-flex;align-items:center;font-size:.88rem;font-weight:700;color:var(--ink);transition:color .2s}
+.nav-signin:hover{color:var(--green2)}
+.nav-burger{display:none;background:none;border:none;font-size:1.5rem;line-height:1;color:var(--ink);cursor:pointer;padding:.2rem .3rem}
+.mobile-menu{display:none;position:fixed;top:68px;left:0;right:0;z-index:99;background:#fff;
+  border-bottom:1px solid var(--line);box-shadow:0 16px 30px rgba(20,32,51,.1);
+  flex-direction:column;padding:.5rem 0}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:.85rem 5%;font-size:.95rem;font-weight:700;color:var(--text);border-bottom:1px solid #f1f5f9}
+.mobile-menu a:last-child{border-bottom:none}
+.mobile-menu a:hover{background:#f8fafc;color:var(--green2)}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-signin{display:none}
+  .nav-burger{display:inline-flex}
+  .nav-cta{display:inline-flex;align-items:center;height:40px;padding:0 1rem;font-size:.8rem}
+  .mobile-menu{top:60px}
+  nav{height:60px;padding:0 4%}
+}
+
+/* ===== PAGE HEADER ===== */
+.page-header{
+  position:relative;z-index:1;
+  max-width:var(--max);margin:0 auto;padding:3.5rem 5% 2rem;
+}
+.breadcrumb{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--muted);font-weight:700;margin-bottom:1.2rem}
+.breadcrumb a{color:var(--muted);transition:color .2s}
+.breadcrumb a:hover{color:var(--green2)}
+.breadcrumb span{color:var(--green2)}
+.page-badge{display:inline-flex;align-items:center;background:#dcfce7;border:1px solid #bbf7d0;
+  color:var(--green2);border-radius:999px;padding:.35rem .75rem;margin-bottom:1rem;font-size:.78rem;font-weight:800}
+.page-title{color:var(--ink);font-size:clamp(2rem,4vw,3rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:.8rem}
+.page-sub{color:var(--muted);font-size:1.05rem;line-height:1.7;max-width:580px}
+
+/* ===== CONTACT GRID ===== */
+.contact-wrap{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:1.5rem 5% 4rem}
+.contact-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:2.5rem;align-items:start}
+
+/* ===== CONTACT CHANNELS ===== */
+.channels{display:flex;flex-direction:column;gap:1.2rem}
+.channel-card{
+  background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:1.5rem;box-shadow:var(--shadow-sm);transition:all .2s;
+  display:flex;align-items:flex-start;gap:1rem;
+}
+.channel-card:hover{border-color:#9edcb2;box-shadow:0 14px 28px rgba(22,163,74,.09);transform:translateY(-2px)}
+.channel-card.primary{border-color:#bbf7d0;background:#f0fdf4}
+.ch-icon{
+  flex-shrink:0;width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+  background:#dcfce7;border:1px solid #bbf7d0;
+}
+.channel-card.wa-card .ch-icon{background:#d4f5e5;border-color:#a7f3d0}
+.ch-body{flex:1}
+.ch-label{font-size:.7rem;font-weight:900;color:var(--green2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.25rem}
+.ch-title{color:var(--ink);font-size:1rem;font-weight:800;margin-bottom:.3rem}
+.ch-desc{color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:.8rem}
+.ch-link{
+  display:inline-flex;align-items:center;gap:.4rem;font-size:.84rem;font-weight:800;
+  color:var(--green2);border:1px solid var(--green);border-radius:7px;padding:.45rem .9rem;
+  transition:all .2s;
+}
+.ch-link:hover{background:var(--green);color:#fff}
+.ch-link.wa-link{background:var(--wa);color:#fff;border-color:var(--wa)}
+.ch-link.wa-link:hover{background:#1da851;border-color:#1da851}
+.ch-respond{display:inline-flex;align-items:center;gap:.35rem;font-size:.74rem;color:var(--muted);font-weight:700;margin-top:.5rem}
+.ch-respond::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e}
+
+/* ===== INQUIRY FORM ===== */
+.form-card{
+  background:#fff;border:1px solid var(--line);border-radius:10px;
+  box-shadow:var(--shadow-sm);overflow:hidden;
+}
+.form-hdr{
+  background:#f8fafc;border-bottom:1px solid var(--line);
+  padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;
+}
+.form-ht{color:var(--green2);font-size:.8rem;font-weight:900;letter-spacing:.04em}
+.form-hs{color:var(--muted);font-size:.74rem}
+.form-body{padding:1.4rem}
+.fg{display:flex;flex-direction:column;gap:.35rem;margin-bottom:.9rem}
+.fg label{color:var(--muted);font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.fg input,.fg select,.fg textarea{
+  background:#fff;border:1px solid #cbd5e1;color:var(--ink);border-radius:7px;padding:.65rem .8rem;
+  font-size:.88rem;font-family:var(--font);outline:none;transition:all .15s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{
+  border-color:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,.1);
+}
+.fg textarea{resize:vertical;min-height:110px;line-height:1.6}
+.fg select{-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.form-note{font-size:.74rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.submit-btn{
+  width:100%;background:var(--green);color:#fff;border:none;border-radius:7px;
+  font-size:.92rem;font-weight:800;padding:.95rem;cursor:pointer;
+  box-shadow:0 12px 22px rgba(22,163,74,.18);transition:background .2s;
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+}
+.submit-btn:hover{background:var(--green2)}
+.submit-btn:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed}
+.form-success{
+  display:none;text-align:center;padding:2rem 1rem;
+}
+.form-success .check{font-size:2.5rem;margin-bottom:.8rem}
+.form-success .stitle{color:var(--ink);font-size:1.2rem;font-weight:900;margin-bottom:.5rem}
+.form-success .ssub{color:var(--muted);font-size:.9rem;line-height:1.6}
+
+/* ===== FAQ SECTION ===== */
+.faq-section{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:0 5% 4rem}
+.faq-title{color:var(--ink);font-size:1.5rem;font-weight:900;letter-spacing:-.02em;margin-bottom:1.5rem}
+.faq-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.faq-item{
+  background:#fff;border:1px solid var(--line);border-radius:8px;padding:1.3rem;
+  box-shadow:var(--shadow-sm);
+}
+.faq-q{color:var(--ink);font-size:.92rem;font-weight:800;margin-bottom:.5rem}
+.faq-a{color:var(--muted);font-size:.85rem;line-height:1.65}
+.faq-a a{color:var(--green2);font-weight:600}
+
+/* ===== FOOTER ===== */
+footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
+.fi{max-width:var(--max);margin:0 auto;text-align:center}
+.flogo{color:var(--green2);font-size:1rem;font-weight:900;margin-bottom:.8rem}
+.flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks a{font-size:.84rem;color:var(--muted);transition:color .2s}
+.flinks a:hover{color:var(--ink)}
+.flinks2{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks2 a{font-size:.75rem;color:var(--muted)}
+.flinks2 a:hover{color:var(--ink)}
+.fcopy{font-size:.75rem;color:var(--muted)}
+
+/* ===== FLOAT WA ===== */
+.waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px rgba(37,211,102,.25);
+  z-index:999;transition:transform .2s}
+.waf:hover{transform:scale(1.08)}
+.toast{position:fixed;bottom:6rem;right:2rem;background:#fff;border:1px solid var(--line);
+  color:var(--ink);padding:1rem 1.5rem;font-size:.85rem;border-radius:8px;box-shadow:var(--shadow);
+  z-index:1000;transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--red);color:var(--red)}
+
+@media(max-width:900px){
+  .contact-grid{grid-template-columns:1fr}
+  .faq-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .frow{grid-template-columns:1fr}
+  .page-header{padding:2.5rem 5% 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
+  <ul class="nav-links">
+    <li><a href="quote.html">Quote</a></li>
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="index.html#capabilities">Capabilities</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="track.html">Track Order</a></li>
+    <li><a href="contact.html" class="active">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="account.html" class="nav-signin">Sign In</a>
+    <a href="quote.html" class="nav-cta">GET QUOTE</a>
+    <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="quote.html">Quote</a>
+  <a href="index.html#services">Services</a>
+  <a href="index.html#capabilities">Capabilities</a>
+  <a href="index.html#process">Process</a>
+  <a href="blog.html">Blog</a>
+  <a href="track.html">Track Order</a>
+  <a href="contact.html">Contact</a>
+  <a href="account.html">Sign In</a>
+</div>
+
+<div class="page-header">
+  <div class="breadcrumb">
+    <a href="index.html">Home</a>
+    <span>›</span>
+    <span>Contact Us</span>
+  </div>
+  <div class="page-badge">// REACH OUR TEAM</div>
+  <h1 class="page-title">Get in Touch</h1>
+  <p class="page-sub">Have a project, question, or just want to check our capabilities? Our engineers respond within 24 hours — usually much faster.</p>
+</div>
+
+<div class="contact-wrap">
+  <div class="contact-grid">
+
+    <!-- Left: Contact Channels -->
+    <div class="channels">
+
+      <div class="channel-card wa-card primary">
+        <div class="ch-icon">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="#16a34a"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
+        </div>
+        <div class="ch-body">
+          <div class="ch-label">Fastest Response</div>
+          <div class="ch-title">WhatsApp</div>
+          <div class="ch-desc">Chat directly with our engineers. Fastest way to discuss technical specs, get a quick estimate, or upload photos of your board.</div>
+          <a href="https://wa.me/" class="ch-link wa-link" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
+            OPEN WHATSAPP
+          </a>
+          <div class="ch-respond">Typically within 2 hours</div>
+        </div>
+      </div>
+
+      <div class="channel-card">
+        <div class="ch-icon">✉️</div>
+        <div class="ch-body">
+          <div class="ch-label">Email</div>
+          <div class="ch-title">Send Us an Email</div>
+          <div class="ch-desc">Ideal for detailed technical inquiries, attaching Gerber/BOM files, or official correspondence. We reply within 24 hours.</div>
+          <a href="#" class="ch-link" id="emailLink">✉ OPEN EMAIL</a>
+          <div class="ch-respond">Within 24 hours</div>
+        </div>
+      </div>
+
+      <div class="channel-card">
+        <div class="ch-icon">📋</div>
+        <div class="ch-body">
+          <div class="ch-label">Full Inquiry</div>
+          <div class="ch-title">Submit a Formal Inquiry</div>
+          <div class="ch-desc">Upload your Gerber, BOM, and placement files. Our engineers will review and send you a confirmed quote within 24h.</div>
+          <a href="quote.html" class="ch-link">→ GO TO INQUIRY FORM</a>
+        </div>
+      </div>
+
+      <div class="channel-card">
+        <div class="ch-icon">📦</div>
+        <div class="ch-body">
+          <div class="ch-label">Order Support</div>
+          <div class="ch-title">Track or Update Your Order</div>
+          <div class="ch-desc">Check your order status, shipment tracking number, or contact us about an existing order.</div>
+          <a href="track.html" class="ch-link">→ TRACK MY ORDER</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Quick Contact Form -->
+    <div class="form-card">
+      <div class="form-hdr">
+        <span class="form-ht">// QUICK MESSAGE</span>
+        <span class="form-hs">No file upload — just a message</span>
+      </div>
+      <div class="form-body" id="formBody">
+        <div class="frow">
+          <div class="fg">
+            <label>Your Name *</label>
+            <input type="text" id="c-name" placeholder="John Smith" required>
+          </div>
+          <div class="fg">
+            <label>Email *</label>
+            <input type="email" id="c-email" placeholder="you@company.com" required>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Subject</label>
+          <select id="c-subject">
+            <option value="general">General Question</option>
+            <option value="quote">Request a Quote</option>
+            <option value="technical">Technical / DFM Question</option>
+            <option value="order">Order / Shipment Support</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Your WhatsApp (optional)</label>
+          <input type="text" id="c-whatsapp" placeholder="+1 555 123 4567">
+        </div>
+        <div class="fg">
+          <label>Message *</label>
+          <textarea id="c-message" placeholder="Describe your project, question, or requirement. Include PCB dimensions, layer count, quantity, and any special requirements..."></textarea>
+        </div>
+        <p class="form-note">For file uploads (Gerber, BOM, placement), please use the <a href="quote.html" style="color:var(--green2);font-weight:700">full inquiry form</a>. This form is for quick messages only.</p>
+        <button class="submit-btn" id="submitBtn" onclick="sendMessage()">
+          <span id="btnText">▶ SEND MESSAGE</span>
+        </button>
+      </div>
+      <div class="form-success" id="formSuccess">
+        <div class="check">✅</div>
+        <div class="stitle">Message Received!</div>
+        <div class="ssub">Thank you for reaching out. Our engineers will reply to your email within 24 hours.<br><br>
+          Need faster response? <a href="https://wa.me/" id="successWaLink" style="color:var(--green2);font-weight:700">Chat on WhatsApp →</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="faq-title">// Frequently Asked Questions</div>
+  <div class="faq-grid">
+    <div class="faq-item">
+      <div class="faq-q">What is the minimum order quantity?</div>
+      <div class="faq-a">Our minimum is <strong>5 PCBs</strong>. We specialize in small batches from 5 to a few hundred units — ideal for prototypes and pre-production runs.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How long does production take?</div>
+      <div class="faq-a">Standard lead time is <strong>7–10 business days</strong> from payment confirmation, including PCB fabrication, SMT/DIP assembly, and functional testing. Express options may be available.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What files do I need to provide?</div>
+      <div class="faq-a">For PCB fabrication: <strong>Gerber files</strong>. For assembly: Gerber + <strong>BOM</strong> (bill of materials) + <strong>centroid/placement file</strong>. Pack everything in a ZIP and upload on the inquiry page.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do you do functional testing?</div>
+      <div class="faq-a">Yes — our engineer will power up and verify each board against your test specification. This is available as an add-on for Turnkey orders. <a href="quote.html">Request a quote →</a></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What payment methods do you accept?</div>
+      <div class="faq-a">We accept <strong>PayPal</strong> (with buyer protection), Apple Pay, and Google Pay. Payment is requested after engineer review and quote confirmation — not upfront.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Do you ship worldwide?</div>
+      <div class="faq-a">Yes. We ship via <strong>DHL, FedEx</strong>, and other carriers worldwide. Shipping is quoted separately after production, based on weight and destination.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="fi">
+    <div class="flogo">▶ PCBAForge</div>
+    <div class="flinks">
+      <a href="index.html#services">Services</a>
+      <a href="index.html#quote">Quick Estimator</a>
+      <a href="index.html#capabilities">Capabilities</a>
+      <a href="index.html#process">Process</a>
+      <a href="quote.html">Submit Inquiry</a>
+      <a href="blog.html">Blog</a>
+      <a href="track.html">Track Order</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="flinks2">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="shipping.html">Shipping Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+  </div>
+</footer>
+
+<a href="https://wa.me/" class="waf" target="_blank" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 32 32" fill="white"><path d="M16 0C7.164 0 0 7.163 0 16c0 2.822.736 5.469 2.018 7.773L0 32l8.418-2.207A15.93 15.93 0 0016 32c8.836 0 16-7.163 16-16S24.836 0 16 0zm8.078 22.418c-.336.943-1.965 1.805-2.703 1.918-.691.105-1.559.15-2.514-.158-.578-.188-1.32-.438-2.268-.857-3.992-1.723-6.602-5.73-6.801-5.994-.199-.264-1.625-2.162-1.625-4.125s1.027-2.926 1.393-3.328c.363-.402.793-.502 1.059-.502.264 0 .527.002.758.014.242.012.568-.092.889.678.336.801 1.143 2.764 1.242 2.963.1.199.166.43.033.693-.133.264-.199.43-.398.662-.199.232-.418.519-.596.697-.199.199-.406.414-.175.812.232.398 1.031 1.699 2.213 2.748 1.52 1.355 2.801 1.773 3.199 1.973.398.199.629.166.861-.1.232-.264.994-1.162 1.26-1.561.264-.398.527-.332.889-.199.363.133 2.309 1.09 2.707 1.287.398.199.662.299.762.465.1.166.1.963-.236 1.906z"/></svg>
+</a>
+
+<div class="toast" id="toast"></div>
+
+<script>
+async function sendMessage() {
+  var name    = document.getElementById('c-name').value.trim();
+  var email   = document.getElementById('c-email').value.trim();
+  var subject = document.getElementById('c-subject').value;
+  var wa      = document.getElementById('c-whatsapp').value.trim();
+  var message = document.getElementById('c-message').value.trim();
+
+  if (!name || !email || !message) {
+    showToast('Please fill in name, email, and message.', true);
+    return;
+  }
+  if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+    showToast('Please enter a valid email address.', true);
+    return;
+  }
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  document.getElementById('btnText').textContent = 'Sending...';
+
+  try {
+    // 复用 inquiry API，用 mode=contact 发送，不带文件
+    var fd = new FormData();
+    fd.append('mode', 'contact');
+    fd.append('name', name);
+    fd.append('email', email);
+    fd.append('whatsapp', wa);
+    fd.append('notes', '[' + subject.toUpperCase() + '] ' + message);
+
+    var res = await fetch('/api/inquiry', { method: 'POST', body: fd });
+    var data = await res.json();
+
+    if (data.success) {
+      document.getElementById('formBody').style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+    } else {
+      throw new Error(data.error || 'Send failed');
+    }
+  } catch(e) {
+    showToast('Failed to send: ' + e.message, true);
+    btn.disabled = false;
+    document.getElementById('btnText').textContent = '▶ SEND MESSAGE';
+  }
+}
+
+function showToast(msg, err) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (err ? ' error' : '') + ' show';
+  setTimeout(function(){ t.className = 'toast'; }, 3500);
+}
+
+// Burger nav
+(function(){
+  var b = document.getElementById('navBurger'), m = document.getElementById('mobileMenu');
+  if(b && m){
+    b.addEventListener('click', function(e){ e.stopPropagation(); m.classList.toggle('open'); b.textContent = m.classList.contains('open') ? '\u2715' : '\u2630'; });
+    document.addEventListener('click', function(e){ if(m.classList.contains('open') && !m.contains(e.target) && e.target !== b){ m.classList.remove('open'); b.textContent='\u2630'; } });
+    m.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', function(){ m.classList.remove('open'); b.textContent='\u2630'; }); });
+  }
+})();
+</script>
+<script>
+(function(){
+  var wafEl = document.querySelector('.waf');
+  var waLinks = document.querySelectorAll('[href^="https://wa.me"]');
+  var emailLink = document.getElementById('emailLink');
+  var successWa = document.getElementById('successWaLink');
+  if(wafEl) wafEl.style.display = 'none';
+
+  fetch('/api/settings/public').then(function(r){ return r.json(); }).then(function(cfg){
+    var wa    = (cfg.whatsapp_number || '').replace(/[^0-9]/g,'');
+    var email = cfg.contact_email || '';
+    if(wa){
+      waLinks.forEach(function(el){
+        el.href = 'https://wa.me/' + wa + '?text=' + encodeURIComponent('Hi, I found PCBAForge and would like to discuss a PCBA project.');
+      });
+      if(successWa) successWa.href = 'https://wa.me/' + wa;
+    }
+    if(email && emailLink){
+      emailLink.href = 'mailto:' + email + '?subject=PCBA%20Inquiry%20from%20Website';
+      emailLink.textContent = '✉ ' + email;
+    }
+    if(wafEl) wafEl.style.display = '';
+  }).catch(function(){});
+})();
+</script>
+<script src="/cookie-consent.js"></script>
+<script>(function(){var t=localStorage.getItem("cc_token");if(t){document.querySelectorAll(".nav-signin").forEach(function(el){el.textContent="My Account";});}})();</script>
+</body>
+</html>

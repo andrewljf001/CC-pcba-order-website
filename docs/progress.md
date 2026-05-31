@@ -1,1 +1,59 @@
-IyBQQ0JBRm9yZ2Ug6K6h5Y2V572R56uZ4oCUIumAmueegemqjOeuoeeQhuefpeiKguagvAoKPiDku7bljZbvvJphbmRyZXdsamYwMDEvQ0MtcGNiYS1vcmRlci13ZWJzaXRlCj4g5Yav5Yqo5a6M5L2NvvpuXOWwjmJhdGNoIFBDQiDCtyBTTVQg4oCXIOmZhOS7tuKAlyDlip3hohXlj5blh4bmjqXlupTlsYLliqjmnI3lrqQKPiDmiYvmnLrlqq3vvJrliIbpg6ggSFRNTC9DU1MvSlMgwrcg5ZCO56uvIE5vZGUuanMgKyBFeHByZXNzIMK3IOaVsOaehXlhciBDbG91ZGZsYXJlIEQxIMK3IOlrqeWDjsKDCmxvdWRmbGFyZSBSMgoKIyMg5b2T5YmN6Zi05q615YCfClBoYXNlIDcg5Z6L5pys5pS56K2m4oCU4oCU5Y6L5L6b6aG95bey5pqX5L6E77yc5YaN5ZCO5re36K6+5Y6G5b6FClBoYXNlIDgg5ZCO5Y+R5cCR6K2m77ya5ZCO5Y+R5YaN5Y2X6K2m5Y+Y6K2m5bey6K2m5b2T5YmN55Sf6ZSJ5YeP5o6nCgojIyDpmIXmm7rlsZXoqpLlgZwKUGhhc2UgMS01IOWFpemDqOWujOaIkCjkuLnliqDmnb/mnInoqKHlupQv5oqc5Lu25Ku75Sus5Zmo5bej5ZCO5Y2X5oCB5pW06K2m5o6nKQpQaGFzZSA2IOacrOWcsOWQjuayoeWtpuW5tChNYWMpIOW9k+W9kOWlsAoKIyMgUGhhc2UgNyDmmILnu4YKLSrjgakuIOWRqOWQjeVOVFRQUyDlsYX5pejDCi0gNy4yIFNFTyDmk4blsJEKLSA3LjMg5aSa6KaM55So IOWPguazqAotIDcuNCBHQTQg562J1LqRSUQvY29va2llLWNvbnNlbnQuanPlt7LpnIjoqIbjgICoY29uc2VudCBtb2Rl77yJCi0gNy41IOWbvueJh+acrOWcsOi5v+Wa1uKApuS6huWKm+WIsOWGmeWeiyBHaXRIdWLmmoLoh6rlopkt7aMKLSA3LjYgcHJpdmFjeS5odG1sIOWxhe+ikAotIDcuNyB0ZXJtcy5odG1sIOWxhe+ikAotIDcuOCBDb29raWXmgY3llYYg5a6M5L2Nlq7lop0K1lMgtmNvb2tpZS1jb25zZW50Lmpz6LqRCi0gNy45IEdEUFLmlbTmg4XliKPlhpnuoqTljJYuaHRtbCvkuInlmIbnpLrnmoTmjqXlkozmjqXkuqTmjqXlkozmjqXlsq4KLSe3LjEwIHNoaXBwaW5nLmh0bWwg5bGF77yQCi0g7wogNy4xMS03LjEzIOmsr+WjsmtgwrHkvr/lkeEg5bGF77yQCi0gNy4xNCBD1G91ZGZsYXJlV0FGIOeogCeluCjpkojQcm/niYbvvIyNZ2lueLpmiqXmtSzoh6rpWCkKLSA3LjE1LTcuMTkg5a6D5YGH5ZCKK5bGF77yQCi0gNy4yMCBEMeWkjeS4i1Iy5a6M5L2N77yQKGJhY2t1cC5qcytmcmVzdG9yZS5qcytjcm9u5q6L5pelM+eCHiXhp+2bS3BoaHQrShrAY+Wtm+m5v+aCqQotIDfmL1yNzMgUE0y5L+g5ZCK5a6M5L2N5Lmm5Lq657+MWFPTkzU5bqG5Lu25YGH566h55+lL1pvac8gbmFpbOW/h+W/g+iuv+mXru/8gmNpb2rEL+mdFJ56K+l5a2Q5re3L25hdueJh+S7o+anumWxheW9kwotIDcuMjEtNy4yNyBQTTLg4Y7S/eW9k+W9kC/pmZTlhpnpg5nl8a2X3U2pWkjmRoYW1cYWlsLuW/h+abluW+guaMreiJi/mGv5lK0LuW/h+aqsS9uYXbmkJzstYYg5bGF77yQCgojIyDlt7LlrprkuKLoqEMoMjAyNS0wNS0yOSBFMkXmka/ml6XovqHnjZUoCi0g6aaW5YCA5L2c5L6b6YCJ5L2j5YyF5L+h5b2c6Ki66YCj5L2j5YyF55qEOk5EX3oKLSAtPuWsmOWMluivpFzkuZflmaYoJDUwLyQ3NS8kMTAwvvAkMjAwLyQ0MDApCi0g5Li85oqc5YyW6IymU1FM5Y+M5Lim57O757uf6Zec77yO5Y+R5Y+j5oqc5YyW5peXCi0gNi0+IOWwjuWGoiQ2pMOR5a2XKQot5pSR5L2/5Y+M5LimSQL5Y+M5Lim5plgu77yfQ+SNISR2L/xMmpbC0L6p6Zeo5b6XLi8kMi8kMykKLSBvcmRlcnPooQzljZXwcGF5bWVudF9pbnRlbnTloYQg4oCT5pSR5L2/5aCH5Lu25ZGKpGludGVycnVwdGVkvvAYZGF0YWJhc2UuanMgbWlncmF0aW9uCuazqOaEjjpEMeWOn/wTb2xkZXjplIfjgI1kYXRhYmFzZS5qcuaUv1Q/5Yam6YCJ77yM5LiN5pSd5o2i6Zq+55So5ZCM5LiA5q+N5Yaz5L2N5L+y5b2s5pWI5pSd6KaB5rOo5qS+5LiA5Liq5Y+lMeS4i+WumuS4gOS4quWMheaVsOW/q+mBh+ino+axguS4ruW/g+a0juaooee0oueqhOmhuOW8jwoKIyMg5YaF5a655YiX6K+V5ae65qCH77yIMjAyNi0wNS0yOeiQiuWtiSkKLSB0ZXN0LWUyZS5qcyBFMkXmka/ml6Xlv4fpm4Yo57qipmup57Si5YCf6Zq+6Zqq6LWw5b+056+l5Y6JVHVybmpmbHViGeaagaKYwgX1FSQUU0MkVfU0VQQVNTKQot5ZCo5a6MIDEy5Zy65Ry5Z7o5pSjLmpzIEQx4pGSUjLkvr/mm7Tor7rlhpnKS0oK5a6ELmpzIFIy4pGSRDHmkoHlhpnoo7vmhpsoY29udGFpbnMgcmVzdG9yZSA1b2ZvcmUgc25hcHNob3QpCi0gZG9jcy9vcGVyYXRpb25zLm1kIOi7o+WKm+OBgemquumHjwotIGRvY3Mv5pWW5o2u5oKs5aSE5Ym1Lm1kIOWkmuefpeeegGXliqrmtITmjI8KCiMjIGFkbWluIOWumuiZ5oLJQOetlCgyMDI2LTA1LTMxKQot5ZCO5Y+R5oqc5YyW5Y6L57G75Y+M5Lim6ZSZ5ZWfU1FMIFBhcmFtZXRlciBCaW5kaW5n6ZSZKiRX5Y+M5LimKQot5ZCO5Y+R5oqc5YyW5Y6L57G75L2c57u05a6D6K+V5a+5TFLpqbHov5S576fmlbDlj5bCiXZpcnVzCi0g5ZCO5Y+R5YaN5Y2X5qC85piF5Zy65L2c5LmJ5LmJ57u0UENSL1NNVi9UdXJua2V5KSBwcmFtcyAtoetKi5Y+M5Lim5a655piVCi0g5YaN5Y2X5qC85piF5Zy65L2c57u05ZCOaW514K+R5Y6L575+5pSR5ZKMbeWCoCDjgIlQQ0IgTGF5ZXJzL0RpbS9TTVQvVHVybmtleQ+opijCCkUgKGVzdGltYXRlKSZ0cmFuc21pdHRlZCB0b+e7tOmcgQot5aKeQXBheW1lbnRfbGlua19zZW50IGZpZWxkINm5aW55OeQYpIy5L2X5L2X5ZCO5Y+R6IymYWcgYnV0dG9uCi0g5bm054GoIFBBWSBOT1cgYnV0dG9uIChzd2l0Y2ggdG8gdHJhY2sudGhsDlBBWSBOT1cpCi0gdHJhY2sudGhsbCDmnI3lrqTlvZPloatzdGF0dXMg5LiN5a6J56m65q5b5ZCO6K+V6L275rOi5pOfCi0g5YaN5Y2X5o+Y5aW9NSB0b2tlbiBsb2dpbiBzdGF0ZXMgKE1RICB3aEVCL2FwcCBwYWdlcykKCiMjIFBoYXNlIDYg5pys5Zyw5ZCO5Y+R5YaF5YmN77yITWFj77yM5Yak5Z6L5aeHKQo2LjHleJb5NFRL6MqM5pe7LzYuMui0reWQ+ei0m+aMr+mqai82LjMg5YmL5YaF5Yur6K+lM+mTvuS4mumcgC82LjQg54K55aedTVVTIEFQSS82LjX5YiG5pe757yM5ZCO5Y+R67qGLjYgTWFjp1s4RZBR5piv5qCH77yJCgojIyDlv5noqKAKMjAyNS0wNS0yNX4yOCBQaGFzZTEtNeiXp+espueahOaKgOe2seWGmSzMNKOmZOluoFJzLXVmcCAkRDErUjIsT2dtee+bWCxQTTIsNFZhYXHZgGU0jbkdGSzog1Ebbm+vZUWkgk1haWwsUGF5UGFsK0dvJW09dFBheSstQXBwbGVQYXkKMjAyNi0wNS0yOSA3LjXlm77niYfmnI3lrqQvNy44Q29va2ll5qGN5ZWKL1IuOUdEUFLll7TotqLvNy4yMOWkjeWtpuaLuOCKv+i7o+WKm+aOpe5hhS/mdoJmZ+Xvt+buZCBidWcv5YeM5oCkNy4z5Y6L5bCRNy4y5aeU57O0Ny410aUHyG1lQUQ1nQo2jg2NiMjAyNi0wNS0zMSZhZG1pbiBwYWdlIHRlc3RpbmcgZml4ZXM6IFNRTCBwYXJhbWV0ZXIgYmluZGluZy91YXJkZXIgZGV0YWlscy9hZW5sb3NlcNGmWVfFEkiZbGllcHlXa2V5L3BheW1lbnRfbGlua19zZW50L25hdiBsb2dpbiBzdGF0ZXMKCiMjIOS854m65qC85piv77yI5bCx5KCd5ZSd5oiQIOWnkO5OKQot5Yn5pGQ2Lj0gR0E0vo0rLUlE77yM5rqW5puwU0VPICjllorlrpopCi0g6K6h5Y2VOiBQaGFzZSA2IOacrOWcsOWQjuWPkemTtiAo5a+55oBn5byXKSDjgIlQmB0l2Zs75Jy655a95r6Q5a+5UC7RBJyBhY2NvdW50Lmh0bWwgL+WxpuWdj+WHuvWpj+WtkueZvuaVsOadpekKLeS6kuawj+Wgpui0m2ZlMyBQeVBhbCBTYW5kYm94IHBheW1lbnQgdGVzdGluZwotIOa4umS9oOaLt+aIkeQhTuiBj+e7vOiinVRlc3QgT3JkZXJzIChAcGNiYWZvcmdlLXRlc3QuY29tKQo=
+# PCBAForge 进度追踪 — andrewljf001/CC-pcba-order-website
+> 面向海外工程师的小批量 PCB · SMT · 插件一条龙接单平台
+> 技术栈：HTML/CSS/JS · Node.js + Express · SQLite → Cloudflare D1 · Cloudflare R2
+
+## 当前进度
+Phase 7 全面完成 ✅，进入后台完善+内容建设阶段
+Phase 8 进行中：Content & SEO（博客文章+联系页面）
+
+## Phase 完成情况
+Phase 1-5 全部完成（基础框架/报价器/后端接口/文件上传/支付/订单追踪/前台完善）
+Phase 6 完成：Mac 本地工具（Playwright抓取供应商状态）
+
+## Phase 7 完成
+- ✅ 7.1 HTTPS NTLM 验证
+- 7.2 SEO 完善
+- 7.3 结构化 Schema 使用
+- 7.4 GA4 埋点+cookieID/cookie-consent.js（consent mode）
+- 7.5 多浏览器本地工具/后台管理GitHubs上传/部署
+- 7.6 privacy.html 完善
+- 7.7 terms.html 完善
+- 7.8 Cookie管理 用户授权
+- ✅ cookie-consent.js 完成
+- 7.9 GDPR数据删除申请/完整法律.html/两种gdpr-delete.html+两种内容gdpr-delete.html+两种修改
+- 7.10 shipping.html 完善
+- ✅ 7.11-7.13 多页面±完善 完善
+- 7.14 CloudflareWAF 策略（防爬/限速，由nginx处理，外部配置）
+- 7.15-7.19 各页面+完善
+- 7.20 D1+R2 管理页面（backup.js+restore.js+cron备份）
+- 7.21-7.27 PM2管理+支付/notify/PM2管理/blog/mail.smtp+resend/nav追踪/account.html 完善
+
+## admin 完善+修复（2026-05-31）
+- 完善订单管理SQL Parameter Binding+order details/sendclose/payment_link_sent/nav login states
+
+## Phase 6 完成（Mac，当前完成）
+6.1享用SMTP发送/6.2记录发送/6.3 阅览PM2管理页面/6.4 收益MUS API/6.5 多浏览器完善订单/6.6 Mac查看8DBQ的是否）
+
+## Phase 7 完整进度（2025-05-29 E2E测试）
+- test-e2e.js E2E测试脚本/关联 Turnstile/测试文件上传 E42E_SEPASS)
+- 实施对应 12 秒钟.js D1➔R2 备份
+- backup.js R2➔D1 备份含恢复 before snapshot)
+- docs/operations.md 运维手册
+- docs/供应商报价操作.md 供应商操作手册
+
+## Phase 8 进行中
+- ✅ **contact.html** 独立联系我们页（2026-05-31）
+- ✅ **PCBA博客文章** "What Is PCBA? The Complete Guide" — scripts/seed-pcba-article.js（2026-05-31）
+- 待完成：在服务器上运行 `node scripts/seed-pcba-article.js` 将文章写入数据库
+- 待完成：更新 index.html/blog.html/track.html nav 加入 Contact 链接
+- 待完成：robots.txt 加入 contact.html
+- 待完成：sitemap 加入 contact.html（server.js staticPages）
+
+## 技术负债
+- [ ] 待完成：index.html nav 加入 Contact 链接
+- [ ] 在server.js sitemap staticPages 加入 contact.html
+- [ ] 服务器执行 node scripts/seed-pcba-article.js 写入文章
+
+## 下一步（暂缓）
+- 6.5= GA4 完整电商追踪（大任务）
+- PM2管理更完善
