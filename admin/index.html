@@ -731,7 +731,7 @@ async function openOrder(id) {
   try {
     const o = await apiFetch(`/api/admin/orders/${id}`);
     document.getElementById('dp-title').textContent = o.order_no;
-    const params = o.params || {};
+    const params = typeof o.params === "string" ? (JSON.parse(o.params || "{}") || {}) : (o.params || {});
     document.getElementById('dp-body').innerHTML = `
       <div class="section-title">// CUSTOMER</div>
       <div class="info-row"><span class="ir-label">Name</span><span class="ir-value">${o.customer_name||'—'}</span></div>
@@ -747,6 +747,8 @@ async function openOrder(id) {
       <div class="info-row"><span class="ir-label">Notes</span><span class="ir-value">${o.notes||'—'}</span></div>
       <div class="section-title">// PARAMETERS</div>
       ${Object.entries(params).map(([k,v]) => `<div class="info-row"><span class="ir-label">${k}</span><span class="ir-value">${v||'—'}</span></div>`).join('')}
+      <div class="section-title">// FILES</div>
+      ${(()=>{ try{ const fs=JSON.parse(o.files||"[]"); return fs.length ? fs.map(f=>`<div class="info-row"><span class="ir-label">${f.name}</span><span class="ir-value"><a href="${f.url}" target="_blank" style="color:var(--green)">⬇ DOWNLOAD</a> <span style="color:var(--muted);font-size:.75rem">(${(f.size/1024/1024).toFixed(1)}MB)</span></span></div>`).join("") : "<div class=\"info-row\"><span class=\"ir-value muted\">No files uploaded</span></div>"; }catch(e){return "";} })()}
       <div class="section-title">// QUOTE & UPDATE</div>
       <div class="form-group"><label>QUOTED PRICE (USD)</label><input type="number" id="dp-quoted" value="${o.quoted_price||''}" placeholder="0.00" step="0.01"></div>
       <div class="form-group"><label>SHIPPING FEE (USD)</label><input type="number" id="dp-shipping" value="${o.shipping_fee||''}" placeholder="0.00" step="0.01"></div>

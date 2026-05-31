@@ -588,6 +588,7 @@ async function loadAccount(){
     token=localStorage.getItem('cc_token');
     document.getElementById('acc-avatar').textContent=(userData.name||'?')[0].toUpperCase();
     document.getElementById('acc-name').textContent=userData.name||'—';
+    window.currentUserEmail = userData.email||'';
     document.getElementById('acc-email').textContent=userData.email||'—';
     const typeEl=document.getElementById('acc-type');
     typeEl.textContent=userData.customer_type?.toUpperCase()||'NORMAL';
@@ -691,8 +692,7 @@ async function loadOrders(){
           <div class="om-item">Quoted <span style="color:var(--green)">${o.quoted_price?'$'+Number(o.quoted_price).toFixed(2):'Pending'}</span></div>
         </div>
         <div style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap">
-          <a href="track.html?order=${o.order_no}" class="btn-outline" style="font-size:.72rem;padding:.35rem .8rem;text-decoration:none">🔍 TRACK ORDER</a>
-          ${o.status==='quoted'&&o.quoted_price?`<span style="font-size:.75rem;color:var(--amber);display:flex;align-items:center">⚡ Payment ready — check email for link</span>`:''}
+          ${o.status==='quoted'&&o.quoted_price&&o.payment_link_sent?`<a href="track.html?order=${o.order_no}&email=${encodeURIComponent(window.currentUserEmail||'')}" class="btn-outline" style="font-size:.72rem;padding:.35rem .8rem;text-decoration:none;background:var(--amber);color:#000;border-color:var(--amber);font-weight:700">⚡ PAY NOW</a>`:''}
         </div>
       </div>`).join('');
   }catch(e){ el.innerHTML=`<div class="empty"><div class="empty-text">Failed to load orders</div></div>`; }

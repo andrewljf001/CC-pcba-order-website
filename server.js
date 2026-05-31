@@ -165,11 +165,11 @@ async function uploadToR2(buffer, filename, mimetype) {
 // ── 文件上传 ──────────────────────────────────────────────
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 50 * 1024 * 1024 },
+  limits: { fileSize: 200 * 1024 * 1024 },
   fileFilter(req, file, cb) {
-    const allowed = ['.zip','.rar','.gerber','.gbr','.drl','.xls','.xlsx','.csv','.txt','.pdf'];
+    const allowed = ['.zip','.rar','.7z'];
     allowed.includes(path.extname(file.originalname).toLowerCase())
-      ? cb(null, true) : cb(new Error('File type not allowed'));
+      ? cb(null, true) : cb(new Error('Only .zip .rar .7z archives accepted. Please pack your files first.'));
   }
 });
 
@@ -303,24 +303,32 @@ app.get('/api/settings/public', async (req, res) => {
 });
 
 // 提交询价（文件上传到 R2）
-app.post('/api/inquiry', upload.array('files', 5), async (req, res) => {
+app.post('/api/inquiry', upload.array('files', 3), async (req, res) => {
   try {
     const { mode, name, email, whatsapp, company, notes, estimate, cf_turnstile } = req.body;
-    if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
+    if (cf_turnstile && !await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
     if (!name || !email || !mode) return res.status(400).json({ error: 'name, email, mode required' });
 
     const params = {};
     if (mode === 'pcb') {
       Object.assign(params, {
-        material: req.body.pcb_material, qty: req.body.pcb_qty,
+        material: req.body.pcb_material, layers: req.body.pcb_layers, qty: req.body.pcb_qty,
         w: req.body.pcb_w, h: req.body.pcb_h, thick: req.body.pcb_thick,
         drill: req.body.pcb_drill, impedance: req.body.pcb_impedance,
         copper: req.body.pcb_copper, finish: req.body.pcb_finish, color: req.body.pcb_color
       });
     } else if (mode === 'smt') {
       Object.assign(params, {
-        qty: req.body.smt_qty, sides: req.body.smt_sides, parts: req.body.smt_parts,
+        qty: req.body.assy_qty||req.body.smt_qty, sides: req.body.smt_sides, parts: req.body.smt_parts,
         ic: req.body.smt_ic, dip: req.body.smt_dip, supply: req.body.smt_supply
+      });
+    } else if (mode === 'turnkey') {
+      Object.assign(params, {
+        material: req.body.pcb_material, layers: req.body.pcb_layers, qty: req.body.assy_qty||req.body.pcb_qty,
+        w: req.body.pcb_w, h: req.body.pcb_h, thick: req.body.pcb_thick,
+        drill: req.body.pcb_drill, finish: req.body.pcb_finish, color: req.body.pcb_color,
+        smt_pads: req.body.smt_pads, dip_pins: req.body.dip_pins,
+        board_source: req.body.board_source, comp_supply: req.body.comp_supply
       });
     }
 
@@ -377,7 +385,7 @@ app.post('/api/order/lookup', async (req, res) => {
     if (!order_no || !email) return res.status(400).json({ error: 'order_no and email required' });
     const { rows } = await pool.query(
       `SELECT o.order_no, o.mode, o.status, o.params, o.estimate, o.quoted_price,
-              o.shipping_fee, o.total_paid, o.tracking_no, o.notes, o.admin_note,
+              o.shipping_fee, o.total_paid, o.tracking_no, o.notes, o.admin_note, o.payment_link_sent,
               o.created_at, o.updated_at, u.name as customer_name
        FROM orders o LEFT JOIN users u ON o.user_id = u.id
        WHERE o.order_no=$1 AND (o.guest_email=$2 OR u.email=$3)`,
@@ -640,12 +648,20 @@ app.get('/api/payment/config', async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, name, cf_turnstile } = req.body;
-    if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
+    if (cf_turnstile && !await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
     if (!email || !password || !name) return res.status(400).json({ error: 'email, password, name required' });
     if (password.length < 8) return res.status(400).json({ error: 'Password min 8 characters' });
 
-    const { rows: exists } = await pool.query('SELECT id FROM users WHERE email=$1', [email.toLowerCase()]);
-    if (exists.length) return res.status(409).json({ error: 'Email already registered' });
+    const { rows: exists } = await pool.query('SELECT id, email_verified, verify_token FROM users WHERE email=$1', [email.toLowerCase()]);
+    if (exists.length) {
+      if (exists[0].email_verified) return res.status(409).json({ error: 'Email already registered. Please sign in.' });
+      // 未验证账号：重新生成token并补发验证邮件
+      const new_token = require('uuid').v4();
+      await pool.query('UPDATE users SET verify_token=$1, name=$2 WHERE email=$3', [new_token, name, email.toLowerCase()]);
+      const verifyUrl2 = (process.env.SITE_URL || 'https://pcbaforge.com') + '/api/auth/verify?token=' + new_token;
+      await sendMail({ to: email, subject: 'Verify your PCBAForge account', html: '<h2>Welcome to PCBAForge</h2><p>Hi ' + name + ', please verify your email:</p><p><a href="' + verifyUrl2 + '" style="background:#16a34a;color:#fff;padding:10px 20px;text-decoration:none;font-weight:bold">VERIFY EMAIL</a></p><p>Link expires in 24 hours.</p>' });
+      return res.json({ success: true, message: 'Verification email resent. Please check your inbox.' });
+    }
 
     const hash         = await bcrypt.hash(password, 12);
     const verify_token = uuidv4();
@@ -853,7 +869,7 @@ app.get('/api/me/orders', userAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT order_no, mode, status, estimate, quoted_price, shipping_fee,
-              total_paid, tracking_no, created_at, updated_at
+              total_paid, tracking_no, payment_link_sent, created_at, updated_at
        FROM orders WHERE user_id=$1 ORDER BY created_at DESC`,
       [req.user.id]
     );
@@ -975,8 +991,8 @@ app.get('/api/admin/orders/:id', adminAuth, async (req, res) => {
       `SELECT o.*, COALESCE(u.name,'') as customer_name, COALESCE(u.email, o.guest_email) as customer_email,
               u.whatsapp as customer_whatsapp, u.company as customer_company
        FROM orders o LEFT JOIN users u ON o.user_id = u.id
-       WHERE o.id=$1 OR o.order_no=$1`,
-      [req.params.id]
+       WHERE o.id=$1 OR o.order_no=$2`,
+      [req.params.id, req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Order not found' });
     res.json(rows[0]);
@@ -1003,12 +1019,12 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
     const { rows } = await pool.query(
       `SELECT o.*, COALESCE(u.email, o.guest_email) as customer_email, COALESCE(u.name,'Customer') as customer_name
        FROM orders o LEFT JOIN users u ON o.user_id = u.id
-       WHERE o.id=$1 OR o.order_no=$1`, [req.params.id]
+       WHERE o.id=$1 OR o.order_no=$2`, [req.params.id, req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Order not found' });
     const order = rows[0];
     if (!order.quoted_price) return res.status(400).json({ error: 'Please set quoted_price first' });
-    await pool.query(`UPDATE orders SET status='quoted', updated_at=datetime('now') WHERE id=$1`, [order.id]);
+    await pool.query(`UPDATE orders SET status='quoted', payment_link_sent=1, updated_at=datetime('now') WHERE id=$1`, [order.id]);
     const trackUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/track.html?order=${order.order_no}`;
     await sendMail({
       to: order.customer_email,

@@ -517,10 +517,10 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
           <div class="card-hdr"><span class="card-ht">04 · UPLOAD FILES</span></div>
           <div class="card-body">
             <div class="upload-zone" id="upload-zone">
-              <input type="file" id="files" multiple accept=".zip,.rar,.gbr,.gerber,.drl,.xls,.xlsx,.csv,.txt,.pdf,.doc,.docx">
-              <div class="upload-icon">📁</div>
-              <div class="upload-title">DROP FILES HERE OR CLICK TO BROWSE</div>
-              <div class="upload-sub">Pack all files in one ZIP/RAR · Max 50MB total</div>
+              <input type="file" id="files" multiple accept=".zip,.rar,.7z">
+              <div class="upload-icon">📦</div>
+              <div class="upload-title">DROP ARCHIVE HERE OR CLICK TO BROWSE</div>
+              <div class="upload-sub">.zip / .rar / .7z only · Max 200MB per file · Max 3 files</div>
             </div>
             <div class="file-list" id="file-list"></div>
             <div style="margin-top:.8rem;font-size:.75rem;color:var(--muted);line-height:1.9" id="file-hint">
@@ -573,6 +573,16 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
             </div>
             <div class="divider"></div>
             <div class="cf-turnstile" data-sitekey="0x4AAAAAADXN55PgWWw3SGxw" data-theme="light" style="margin:1rem 0"></div>
+            <div id="upload-progress-wrap" style="display:none;margin-bottom:.8rem">
+              <div style="display:flex;justify-content:space-between;margin-bottom:.3rem">
+                <span style="font-size:.72rem;color:var(--muted);font-weight:700">UPLOADING FILES</span>
+                <span id="upload-progress-txt" style="font-size:.72rem;color:var(--green2);font-weight:800">0%</span>
+              </div>
+              <div style="background:#e2e8f0;border-radius:999px;height:8px;overflow:hidden">
+                <div id="upload-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--green),#22c55e);border-radius:999px;transition:width .2s"></div>
+              </div>
+              <div style="font-size:.68rem;color:var(--muted);margin-top:.3rem">Please wait — do not close this page</div>
+            </div>
             <button type="submit" class="obtn" id="submit-btn">SUBMIT INQUIRY →</button>
             <p class="submit-note">Engineer confirms within 24h · Payment link sent after review · No charge until you approve the quote</p>
           </div>
@@ -826,11 +836,19 @@ function updateFileHint() {
     addFiles(e.dataTransfer.files);
   });
   input.addEventListener('change', function(){ addFiles(this.files); });
-
   function addFiles(files) {
+    var MAX_SIZE = 200 * 1024 * 1024;
+    var allowed = [".zip", ".rar", ".7z"];
     for (var i = 0; i < files.length; i++) {
-      if (selectedFiles.length >= 8) { alert('Maximum 8 files.'); break; }
-      selectedFiles.push(files[i]);
+      var f = files[i];
+      var dotIdx = f.name.lastIndexOf(".");
+      var ext = dotIdx >= 0 ? f.name.slice(dotIdx).toLowerCase() : "";
+      var ok = false;
+      for (var j = 0; j < allowed.length; j++) { if (allowed[j] === ext) { ok = true; break; } }
+      if (!ok) { alert("Only .zip .rar .7z accepted. Please pack files first."); continue; }
+      if (f.size > MAX_SIZE) { alert("File too large (max 200MB): " + f.name); continue; }
+      if (selectedFiles.length >= 3) { alert("Maximum 3 files allowed."); break; }
+      selectedFiles.push(f);
     }
     renderFiles();
   }
@@ -901,11 +919,28 @@ function collectFormData() {
   if (svc.test) services.push('FUNCTIONAL_TESTING');
   fd.append('service_type', services.join('+'));
 
-  fd.append('name',     document.getElementById('name').value);
-  fd.append('email',    document.getElementById('email').value);
-  fd.append('whatsapp', document.getElementById('whatsapp').value);
-  fd.append('company',  document.getElementById('company').value);
+  // 主表单优先，弹窗填写的作为备用
+  var nameVal     = document.getElementById('name').value     || document.getElementById('modal-name').value      || document.getElementById('modal-login-email').value || '';
+  var emailVal    = document.getElementById('email').value    || document.getElementById('modal-email').value     || document.getElementById('modal-login-email').value || '';
+  var whatsappVal = document.getElementById('whatsapp').value || '';
+  var companyVal  = document.getElementById('company').value  || '';
+  fd.append('name',     nameVal);
+  fd.append('email',    emailVal);
+  fd.append('whatsapp', whatsappVal);
+  fd.append('company',  companyVal);
+  // mode字段（后端必须）
+  var modeVal = services.length === 1 ? services[0].toLowerCase().replace('_fabrication','').replace('_dip_assembly','').replace('functional_','') : (services.length > 1 ? 'turnkey' : 'pcb');
+  if (services.includes('PCB_FABRICATION') && services.length === 1) modeVal = 'pcb';
+  else if (services.includes('SMT_DIP_ASSEMBLY') && !services.includes('PCB_FABRICATION')) modeVal = 'smt';
+  else if (services.length > 1) modeVal = 'turnkey';
+  fd.append('mode', modeVal);
   fd.append('notes',    document.getElementById('notes').value);
+  var tsContainer = document.querySelector('.cf-turnstile');
+  var tsToken = '';
+  if (window.turnstile && tsContainer) {
+    tsToken = window.turnstile.getResponse(tsContainer) || window.turnstile.getResponse() || '';
+  }
+  fd.append('cf_turnstile', tsToken);
 
   if (svc.pcb) {
     fd.append('pcb_material',  document.getElementById('pcb-material').value);
@@ -938,53 +973,96 @@ function collectFormData() {
     fd.append('test_desc', document.getElementById('test-desc').value);
   }
 
-  selectedFiles.forEach(function(f) { fd.append('files', f); });
+  var pbVal = document.getElementById("pb-value") ? document.getElementById("pb-value").textContent.replace(/[^0-9.]/g,"") : "";
+  if (pbVal) fd.append("estimate", pbVal);
   return fd;
 }
 
-async function doSubmit(fd) {
-  var btn = document.getElementById('submit-btn');
+function doSubmit(fd) {
+  var btn      = document.getElementById('submit-btn');
+  var progWrap = document.getElementById('upload-progress-wrap');
+  var progBar  = document.getElementById('upload-progress-bar');
+  var progTxt  = document.getElementById('upload-progress-txt');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>SUBMITTING...';
-  var headers = {};
-  if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
-  try {
-    var res  = await fetch('/api/inquiry', { method: 'POST', body: fd, headers: headers });
-    var data = await res.json();
-    if (data.success) {
-      document.getElementById('inquiry-form').style.display = 'none';
-      var sb = document.getElementById('success-box'); sb.classList.add('show');
-      document.getElementById('success-order').textContent = 'Order #' + data.order_no;
-      document.getElementById('track-link').href = 'track.html?order=' + data.order_no;
-    } else {
-      alert('Error: ' + (data.error || 'Submission failed.'));
+  btn.innerHTML = '<span class="spinner"></span>UPLOADING...';
+  if (progWrap) progWrap.style.display = 'block';
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/inquiry');
+  if (authToken) xhr.setRequestHeader('Authorization', 'Bearer ' + authToken);
+
+  xhr.upload.addEventListener('progress', function(e) {
+    var pct = Math.round(e.loaded / e.total * 100);
+    var mb  = (e.loaded / 1024 / 1024).toFixed(1);
+    var tot = (e.total  / 1024 / 1024).toFixed(1);
+    if (progBar) progBar.style.width = pct + '%';
+    if (progTxt) progTxt.textContent = pct + '%  (' + mb + ' / ' + tot + ' MB)';
+    if (pct === 100) {
+      btn.innerHTML = '<span class="spinner"></span>PROCESSING...';
+    }
+  });
+
+  xhr.addEventListener('load', function() {
+    if (progWrap) progWrap.style.display = 'none';
+    try {
+      var data = JSON.parse(xhr.responseText);
+      if (data.success) {
+        document.getElementById('inquiry-form').style.display = 'none';
+        var sb = document.getElementById('success-box'); sb.classList.add('show');
+        document.getElementById('success-order').textContent = 'Order #' + data.order_no;
+        document.getElementById('track-link').href = 'track.html?order=' + data.order_no;
+      } else {
+        alert('Error: ' + (data.error || 'Submission failed.'));
+        btn.disabled = false; btn.innerHTML = 'SUBMIT INQUIRY →';
+      }
+    } catch(e) {
+      alert('Server error. Please try again.');
       btn.disabled = false; btn.innerHTML = 'SUBMIT INQUIRY →';
     }
-  } catch(err) {
+  });
+
+  xhr.addEventListener('error', function() {
+    if (progWrap) progWrap.style.display = 'none';
     alert('Network error. Please try again.');
     btn.disabled = false; btn.innerHTML = 'SUBMIT INQUIRY →';
-  }
+  });
+
+  xhr.send(fd);
 }
 
 document.getElementById('inquiry-form').addEventListener('submit', function(e) {
   e.preventDefault();
 
+  function scrollToField(el) {
+    el.style.border = '2px solid var(--red)';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.focus();
+    setTimeout(function() { el.style.border = ''; }, 3000);
+  }
   if (!svc.pcb && !svc.assy && !svc.test) {
     document.getElementById('noSvcWarn').classList.add('show');
     window.scrollTo({top: 0, behavior: 'smooth'});
     return;
   }
-  if (!document.getElementById('name').value.trim() || !document.getElementById('email').value.trim()) {
-    alert('Please fill in your name and email.'); return;
+  var nameEl  = document.getElementById('name');
+  var emailEl = document.getElementById('email');
+  if (!nameEl.value.trim())  { scrollToField(nameEl);  return; }
+  if (!emailEl.value.trim()) { scrollToField(emailEl); return; }
+  if (svc.pcb) {
+    var qEl = document.getElementById('pcb-qty');
+    var wEl = document.getElementById('pcb-w');
+    var hEl = document.getElementById('pcb-h');
+    if (!qEl.value) { scrollToField(qEl); return; }
+    if (!wEl.value) { scrollToField(wEl); return; }
+    if (!hEl.value) { scrollToField(hEl); return; }
   }
-  if (svc.pcb && (!document.getElementById('pcb-qty').value || !document.getElementById('pcb-w').value || !document.getElementById('pcb-h').value)) {
-    alert('Please fill in PCB dimensions and quantity.'); return;
+  if (svc.assy) {
+    var aqEl = document.getElementById('assy-qty');
+    if (!aqEl.value) { scrollToField(aqEl); return; }
   }
-  if (svc.assy && !document.getElementById('assy-qty').value) {
-    alert('Please fill in assembly quantity.'); return;
-  }
-  if (svc.test && !document.getElementById('test-desc').value.trim()) {
-    alert('Please describe the testing requirements.'); return;
+  if (svc.test) {
+    var tdEl = document.getElementById('test-desc');
+    if (!tdEl.value.trim()) { scrollToField(tdEl); return; }
   }
 
   if (currentUser) { doSubmit(collectFormData()); }
@@ -1033,20 +1111,34 @@ document.addEventListener('DOMContentLoaded', function() {
     var pass  = document.getElementById('modal-password').value;
     var name  = document.getElementById('modal-name').value;
     var errEl = document.getElementById('modal-register-error');
+    var btn   = e.target.querySelector('button[type=submit]');
     errEl.textContent = '';
+    errEl.style.color = '';
+    btn.disabled = true;
+    btn.textContent = 'PLEASE WAIT...';
     try {
       var res  = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password: pass, name }) });
       var data = await res.json();
       if (data.success) {
-        var lr   = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password: pass }) });
-        var ld   = await lr.json();
-        if (ld.success) {
-          authToken = ld.token; currentUser = ld.user;
-          localStorage.setItem('cc_token', authToken);
-          hideAuthModal(); doSubmit(collectFormData());
+        // 不管有没有验证邮件，立即以Guest身份提交表单
+        hideAuthModal();
+        doSubmit(collectFormData());
+        // 如果是新注册，提示去验邮件以便后续登录追踪订单
+        if (!data.message || data.message.indexOf('Verification email') < 0) {
+          setTimeout(function() {
+            alert('Your inquiry has been submitted!\n\nPlease also check your email to verify your account — this lets you log in later to track your order status.');
+          }, 1000);
         }
-      } else { errEl.textContent = data.error || 'Registration failed.'; }
-    } catch(err) { errEl.textContent = 'Network error.'; }
+      } else {
+        errEl.textContent = data.error || 'Registration failed.';
+        btn.disabled = false;
+        btn.textContent = 'REGISTER & SUBMIT →';
+      }
+    } catch(err) {
+      errEl.textContent = 'Network error. Please try again.';
+      btn.disabled = false;
+      btn.textContent = 'REGISTER & SUBMIT →';
+    }
   });
 
   document.getElementById('modal-login-form').addEventListener('submit', async function(e) {
@@ -1202,5 +1294,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script src="/quote-unsaved-guard.js"></script>
 <script src="/cookie-consent.js"></script>
+<script>(function(){var t=localStorage.getItem("cc_token");if(t){document.querySelectorAll(".nav-signin").forEach(function(el){el.textContent="My Account";});}})();</script>
 </body>
 </html>

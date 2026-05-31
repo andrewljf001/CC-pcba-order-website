@@ -314,7 +314,7 @@ function renderNetErr(){
 function renderResult(d){
   const isCancelled=d.status==='cancelled';
   const stepIdx=STEPS.findIndex(s=>s.key===d.status);
-  const isQuoted=d.status==='quoted'&&d.quoted_price;
+  const isQuoted=d.status==='quoted'&&d.quoted_price&&d.payment_link_sent;
 
   const tlHtml=isCancelled
     ?'<div class="tl-step"><div class="tl-left"><div class="tl-dot" style="border-color:var(--red);background:var(--red)"></div></div><div class="tl-content"><div class="tl-name" style="color:var(--red)">ORDER CANCELLED</div><div class="tl-desc">This order has been cancelled.</div></div></div>'
@@ -344,10 +344,15 @@ function renderResult(d){
         </div>
       </div>
     </div>
+    ${['paid','production','shipped','completed'].includes(d.status)?`
     <div class="timeline-card">
       <div class="timeline-hdr"><span class="timeline-ht">// PROGRESS TIMELINE</span></div>
       <div class="timeline-body"><div class="tl">${tlHtml}</div></div>
-    </div>
+    </div>`:''}
+
+
+
+
     ${extras}
     ${isQuoted?`
     <div class="pay-card">
@@ -624,5 +629,6 @@ if(_p.get('order')){
 })();
 </script>
 <script src="/cookie-consent.js"></script>
+<script>(function(){var t=localStorage.getItem("cc_token");if(t){document.querySelectorAll(".nav-signin").forEach(function(el){el.textContent="My Account";});}})();</script>
 </body>
 </html>
