@@ -322,7 +322,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     <div class="info-card">
       <div class="info-icon">⏱</div>
       <div class="info-title">Response Time</div>
-      <div class="info-body">WhatsApp: under 2 hours<br>Email / Form: within 24 hours<br>Business hours: Mon–Sat, 8am–9pm CST</div>
+      <div class="info-body" id="info-hours">WhatsApp: under 2 hours<br>Email / Form: within 24 hours<br>Business hours: Mon–Sat, 8am–9pm CST</div>
     </div>
     <div class="info-card">
       <div class="info-icon">🌍</div>
@@ -330,9 +330,9 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
       <div class="info-body">We ship to 180+ countries via DHL and FedEx. Shipping quoted after production. Typical transit: 3–7 days express.</div>
     </div>
     <div class="info-card">
-      <div class="info-icon">🔧</div>
-      <div class="info-title">Engineer Support</div>
-      <div class="info-body">Every order includes a DFM review. Functional testing orders include remote debug sessions with our engineers.</div>
+      <div class="info-icon">📍</div>
+      <div class="info-title">Our Address</div>
+      <div class="info-body" id="info-address">Ligao Industrial Park, Longgang, Shenzhen, Guangdong, China</div>
     </div>
   </div>
 
@@ -418,6 +418,11 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     }
     if(email && emailBtn) emailBtn.href='mailto:'+email;
     else if(emailBtn) emailBtn.href='mailto:info@pcbaforge.com';
+    // Address & hours
+    var addrEl = document.getElementById('info-address');
+    var hoursEl = document.getElementById('info-hours');
+    if(addrEl && cfg.contact_address) addrEl.textContent = cfg.contact_address;
+    if(hoursEl && cfg.contact_hours) hoursEl.innerHTML = 'WhatsApp: under 2 hours<br>Email / Form: within 24 hours<br>Business hours: ' + cfg.contact_hours;
   }).catch(function(){
     if(emailBtn) emailBtn.href='mailto:info@pcbaforge.com';
   });
