@@ -1292,7 +1292,25 @@ async function adminResetPassword(id, email) {
 
 // ── INIT ────────────────────────────────────────────
 document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeBlogEditor(); closeDetail(); } });
-if (adminToken) { adminInfo = { name: 'Admin' }; showApp(); }
+if (adminToken) {
+  // Verify token is still valid before entering app
+  fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + adminToken } })
+    .then(function(r) {
+      if (r.status === 401 || r.status === 403) {
+        // Token expired — clear and show login
+        localStorage.removeItem('cc_admin_token');
+        adminToken = null;
+      } else {
+        adminInfo = { name: 'Admin' };
+        showApp();
+      }
+    })
+    .catch(function() {
+      // Network error — still try to show app
+      adminInfo = { name: 'Admin' };
+      showApp();
+    });
+}
 </script>
 </body>
 </html>
