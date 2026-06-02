@@ -378,6 +378,56 @@ tr:hover td{background:#f8fafc}
             <div class="settings-grid" id="settings-grid"><div class="empty"><div class="spinner"></div></div></div>
           </div>
         </div>
+        <!-- ── CONTACT INFO CARD ── -->
+        <div class="card">
+          <div class="card-hdr">
+            <span class="card-ht">// CONTACT INFORMATION</span>
+            <span style="font-size:.72rem;color:var(--muted)">Contact Us 页面 · 显示在前台</span>
+          </div>
+          <div class="card-body">
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;line-height:1.7">
+              以下设置直接影响 <strong style="color:var(--green)">contact.html</strong> 联系页面的显示内容及跳转链接。
+            </div>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <div class="setting-key">whatsapp_number</div>
+                <div class="setting-desc">客服 WhatsApp 号码（纯数字含国家代码，如 8613800001234）<br>用于联系页 WhatsApp 按钮 及浮动按钮</div>
+                <div class="setting-input-wrap">
+                  <input type="text" id="ci-whatsapp_number" placeholder="8613800001234">
+                  <button class="btn btn-green btn-sm" onclick="saveContactSetting('whatsapp_number','ci-whatsapp_number')">SAVE</button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-key">engineer_whatsapp</div>
+                <div class="setting-desc">工程师专线 WhatsApp（纯数字，可与客服号不同）<br>用于 "Talk to an Engineer" 按钮</div>
+                <div class="setting-input-wrap">
+                  <input type="text" id="ci-engineer_whatsapp" placeholder="8613900001234">
+                  <button class="btn btn-green btn-sm" onclick="saveContactSetting('engineer_whatsapp','ci-engineer_whatsapp')">SAVE</button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-key">contact_email</div>
+                <div class="setting-desc">联系邮箱（显示在联系页 Email 按钮，同时接收询价通知邮件）</div>
+                <div class="setting-input-wrap">
+                  <input type="email" id="ci-contact_email" placeholder="info@pcbaforge.com">
+                  <button class="btn btn-green btn-sm" onclick="saveContactSetting('contact_email','ci-contact_email')">SAVE</button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-key">company_name</div>
+                <div class="setting-desc">公司名称（邮件落款 · 页面标题辅助）</div>
+                <div class="setting-input-wrap">
+                  <input type="text" id="ci-company_name" placeholder="PCBAForge">
+                  <button class="btn btn-green btn-sm" onclick="saveContactSetting('company_name','ci-company_name')">SAVE</button>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:.8rem;padding:.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:.76rem;color:var(--muted);line-height:1.7">
+              💡 保存后立即生效，无需重启服务器。前台 contact.html 会自动读取最新值。
+            </div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-hdr">
             <span class="card-ht">// MAIL SERVER CONFIGURATION</span>
@@ -1095,6 +1145,9 @@ async function loadSettings() {
     settingsData.forEach(s => {
       const el = document.getElementById('setting-' + s.key);
       if (el) el.value = s.value || '';
+      // Also populate contact info card inputs
+      const ci = document.getElementById('ci-' + s.key);
+      if (ci) ci.value = s.value || '';
     });
     toggleMailFields();
     const displaySettings = settingsData.filter(s => !MAIL_KEYS.includes(s.key));
@@ -1111,6 +1164,17 @@ async function loadSettings() {
         </div>
       </div>`
     ).join('');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function saveContactSetting(key, inputId) {
+  try {
+    const val = document.getElementById(inputId).value.trim();
+    await apiFetch(`/api/admin/settings/${key}`, { method:'PUT', body: JSON.stringify({ value: val }) });
+    // keep setting- input in sync too
+    const el = document.getElementById('setting-' + key);
+    if (el) el.value = val;
+    toast('✅ Saved: ' + key);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
