@@ -421,6 +421,22 @@ tr:hover td{background:#f8fafc}
                   <button class="btn btn-green btn-sm" onclick="saveContactSetting('company_name','ci-company_name')">SAVE</button>
                 </div>
               </div>
+              <div class="setting-item">
+                <div class="setting-key">contact_address</div>
+                <div class="setting-desc">公司地址（显示在联系页 Address 信息卡）</div>
+                <div class="setting-input-wrap">
+                  <input type="text" id="ci-contact_address" placeholder="Ligao Industrial Park, Longgang, Shenzhen, China">
+                  <button class="btn btn-green btn-sm" onclick="saveContactSetting('contact_address','ci-contact_address')">SAVE</button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-key">contact_hours</div>
+                <div class="setting-desc">营业时间（显示在联系页 Response Time 信息卡）</div>
+                <div class="setting-input-wrap">
+                  <input type="text" id="ci-contact_hours" placeholder="Mon–Sat, 8am–9pm CST">
+                  <button class="btn btn-green btn-sm" onclick="saveContactSetting('contact_hours','ci-contact_hours')">SAVE</button>
+                </div>
+              </div>
             </div>
             <div style="margin-top:.8rem;padding:.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:.76rem;color:var(--muted);line-height:1.7">
               💡 保存后立即生效，无需重启服务器。前台 contact.html 会自动读取最新值。
@@ -1292,25 +1308,7 @@ async function adminResetPassword(id, email) {
 
 // ── INIT ────────────────────────────────────────────
 document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeBlogEditor(); closeDetail(); } });
-if (adminToken) {
-  // Verify token is still valid before entering app
-  fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + adminToken } })
-    .then(function(r) {
-      if (r.status === 401 || r.status === 403) {
-        // Token expired — clear and show login
-        localStorage.removeItem('cc_admin_token');
-        adminToken = null;
-      } else {
-        adminInfo = { name: 'Admin' };
-        showApp();
-      }
-    })
-    .catch(function() {
-      // Network error — still try to show app
-      adminInfo = { name: 'Admin' };
-      showApp();
-    });
-}
+if (adminToken) { adminInfo = { name: 'Admin' }; showApp(); }
 </script>
 </body>
 </html>
