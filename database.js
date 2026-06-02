@@ -122,6 +122,8 @@ async function initDB() {
     ['shipping_address',  'Ligao Industrial Park, Longgang, Shenzhen, Guangdong, China', 'Factory shipping address'],
     ['contact_email',     '',      'Admin notification email'],
     ['company_name',      'PCBAForge', 'Company display name'],
+    ['contact_address',   'Ligao Industrial Park, Longgang, Shenzhen, Guangdong, China', 'Address shown on Contact page'],
+    ['contact_hours',     'Mon–Sat, 8am–9pm CST', 'Business hours shown on Contact page'],
     ['google_oauth_enabled', 'false', 'Enable Google OAuth login'],
     ['github_oauth_enabled', 'false', 'Enable GitHub OAuth login'],
     ['pcb_tier1_price',   '50',    'PCB std price: 1-10pcs no impedance'],
