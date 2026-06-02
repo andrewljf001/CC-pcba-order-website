@@ -88,7 +88,6 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .stitle{color:var(--ink);font-size:clamp(1.8rem,3vw,2.7rem);line-height:1.05;letter-spacing:-.04em;font-weight:900;margin-bottom:2.5rem}
 .divider{height:1px;background:var(--line);margin:0}
 
-/* swap wrapper (mobile reorder services<->quote) */
 .swap-wrap{display:block}
 
 /* ===== SERVICE CARDS ===== */
@@ -188,6 +187,8 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .bwa:hover{opacity:.9}
 .bem{display:inline-flex;align-items:center;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:7px;font-size:.92rem;font-weight:800;padding:.85rem 1.8rem;transition:all .2s}
 .bem:hover{background:rgba(255,255,255,.1)}
+.bem-contact{display:inline-flex;align-items:center;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:7px;font-size:.92rem;font-weight:800;padding:.85rem 1.8rem;transition:all .2s}
+.bem-contact:hover{background:rgba(255,255,255,.2)}
 
 /* ===== FOOTER ===== */
 footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
@@ -237,18 +238,15 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   .frow{grid-template-columns:1fr}
   .svc-selector{grid-template-columns:1fr}
   .ctasec{max-width:none;margin:2rem 4%;padding:2.5rem 5%}
-  /* 手机端：报价模块(quote)提到服务模块(services)之前 */
   .swap-wrap{display:flex;flex-direction:column}
   .swap-quote{order:1}
   .swap-services{order:2}
 }
 
-
 /* ===== 移动导航(汉堡+常驻Blog) ===== */
 .nav-right{display:flex;align-items:center;gap:.7rem}
 .nav-blog-m{display:none;align-items:center;font-size:.8rem;font-weight:800;color:var(--green2);border:1px solid var(--green);border-radius:7px;padding:.5rem .9rem;transition:all .2s}
 .nav-blog-m:hover{background:#f0fdf4}
-.nav-blog-m:hover{color:var(--green2)}
 .nav-signin{display:inline-flex;align-items:center;font-size:.88rem;font-weight:700;color:var(--ink);transition:color .2s}
 .nav-signin:hover{color:var(--green2)}
 .nav-burger{display:none;background:none;border:none;font-size:1.5rem;line-height:1;color:var(--ink);cursor:pointer;padding:.2rem .3rem}
@@ -292,7 +290,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     <li><a href="#services">Services</a></li>
     <li><a href="#capabilities">Capabilities</a></li>
     <li><a href="#process">Process</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="contact.html">Contact</a></li>
     <li><a href="blog.html">Blog</a></li>
     <li><a href="track.html">Track Order</a></li>
   </ul>
@@ -308,7 +306,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   <a href="index.html#services">Services</a>
   <a href="index.html#capabilities">Capabilities</a>
   <a href="index.html#process">Process</a>
-  <a href="index.html#contact">Contact</a>
+  <a href="contact.html">Contact</a>
   <a href="blog.html">Blog</a>
   <a href="track.html">Track Order</a>
   <a href="account.html">Sign In</a>
@@ -651,6 +649,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
       CHAT ON WHATSAPP
     </a>
     <a href="quote.html" class="bem">📋 SUBMIT INQUIRY</a>
+    <a href="contact.html" class="bem-contact">✉ CONTACT US</a>
   </div>
 </section>
 
@@ -659,9 +658,15 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     <div class="flogo">▶ PCBAForge</div>
     <div class="flinks">
       <a href="#services">Services</a><a href="#quote">Quick Estimator</a><a href="#capabilities">Capabilities</a>
-      <a href="#process">Process</a><a href="quote.html">Submit Inquiry</a><a href="blog.html">Blog</a><a href="track.html">Track Order</a>
+      <a href="#process">Process</a><a href="quote.html">Submit Inquiry</a><a href="blog.html">Blog</a>
+      <a href="track.html">Track Order</a><a href="contact.html">Contact</a>
     </div>
-    <div class="flinks2" style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap"><a href="privacy.html" style="font-size:.75rem;color:var(--muted)">Privacy Policy</a><a href="shipping.html" style="font-size:.75rem;color:var(--muted)">Shipping Policy</a><a href="terms.html" style="font-size:.75rem;color:var(--muted)">Terms of Service</a></div><div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+    <div class="flinks2" style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap">
+      <a href="privacy.html" style="font-size:.75rem;color:var(--muted)">Privacy Policy</a>
+      <a href="shipping.html" style="font-size:.75rem;color:var(--muted)">Shipping Policy</a>
+      <a href="terms.html" style="font-size:.75rem;color:var(--muted)">Terms of Service</a>
+    </div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
 </footer>
 
@@ -826,11 +831,6 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
 });
 </script>
 <script>
-/* =========================================================================
-   工程师专线 WhatsApp —— 在下面引号内填号码（带国家码，不要加 + 号和空格）
-   例如中国大陆：8613812345678   美国：14155551234
-   留空时，"Talk to an Engineer" 按钮会自动回退到下方的客服 WhatsApp。
-   ========================================================================= */
 var ENGINEER_WHATSAPP = '';
 
 (function(){
@@ -843,11 +843,9 @@ var ENGINEER_WHATSAPP = '';
   if(bwaEl) bwaEl.style.display='none';
 
   fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
-    // 载入报价参数(共享)，然后重算一次
     if (window.PCBAPricing) { window.PCBAPricing.loadPricingFromConfig(cfg); if (typeof hCalc==='function') hCalc(); }
     var wa  = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
     var eng = (cfg.engineer_whatsapp||ENGINEER_WHATSAPP||'').replace(/[^0-9]/g,'');
-    // 普通客服 WhatsApp 链接
     if(wa){
       waLinks.forEach(function(el){
         var orig = el.href;
@@ -855,7 +853,6 @@ var ENGINEER_WHATSAPP = '';
         el.href = 'https://wa.me/' + wa + (text ? '?text='+text : '');
       });
     }
-    // "Talk to an Engineer" 按钮：优先工程师专线，没填则回退客服号
     var engTarget = eng || wa;
     if(engBtn && engTarget){
       engBtn.href = 'https://wa.me/' + engTarget + '?text=' + engMsg;
