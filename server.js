@@ -76,6 +76,7 @@ app.get('/sitemap.xml', async (req, res) => {
     const staticPages = [
       { loc: '/', priority: '1.0', freq: 'weekly' },
       { loc: '/quote.html', priority: '0.9', freq: 'monthly' },
+      { loc: '/contact.html', priority: '0.8', freq: 'monthly' },
       { loc: '/track.html', priority: '0.7', freq: 'monthly' },
       { loc: '/blog.html', priority: '0.8', freq: 'weekly' },
       { loc: '/shipping.html', priority: '0.4', freq: 'yearly' },
@@ -330,6 +331,9 @@ app.post('/api/inquiry', upload.array('files', 3), async (req, res) => {
         smt_pads: req.body.smt_pads, dip_pins: req.body.dip_pins,
         board_source: req.body.board_source, comp_supply: req.body.comp_supply
       });
+    } else if (mode === 'general') {
+      // Contact form submission — no file params needed
+      Object.assign(params, { topic: req.body.topic || 'general' });
     }
 
     const files = [];
