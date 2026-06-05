@@ -124,7 +124,7 @@ nav{display:flex;justify-content:space-between;align-items:center;padding:0 5%;h
 .pay-item-label{font-size:.64rem;color:var(--muted);font-weight:700;letter-spacing:.06em;margin-bottom:.2rem}
 .pay-item-val{font-size:.92rem;color:var(--ink);font-weight:700}
 
-/* PAY BUTTONS — 品牌官方色保留 */
+/* PAY BUTTONS */
 .pay-btns{max-width:400px;margin:0 auto;display:flex;flex-direction:column;gap:.75rem}
 .pay-btn{display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%;height:52px;border:none;cursor:pointer;border-radius:8px;font-size:.84rem;letter-spacing:.02em;transition:opacity .18s,transform .1s}
 .pay-btn:hover{opacity:.88}
@@ -160,7 +160,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px rgba(37,211,102,.25);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.08)}
 @media(max-width:768px){nav{height:60px;padding:0 4%}.nav-links{display:none}.wrap{padding:2.5rem 4% 3rem}.page-title{font-size:2rem}}
 
-/* ===== 移动导航(汉堡+常驻Blog+SignIn) ===== */
+/* ===== 移动导航 ===== */
 .nav-right{display:flex;align-items:center;gap:.7rem}
 .nav-blog-m{display:none;align-items:center;font-size:.8rem;font-weight:800;color:var(--green2);border:1px solid var(--green);border-radius:7px;padding:.5rem .9rem;transition:all .2s}
 .nav-blog-m:hover{background:#f0fdf4}
@@ -192,7 +192,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     <li><a href="index.html#services">Services</a></li>
     <li><a href="index.html#capabilities">Capabilities</a></li>
     <li><a href="index.html#process">Process</a></li>
-    <li><a href="index.html#contact">Contact</a></li>
+    <li><a href="contact.html">Contact</a></li>
     <li><a href="blog.html">Blog</a></li>
     <li><a href="track.html">Track Order</a></li>
   </ul>
@@ -208,7 +208,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   <a href="index.html#services">Services</a>
   <a href="index.html#capabilities">Capabilities</a>
   <a href="index.html#process">Process</a>
-  <a href="index.html#contact">Contact</a>
+  <a href="contact.html">Contact</a>
   <a href="blog.html">Blog</a>
   <a href="track.html">Track Order</a>
   <a href="account.html">Sign In</a>
@@ -349,10 +349,6 @@ function renderResult(d){
       <div class="timeline-hdr"><span class="timeline-ht">// PROGRESS TIMELINE</span></div>
       <div class="timeline-body"><div class="tl">${tlHtml}</div></div>
     </div>`:''}
-
-
-
-
     ${extras}
     ${isQuoted?`
     <div class="pay-card">
@@ -406,12 +402,11 @@ function loadScript(src,id){
   });
 }
 
-/* server-side create + capture (same endpoints as before) */
 async function serverCreateOrder(){
   const r=await fetch('/api/payment/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_no:_orderNo,email:_email})});
   const d=await r.json();
   if(!r.ok)throw new Error(d.error||'Failed to create order');
-  return d.paypal_order_id; // PayPal order ID
+  return d.paypal_order_id;
 }
 
 async function serverCapture(ppOrderId){
@@ -422,14 +417,13 @@ async function serverCapture(ppOrderId){
   else{showProcessing(false);throw new Error(d.error||'Capture failed');}
 }
 
-/* inject an "OR" divider */
 function addOr(container){
   const d=document.createElement('div');d.className='pay-or';d.textContent='OR';
   container.appendChild(d);
 }
 
 /* ══════════════════════════════════════════════════════════
-   INIT PAYMENT — orchestrates all three methods
+   INIT PAYMENT
 ══════════════════════════════════════════════════════════ */
 async function initPayment(){
   const wrap=document.getElementById('pay-btns');
@@ -441,10 +435,9 @@ async function initPayment(){
       return;
     }
 
-    wrap.innerHTML=''; // clear loader
+    wrap.innerHTML='';
     let btnCount=0;
 
-    /* ── 1. PayPal v6 ─────────────────────────────────── */
     const ppSdkSrc=cfg.mode==='sandbox'
       ?'https://www.sandbox.paypal.com/web-sdk/v6/core'
       :'https://www.paypal.com/web-sdk/v6/core';
@@ -484,7 +477,6 @@ async function initPayment(){
       btnCount++;
     }
 
-    /* ── 2. Google Pay (v5 APM SDK) ───────────────────── */
     try{
       await loadScript(`https://www.paypal.com/sdk/js?client-id=${cfg.client_id}&currency=USD&components=googlepay`+(cfg.mode==='sandbox'?'&buyer-country=US':''),'pp-googlepay-sdk');
       await loadScript('https://pay.google.com/gp/p/js/pay.js','gp-sdk');
@@ -532,7 +524,6 @@ async function initPayment(){
       }
     }catch(e){console.warn('[Google Pay]',e.message);}
 
-    /* ── 3. Apple Pay (v5 APM SDK) — Apple devices only ── */
     if(IS_APPLE){
       try{
         if(!window.ApplePaySession||!ApplePaySession.canMakePayments()){throw new Error('ApplePaySession not available');}

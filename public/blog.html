@@ -80,7 +80,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
 @media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:768px){nav{height:60px;padding:0 4%}.nav-links{display:none}.sec{padding:2.5rem 4%}.stitle{font-size:2rem}.blog-grid{grid-template-columns:1fr}}
 
-/* ===== 移动导航(汉堡+常驻Blog+SignIn) ===== */
+/* ===== 移动导航 ===== */
 .nav-right{display:flex;align-items:center;gap:.7rem}
 .nav-blog-m{display:none;align-items:center;font-size:.8rem;font-weight:800;color:var(--green2);border:1px solid var(--green);border-radius:7px;padding:.5rem .9rem;transition:all .2s}
 .nav-blog-m:hover{background:#f0fdf4}
@@ -112,7 +112,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
     <li><a href="index.html#services">Services</a></li>
     <li><a href="index.html#capabilities">Capabilities</a></li>
     <li><a href="index.html#process">Process</a></li>
-    <li><a href="index.html#contact">Contact</a></li>
+    <li><a href="contact.html">Contact</a></li>
     <li><a href="blog.html" class="active">Blog</a></li>
     <li><a href="track.html">Track Order</a></li>
   </ul>
@@ -128,7 +128,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
   <a href="index.html#services">Services</a>
   <a href="index.html#capabilities">Capabilities</a>
   <a href="index.html#process">Process</a>
-  <a href="index.html#contact">Contact</a>
+  <a href="contact.html">Contact</a>
   <a href="blog.html">Blog</a>
   <a href="track.html">Track Order</a>
   <a href="account.html">Sign In</a>
@@ -242,7 +242,6 @@ loadPosts();
   var wafEl = document.querySelector('.waf');
   var bwaEl = document.querySelector('.bwa');
   var waLinks = document.querySelectorAll('[href^="https://wa.me"]');
-  // 先隐藏所有 WA 按钮
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
   fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
