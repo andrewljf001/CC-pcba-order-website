@@ -1308,7 +1308,15 @@ async function adminResetPassword(id, email) {
 
 // ── INIT ────────────────────────────────────────────
 document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeBlogEditor(); closeDetail(); } });
-if (adminToken) { adminInfo = { name: 'Admin' }; showApp(); }
+if (adminToken) {
+  adminInfo = { name: 'Admin' };
+  apiFetch('/api/admin/stats', {}, true)
+    .then(() => { showApp(); })
+    .catch(() => {
+      adminToken = null;
+      localStorage.removeItem('cc_admin_token');
+    });
+}
 </script>
 </body>
 </html>
