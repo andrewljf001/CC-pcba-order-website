@@ -3,57 +3,50 @@
 > 技术栈：HTML/CSS/JS · Node.js + Express · SQLite → Cloudflare D1 · Cloudflare R2
 
 ## 当前进度
-Phase 7 全面完成 ✅，进入后台完善+内容建设阶段
-Phase 8 进行中：Content & SEO（博客文章+联系页面）
+**Phase 8 全面完成 ✅**
+网站已上线，所有主要功能收尾完毕。
+
+---
 
 ## Phase 完成情况
-Phase 1-5 全部完成（基础框架/报价器/后端接口/文件上传/支付/订单追踪/前台完善）
-Phase 6 完成：Mac 本地工具（Playwright抓取供应商状态）
 
-## Phase 7 完成
-- ✅ 7.1 HTTPS NTLM 验证
-- 7.2 SEO 完善
-- 7.3 结构化 Schema 使用
-- 7.4 GA4 埋点+cookieID/cookie-consent.js（consent mode）
-- 7.5 多浏览器本地工具/后台管理GitHubs上传/部署
-- 7.6 privacy.html 完善
-- 7.7 terms.html 完善
-- 7.8 Cookie管理 用户授权
-- ✅ cookie-consent.js 完成
-- 7.9 GDPR数据删除申请/完整法律.html/两种gdpr-delete.html+两种内容gdpr-delete.html+两种修改
-- 7.10 shipping.html 完善
-- ✅ 7.11-7.13 多页面±完善 完善
-- 7.14 CloudflareWAF 策略（防爬/限速，由nginx处理，外部配置）
-- 7.15-7.19 各页面+完善
-- 7.20 D1+R2 管理页面（backup.js+restore.js+cron备份）
-- 7.21-7.27 PM2管理+支付/notify/PM2管理/blog/mail.smtp+resend/nav追踪/account.html 完善
+### Phase 1–7 全部完成
+- 基础框架、报价器、后端接口、文件上传、支付、订单追踪、前台完善
+- GDPR cookie consent、D1→R2 备份、PayPal v6 + Google Pay + Apple Pay
+- 管理后台（订单/客户/支付/设置）、E2E 测试 17/17 通过
+- Turnstile 人机验证、Nginx 性能优化
 
-## admin 完善+修复（2026-05-31）
-- 完善订单管理SQL Parameter Binding+order details/sendclose/payment_link_sent/nav login states
+### Phase 8 完成（2026-06-05）
+- ✅ contact.html 独立联系页（含表单、FAQ、渠道卡片）
+- ✅ 全站导航更新：quote/track/blog/contact 四页 nav 加入 Contact 链接，顺序统一
+- ✅ contact.html nav 顺序修复（与其他页面一致：Quote · Services · Capabilities · Process · Contact · Blog · Track Order）
+- ✅ sitemap 已包含 contact.html（server.js staticPages）
+- ✅ robots.txt 正常（Allow: / 覆盖所有页面）
+- ✅ Apple Pay 域名验证完成（pcbaforge.com 已在 PayPal 注册）
+- ✅ Apple Pay 验证文件部署：public/.well-known/apple-developer-merchantid-domain-association
+- ✅ GA4 埋点完成：G-7966B84XT6（PCBAForge 独立媒体资源）加入全站 11 个页面
 
-## Phase 6 完成（Mac，当前完成）
-6.1享用SMTP发送/6.2记录发送/6.3 阅览PM2管理页面/6.4 收益MUS API/6.5 多浏览器完善订单/6.6 Mac查看8DBQ的是否）
+---
 
-## Phase 7 完整进度（2025-05-29 E2E测试）
-- test-e2e.js E2E测试脚本/关联 Turnstile/测试文件上传 E42E_SEPASS)
-- 实施对应 12 秒钟.js D1➔R2 备份
-- backup.js R2➔D1 备份含恢复 before snapshot)
-- docs/operations.md 运维手册
-- docs/供应商报价操作.md 供应商操作手册
+## 技术配置记录
 
-## Phase 8 进行中
-- ✅ **contact.html** 独立联系我们页（2026-05-31）
-- ✅ **PCBA博客文章** "What Is PCBA? The Complete Guide" — scripts/seed-pcba-article.js（2026-05-31）
-- 待完成：在服务器上运行 `node scripts/seed-pcba-article.js` 将文章写入数据库
-- 待完成：更新 index.html/blog.html/track.html nav 加入 Contact 链接
-- 待完成：robots.txt 加入 contact.html
-- 待完成：sitemap 加入 contact.html（server.js staticPages）
+| 项目 | 值 |
+|------|-----|
+| GA4 Measurement ID | G-7966B84XT6 |
+| GA4 属性 | PCBAForge（独立媒体资源） |
+| Apple Pay 域名 | pcbaforge.com（PayPal 已验证）|
+| PayPal App | PCBAForge（Live，5/28/26 创建）|
 
-## 技术负债
-- [ ] 待完成：index.html nav 加入 Contact 链接
-- [ ] 在server.js sitemap staticPages 加入 contact.html
-- [ ] 服务器执行 node scripts/seed-pcba-article.js 写入文章
+---
 
-## 下一步（暂缓）
-- 6.5= GA4 完整电商追踪（大任务）
-- PM2管理更完善
+## 剩余事项（低优先级）
+- [ ] 测试订单清理（4条 @pcbaforge-test.com 邮箱的测试数据）
+- [ ] fail2ban 阈值调高（maxretry=10）防止开发时频繁被封IP
+- [ ] index.html nav 加入 Contact 链接（需 Andrew 明确授权才能改首页）
+
+---
+
+## 下一阶段（待规划）
+- SEO 内容建设（博客文章持续更新）
+- Google Search Console 提交 sitemap
+- 电商转化追踪（GA4 事件）
