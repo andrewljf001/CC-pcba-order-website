@@ -35,6 +35,8 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .nav-cta{background:var(--green);color:#fff;border-radius:7px;font-size:.85rem;font-weight:800;padding:.55rem 1.15rem;box-shadow:0 12px 22px rgba(22,163,74,.18);transition:background .2s}
 .nav-cta:hover{background:var(--green2)}
 .nav-right{display:flex;align-items:center;gap:.7rem}
+.nav-blog-m{display:none;align-items:center;font-size:.8rem;font-weight:800;color:var(--green2);border:1px solid var(--green);border-radius:7px;padding:.5rem .9rem;transition:all .2s}
+.nav-blog-m:hover{background:#f0fdf4}
 .nav-signin{display:inline-flex;align-items:center;font-size:.88rem;font-weight:700;color:var(--ink);transition:color .2s}
 .nav-signin:hover{color:var(--green2)}
 .nav-burger{display:none;background:none;border:none;font-size:1.5rem;line-height:1;color:var(--ink);cursor:pointer;padding:.2rem .3rem}
@@ -43,6 +45,14 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .mobile-menu a{padding:.85rem 5%;font-size:.95rem;font-weight:700;color:var(--text);border-bottom:1px solid #f1f5f9}
 .mobile-menu a:last-child{border-bottom:none}
 .mobile-menu a:hover{background:#f8fafc;color:var(--green2)}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-blog-m{display:inline-flex;height:40px;padding:0 .9rem;font-size:.8rem}
+  .nav-signin{display:none}
+  .nav-burger{display:inline-flex}
+  .nav-cta{display:inline-flex;align-items:center;height:40px;padding:0 1rem;font-size:.8rem}
+  .mobile-menu{top:60px}
+}
 
 /* HERO */
 .page-hero{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:3.5rem 5% 2.5rem}
@@ -146,10 +156,6 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 }
 @media(max-width:768px){
   nav{height:60px;padding:0 4%}
-  .nav-links{display:none}
-  .nav-burger{display:inline-flex}
-  .nav-cta{display:inline-flex;align-items:center;height:40px;padding:0 1rem;font-size:.8rem}
-  .mobile-menu{top:60px}
   .page-hero{padding:2.5rem 4% 1.5rem}
   .content-wrap{padding:0 4% 3.5rem}
   .frow2{grid-template-columns:1fr}
@@ -162,27 +168,29 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 <nav>
   <a href="index.html" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <ul class="nav-links">
-    <li><a href="quote.html">Quote</a></li>
+    <li><a href="index.html#quote">Quote</a></li>
     <li><a href="index.html#services">Services</a></li>
     <li><a href="index.html#capabilities">Capabilities</a></li>
+    <li><a href="index.html#process">Process</a></li>
+    <li><a href="contact.html" class="active">Contact</a></li>
     <li><a href="blog.html">Blog</a></li>
     <li><a href="track.html">Track Order</a></li>
-    <li><a href="contact.html" class="active">Contact</a></li>
   </ul>
   <div class="nav-right">
+    <a href="blog.html" class="nav-blog-m">Blog</a>
     <a href="account.html" class="nav-signin">Sign In</a>
     <a href="quote.html" class="nav-cta">GET QUOTE</a>
     <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="quote.html">Quote</a>
+  <a href="index.html#quote">Quote</a>
   <a href="index.html#services">Services</a>
   <a href="index.html#capabilities">Capabilities</a>
   <a href="index.html#process">Process</a>
+  <a href="contact.html">Contact</a>
   <a href="blog.html">Blog</a>
   <a href="track.html">Track Order</a>
-  <a href="contact.html">Contact</a>
   <a href="account.html">Sign In</a>
 </div>
 
@@ -398,7 +406,6 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 <div class="toast" id="toast"></div>
 
 <script>
-// Load WhatsApp number and email from settings
 (function(){
   var wafEl = document.getElementById('waf');
   var waBtn = document.getElementById('wa-chat-btn');
@@ -418,7 +425,6 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     }
     if(email && emailBtn) emailBtn.href='mailto:'+email;
     else if(emailBtn) emailBtn.href='mailto:info@pcbaforge.com';
-    // Address & hours
     var addrEl = document.getElementById('info-address');
     var hoursEl = document.getElementById('info-hours');
     if(addrEl && cfg.contact_address) addrEl.textContent = cfg.contact_address;
@@ -428,7 +434,6 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   });
 })();
 
-// Contact form submission — uses /api/inquiry as backend
 document.getElementById('contactForm').addEventListener('submit', async function(e){
   e.preventDefault();
   var btn = document.getElementById('submitBtn');
@@ -478,7 +483,6 @@ function showToast(msg, isError){
   setTimeout(function(){t.classList.remove('show');},4000);
 }
 
-// Mobile nav
 (function(){
   var b=document.getElementById('navBurger'), m=document.getElementById('mobileMenu');
   if(b&&m){
