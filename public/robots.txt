@@ -6,4 +6,4 @@ Disallow: /gdpr-delete.html
 Disallow: /payment-success.html
 Disallow: /api/
 
-Sitemap: https://pcbaforge.com/sitemap.xml
+Sitemap: https://pcbaforge.com/sitemap_index.xml

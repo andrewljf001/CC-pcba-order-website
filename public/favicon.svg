@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PCBAForge board icon">
+  <defs>
+    <linearGradient id="bg" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#071923"/>
+      <stop offset="1" stop-color="#102f3b"/>
+    </linearGradient>
+    <linearGradient id="board" x1="14" y1="16" x2="50" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f9f7a"/>
+      <stop offset="1" stop-color="#076b53"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect x="13" y="16" width="38" height="32" rx="5" fill="url(#board)" stroke="#2dd4bf" stroke-width="2.5"/>
+  <rect x="24" y="24" width="16" height="16" rx="2.5" fill="#0b2a2c" stroke="#facc15" stroke-width="2"/>
+  <circle cx="19" cy="22" r="2.4" fill="#facc15"/>
+  <circle cx="45" cy="22" r="2.4" fill="#facc15"/>
+  <circle cx="19" cy="42" r="2.4" fill="#facc15"/>
+  <circle cx="45" cy="42" r="2.4" fill="#facc15"/>
+  <path d="M21.5 22H28M36 22h6.5M21.5 42H28M36 42h6.5M19 24.5V32h5M45 24.5V32h-5M32 18.5V24M32 40v5.5" fill="none" stroke="#facc15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+  <path d="M26 29h12M26 35h12M29 26v12M35 26v12" stroke="#2dd4bf" stroke-linecap="round" stroke-width="1.6"/>
+  <path d="M9 26h5M9 38h5M50 26h5M50 38h5" stroke="#7dd3fc" stroke-linecap="round" stroke-width="2.5"/>
+</svg>

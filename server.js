@@ -69,38 +69,126 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ── 动态 Sitemap ─────────────────────────────────
+const SITEMAP_EXCLUDED_HTML = new Set([
+  'account.html',
+  'blog-post.html',
+  'gdpr-delete.html',
+  'payment-success.html'
+]);
+
+const SITEMAP_PAGE_ORDER = [
+  'index.html',
+  'quote.html',
+  'contact.html',
+  'track.html',
+  'blog.html',
+  'shipping.html',
+  'privacy.html',
+  'terms.html'
+];
+
+const SITEMAP_PAGE_META = {
+  'index.html': { loc: '/', priority: '1.0', freq: 'weekly' },
+  'quote.html': { loc: '/quote.html', priority: '0.9', freq: 'monthly' },
+  'contact.html': { loc: '/contact.html', priority: '0.8', freq: 'monthly' },
+  'track.html': { loc: '/track.html', priority: '0.7', freq: 'monthly' },
+  'blog.html': { loc: '/blog.html', priority: '0.8', freq: 'weekly' },
+  'shipping.html': { loc: '/shipping.html', priority: '0.4', freq: 'yearly' },
+  'privacy.html': { loc: '/privacy.html', priority: '0.3', freq: 'yearly' },
+  'terms.html': { loc: '/terms.html', priority: '0.3', freq: 'yearly' }
+};
+
+function canonicalSiteUrl() {
+  return (process.env.SITE_URL || 'https://pcbaforge.com').replace(/\/$/, '');
+}
+
+function xmlEscape(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function formatSitemapDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().split('T')[0];
+}
+
+function getPublicSitemapPages() {
+  const publicDir = path.join(__dirname, 'public');
+  let files = [];
+  try {
+    files = fs.readdirSync(publicDir).filter((file) => file.endsWith('.html'));
+  } catch {
+    files = [];
+  }
+
+  const orderedFiles = [
+    ...SITEMAP_PAGE_ORDER,
+    ...files.filter((file) => !SITEMAP_PAGE_ORDER.includes(file)).sort()
+  ];
+
+  return orderedFiles
+    .filter((file, index) => orderedFiles.indexOf(file) === index)
+    .filter((file) => !SITEMAP_EXCLUDED_HTML.has(file))
+    .map((file) => {
+      const filePath = path.join(publicDir, file);
+      if (!fs.existsSync(filePath)) return null;
+      const html = fs.readFileSync(filePath, 'utf8');
+      if (/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)) return null;
+      const meta = SITEMAP_PAGE_META[file] || {
+        loc: `/${file}`,
+        priority: '0.5',
+        freq: 'monthly'
+      };
+      return {
+        ...meta,
+        lastmod: formatSitemapDate(fs.statSync(filePath).mtime)
+      };
+    })
+    .filter(Boolean);
+}
+
+// ── Sitemap ─────────────────────────────────
+app.get('/sitemap_index.xml', (req, res) => {
+  const base = canonicalSiteUrl();
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    `  <sitemap><loc>${xmlEscape(`${base}/sitemap.xml`)}</loc></sitemap>`,
+    '</sitemapindex>'
+  ].join('\n');
+  res.set('Content-Type', 'application/xml');
+  res.set('Cache-Control', 'public, max-age=300');
+  res.send(xml);
+});
+
 app.get('/sitemap.xml', async (req, res) => {
   try {
-    const base = (process.env.SITE_URL || 'https://pcbaforge.com').replace(/\/$/, '');
-    const staticPages = [
-      { loc: '/', priority: '1.0', freq: 'weekly' },
-      { loc: '/quote.html', priority: '0.9', freq: 'monthly' },
-      { loc: '/contact.html', priority: '0.8', freq: 'monthly' },
-      { loc: '/track.html', priority: '0.7', freq: 'monthly' },
-      { loc: '/blog.html', priority: '0.8', freq: 'weekly' },
-      { loc: '/shipping.html', priority: '0.4', freq: 'yearly' },
-      { loc: '/privacy.html', priority: '0.3', freq: 'yearly' },
-      { loc: '/terms.html', priority: '0.3', freq: 'yearly' }
-    ];
+    const base = canonicalSiteUrl();
+    const staticPages = getPublicSitemapPages();
     let posts = [];
     try {
       const { rows } = await pool.query("SELECT slug, updated_at, published_at FROM posts WHERE status='published' ORDER BY published_at DESC");
       posts = rows || [];
     } catch (e) { posts = []; }
-    const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const fmt = (d) => { try { return new Date(d).toISOString().split('T')[0]; } catch(e){ return ''; } };
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     for (const p of staticPages) {
-      xml += `  <url><loc>${base}${p.loc}</loc><changefreq>${p.freq}</changefreq><priority>${p.priority}</priority></url>\n`;
+      xml += `  <url><loc>${xmlEscape(`${base}${p.loc}`)}</loc>${p.lastmod ? `<lastmod>${p.lastmod}</lastmod>` : ''}<changefreq>${p.freq}</changefreq><priority>${p.priority}</priority></url>\n`;
     }
     for (const post of posts) {
-      const lm = fmt(post.updated_at || post.published_at);
-      xml += `  <url><loc>${base}/blog-post.html?slug=${esc(post.slug)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
+      const lm = formatSitemapDate(post.updated_at || post.published_at);
+      const postLoc = `${base}/blog-post.html?slug=${encodeURIComponent(post.slug)}`;
+      xml += `  <url><loc>${xmlEscape(postLoc)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
     }
     xml += '</urlset>';
     res.set('Content-Type', 'application/xml');
+    res.set('Cache-Control', 'public, max-age=300');
     res.send(xml);
   } catch (err) {
     res.status(500).send('sitemap error');
