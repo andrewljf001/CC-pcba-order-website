@@ -153,6 +153,213 @@ function getPublicSitemapPages() {
     .filter(Boolean);
 }
 
+function htmlEscape(value) {
+  return xmlEscape(value);
+}
+
+function stripHtml(value) {
+  return String(value || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function truncateText(value, maxLength = 160) {
+  const text = String(value || '').trim();
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 3).trimEnd() + '...';
+}
+
+function formatDisplayDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC'
+  });
+}
+
+function parsePostTags(value) {
+  try {
+    const parsed = JSON.parse(value || '[]');
+    return Array.isArray(parsed) ? parsed.filter(Boolean).map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+function readPublicHtml(fileName) {
+  return fs.readFileSync(path.join(__dirname, 'public', fileName), 'utf8');
+}
+
+function injectPageHead(html, { title, description, canonical, robots, jsonLd }) {
+  let out = html
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${htmlEscape(title)}</title>`)
+    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${htmlEscape(description)}">`);
+
+  const headTags = [];
+  if (robots) headTags.push(`<meta name="robots" content="${htmlEscape(robots)}">`);
+  if (canonical) {
+    headTags.push(`<link rel="canonical" href="${htmlEscape(canonical)}">`);
+    headTags.push(`<meta property="og:url" content="${htmlEscape(canonical)}">`);
+  }
+  headTags.push(`<meta property="og:title" content="${htmlEscape(title)}">`);
+  headTags.push(`<meta property="og:description" content="${htmlEscape(description)}">`);
+  if (jsonLd) {
+    headTags.push(`<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>`);
+  }
+
+  return out.replace('</head>', `${headTags.join('\n')}\n</head>`);
+}
+
+function replaceArticleWrap(html, contentHtml) {
+  return html.replace(
+    /<div class="article-wrap" id="article-wrap">[\s\S]*?<\/div>\s*<\/div>\s*(?=<footer>)/,
+    `<div class="article-wrap" id="article-wrap">\n${contentHtml}\n</div>\n\n`
+  );
+}
+
+function renderArticleBody(post) {
+  const tags = parsePostTags(post.tags);
+  const tagsHtml = tags
+    .map((tag) => `<span class="article-tag">${htmlEscape(tag)}</span>`)
+    .join('');
+  const coverHtml = post.cover_url
+    ? `<img class="article-cover" src="${htmlEscape(post.cover_url)}" alt="${htmlEscape(post.title)}">`
+    : '';
+
+  return [
+    '<a href="blog.html" class="back-link">&larr; BACK TO BLOG</a>',
+    tagsHtml ? `<div class="article-tags">${tagsHtml}</div>` : '',
+    `<h1 class="article-title">${htmlEscape(post.title)}</h1>`,
+    '<div class="article-meta">',
+    `<span>${htmlEscape(post.author || 'PCBAForge Team')}</span>`,
+    `<span>${htmlEscape(formatDisplayDate(post.published_at))}</span>`,
+    '</div>',
+    coverHtml,
+    `<div class="article-content" id="post-content">${post.content || ''}</div>`,
+    '<div class="article-cta">',
+    '<div class="article-cta-title">Ready to build your PCBA?</div>',
+    '<div class="article-cta-sub">Get an instant quote or submit your Gerber + BOM files to our engineers.</div>',
+    '<div class="article-cta-btns">',
+    '<a href="index.html#quote" class="btn-green">GET INSTANT QUOTE</a>',
+    '<a href="quote.html" class="btn-outline">SUBMIT INQUIRY &rarr;</a>',
+    '</div>',
+    '</div>'
+  ].join('\n');
+}
+
+function renderArticleStatus(title, message) {
+  return [
+    '<div class="state-wrap">',
+    '<div class="state-title">ARTICLE NOT FOUND</div>',
+    `<div class="state-sub">${htmlEscape(message)}<br><br><a href="blog.html" style="color:var(--green)">&larr; Back to Blog</a></div>`,
+    '</div>'
+  ].join('\n');
+}
+
+function renderBlogPostPage(post) {
+  const base = canonicalSiteUrl();
+  const description = truncateText(post.excerpt || stripHtml(post.content) || post.title);
+  const canonical = `${base}/blog-post.html?slug=${encodeURIComponent(post.slug)}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description,
+    author: { '@type': 'Organization', name: post.author || 'PCBAForge Team' },
+    publisher: { '@type': 'Organization', name: 'PCBAForge' },
+    datePublished: post.published_at || post.created_at,
+    dateModified: post.updated_at || post.published_at || post.created_at,
+    mainEntityOfPage: canonical
+  };
+  if (post.cover_url) jsonLd.image = post.cover_url;
+
+  let html = readPublicHtml('blog-post.html');
+  html = injectPageHead(html, {
+    title: `${post.title} — PCBAForge Blog`,
+    description,
+    canonical,
+    jsonLd
+  });
+  return replaceArticleWrap(html, renderArticleBody(post));
+}
+
+function renderBlogPostNotFound(message) {
+  let html = readPublicHtml('blog-post.html');
+  html = injectPageHead(html, {
+    title: 'Article Not Found — PCBAForge Blog',
+    description: 'The requested PCBAForge blog article was not found.',
+    canonical: `${canonicalSiteUrl()}/blog.html`,
+    robots: 'noindex,follow'
+  });
+  return replaceArticleWrap(html, renderArticleStatus('Article Not Found', message));
+}
+
+function renderBlogCards(posts) {
+  if (!posts.length) {
+    return '<div class="empty-state"><div class="empty-t">NO ARTICLES YET</div><div class="empty-s">Check back soon. New PCBA engineering content is coming.</div></div>';
+  }
+
+  return posts.map((post) => {
+    const tags = parsePostTags(post.tags);
+    const tagsHtml = tags
+      .map((tag) => `<span class="post-tag">${htmlEscape(tag)}</span>`)
+      .join('');
+    const coverHtml = post.cover_url
+      ? `<img class="post-cover" src="${htmlEscape(post.cover_url)}" alt="${htmlEscape(post.title)}" loading="lazy">`
+      : '<div class="post-cover-ph">// NO COVER</div>';
+    return [
+      `<a class="post-card" href="blog-post.html?slug=${encodeURIComponent(post.slug)}">`,
+      coverHtml,
+      '<div class="post-body">',
+      tagsHtml ? `<div class="post-tags">${tagsHtml}</div>` : '',
+      `<div class="post-title">${htmlEscape(post.title)}</div>`,
+      post.excerpt ? `<div class="post-excerpt">${htmlEscape(post.excerpt)}</div>` : '',
+      `<div class="post-meta"><span>${htmlEscape(formatDisplayDate(post.published_at))}</span></div>`,
+      '</div>',
+      '</a>'
+    ].join('\n');
+  }).join('\n');
+}
+
+function renderBlogTagBar(tags, activeTag) {
+  const allLink = `<a class="${activeTag ? '' : 'active'}" href="blog.html">ALL</a>`;
+  const tagLinks = tags.map((tag) => {
+    const activeClass = tag === activeTag ? ' class="active"' : '';
+    return `<a${activeClass} href="blog.html?tag=${encodeURIComponent(tag)}">${htmlEscape(tag)}</a>`;
+  });
+  return [allLink, ...tagLinks].join('\n');
+}
+
+function renderBlogPagination(page, total, limit, activeTag) {
+  const pages = Math.ceil(total / limit);
+  if (pages <= 1) return '';
+  const tagQuery = activeTag ? `&tag=${encodeURIComponent(activeTag)}` : '';
+  const links = [];
+  for (let i = 1; i <= pages; i++) {
+    links.push(`<a class="page-btn${i === page ? ' active' : ''}" href="blog.html?page=${i}${tagQuery}">${i}</a>`);
+  }
+  return links.join('\n');
+}
+
+function injectBlogList(html, { posts, total, page, limit, tags, activeTag }) {
+  return html
+    .replace(
+      /<div class="tag-bar" id="tag-bar">[\s\S]*?<\/div>/,
+      `<div class="tag-bar" id="tag-bar">\n${renderBlogTagBar(tags, activeTag)}\n</div>`
+    )
+    .replace(
+      /<div class="blog-grid" id="blog-grid">[\s\S]*?<\/div>\s*<div class="pagination" id="pagination"><\/div>/,
+      `<div class="blog-grid" id="blog-grid">\n${renderBlogCards(posts)}\n</div>\n<div class="pagination" id="pagination">\n${renderBlogPagination(page, total, limit, activeTag)}\n</div>`
+    );
+}
+
 // ── Sitemap ─────────────────────────────────
 app.get('/sitemap_index.xml', (req, res) => {
   const base = canonicalSiteUrl();
@@ -206,6 +413,70 @@ app.get('/account.html', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.set('Pragma', 'no-cache');
   res.sendFile(require('path').join(__dirname, 'public', 'account.html'));
+});
+
+app.get('/blog.html', async (req, res) => {
+  try {
+    const page = Math.max(1, Number(req.query.page || 1) || 1);
+    const limit = 12;
+    const offset = (page - 1) * limit;
+    const activeTag = String(req.query.tag || '').trim();
+    let where = "WHERE status='published'";
+    const params = [];
+    if (activeTag) {
+      where += ' AND tags LIKE ?';
+      params.push('%' + activeTag + '%');
+    }
+
+    const { rows: posts } = await pool.query(
+      `SELECT id, slug, title, excerpt, cover_url, tags, author, views, published_at, created_at
+       FROM posts ${where} ORDER BY published_at DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    );
+    const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
+    const { rows: tagRows } = await pool.query("SELECT tags FROM posts WHERE status='published'");
+    const tags = [...new Set(tagRows.flatMap((row) => parsePostTags(row.tags)))].sort();
+
+    let html = readPublicHtml('blog.html');
+    html = injectPageHead(html, {
+      title: 'PCBAForge Blog — PCBA Engineering Insights & Guides',
+      description: 'Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.',
+      canonical: `${canonicalSiteUrl()}/blog.html`
+    });
+    html = injectBlogList(html, {
+      posts,
+      total: Number(countRows[0]?.total || 0),
+      page,
+      limit,
+      tags,
+      activeTag
+    });
+    res.set('Cache-Control', 'public, max-age=300');
+    res.send(html);
+  } catch (err) {
+    res.status(500).send('blog error');
+  }
+});
+
+app.get('/blog-post.html', async (req, res) => {
+  try {
+    const slug = String(req.query.slug || '').trim();
+    if (!slug) {
+      res.status(404).send(renderBlogPostNotFound('No article slug was provided.'));
+      return;
+    }
+
+    const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [slug]);
+    if (!rows.length) {
+      res.status(404).send(renderBlogPostNotFound('The requested article was not found.'));
+      return;
+    }
+
+    res.set('Cache-Control', 'public, max-age=300');
+    res.send(renderBlogPostPage(rows[0]));
+  } catch (err) {
+    res.status(500).send('blog post error');
+  }
 });
 
 app.use(express.static('public'));
