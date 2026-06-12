@@ -199,6 +199,8 @@ function readPublicHtml(fileName) {
 
 function injectPageHead(html, { title, description, canonical, robots, jsonLd }) {
   let out = html
+    .replace(/<link\s+rel=["\']canonical["\'][^>]*>\s*/gi, '')
+    .replace(/<meta\s+property=["\']og:url["\'][^>]*>\s*/gi, '')
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${htmlEscape(title)}</title>`)
     .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${htmlEscape(description)}">`);
 
@@ -247,7 +249,7 @@ function renderArticleBody(post) {
     '<div class="article-cta-title">Ready to build your PCBA?</div>',
     '<div class="article-cta-sub">Get an instant quote or submit your Gerber + BOM files to our engineers.</div>',
     '<div class="article-cta-btns">',
-    '<a href="index.html#quote" class="btn-green">GET INSTANT QUOTE</a>',
+    '<a href="/#quote" class="btn-green">GET INSTANT QUOTE</a>',
     '<a href="quote.html" class="btn-outline">SUBMIT INQUIRY &rarr;</a>',
     '</div>',
     '</div>'
@@ -479,6 +481,9 @@ app.get('/blog-post.html', async (req, res) => {
   }
 });
 
+app.get('/index.html', (req, res) => {
+  res.redirect(301, '/');
+});
 app.use(express.static('public'));
 app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');

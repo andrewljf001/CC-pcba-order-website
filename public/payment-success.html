@@ -108,7 +108,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 </head>
 <body>
 <nav>
-  <a href="index.html" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
+  <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <div class="nav-right">
     <a href="blog.html" class="nav-blog-m">Blog</a>
     <a href="account.html" class="nav-signin">Sign In</a>
@@ -117,11 +117,11 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="index.html#quote">Quote</a>
-  <a href="index.html#services">Services</a>
-  <a href="index.html#capabilities">Capabilities</a>
-  <a href="index.html#process">Process</a>
-  <a href="index.html#contact">Contact</a>
+  <a href="quote.html">Quote</a>
+  <a href="/#services">Services</a>
+  <a href="/#capabilities">Capabilities</a>
+  <a href="/#process">Process</a>
+  <a href="/#contact">Contact</a>
   <a href="blog.html">Blog</a>
   <a href="track.html">Track Order</a>
   <a href="account.html">Sign In</a>
@@ -137,8 +137,8 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   <div class="fi">
     <div class="flogo">▶ PCBAForge</div>
     <div class="flinks">
-      <a href="index.html#services">Services</a>
-      <a href="index.html#quote">Quick Estimator</a>
+      <a href="/#services">Services</a>
+      <a href="/#quote">Quick Estimator</a>
       <a href="blog.html">Blog</a>
       <a href="track.html">Track Order</a>
     </div>
@@ -202,7 +202,7 @@ async function init() {
 
       <div class="btn-group">
         <a href="track.html?order=${o.order_no}" class="btn-green">📦 TRACK ORDER →</a>
-        <a href="index.html" class="btn-outline">← BACK TO HOME</a>
+        <a href="/" class="btn-outline">← BACK TO HOME</a>
       </div>`;
 
   } catch(e) {
@@ -215,7 +215,7 @@ function renderError(msg) {
     <div style="font-size:3rem;margin-bottom:1rem">⚠</div>
     <div style="font-family:'Inter',sans-serif;font-size:1rem;color:var(--red);margin-bottom:.5rem">PAYMENT ERROR</div>
     <div style="font-size:.85rem;color:var(--muted);margin-bottom:2rem">${msg}</div>
-    <a href="index.html" style="background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.78rem;font-weight:700;padding:.7rem 1.6rem;display:inline-block">← GO HOME</a>
+    <a href="/" style="background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.78rem;font-weight:700;padding:.7rem 1.6rem;display:inline-block">← GO HOME</a>
   </div>`;
 }
 
