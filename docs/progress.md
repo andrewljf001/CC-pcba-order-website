@@ -50,3 +50,11 @@
 - SEO 内容建设（博客文章持续更新）
 - GA4 电商转化追踪（quote 提交、payment 完成事件）
 - Cloudflare WAF / Bot Fight Mode 策略收紧
+
+---
+
+## 运营维护记录
+
+| 日期 | 操作 | 说明 |
+|------|------|------|
+| 2026-06-12 | Google 收录修复 | 线上热修复并提交 GitHub：为公开页面添加 canonical，`/index.html` 301 到 `/`，清理站内 `index.html#...` 链接；已在 Search Console 请求验证修复与重新编入索引。 |

@@ -154,4 +154,5 @@ which node
 
 | 日期 | 操作 | 说明 |
 |------|------|------|
+| 2026-06-12 | 修复 Google 收录规范化问题 | 在 VPS 线上热修复后提交 GitHub：添加页面 canonical、设置 `/index.html` 301 到 `/`、清理站内 `index.html#...` 链接；PM2 重启 `ccpcba` 并验证线上返回正常。 |
 | 2026-05-29 | 建立备份+恢复机制 | backup.js / restore.js / cron 每日 3:00 / 保留30天 |
