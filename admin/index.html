@@ -601,7 +601,16 @@ tr:hover td{background:#f8fafc}
     </div>
     <div class="form-group">
       <label>COVER IMAGE URL <span style="color:var(--muted);font-size:.6rem">(optional)</span></label>
-      <input type="text" id="post-cover" placeholder="https://...">
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <input type="text" id="post-cover" placeholder="https://..." oninput="updateCoverPreview(this.value)">
+        <label style="cursor:pointer;background:var(--green);color:#000;padding:.45rem .75rem;font-size:.72rem;font-family:var(--mono);font-weight:700;border-radius:4px;white-space:nowrap;flex-shrink:0">
+          ↑ UPLOAD
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden onchange="uploadCoverImage(this)">
+        </label>
+      </div>
+      <div id="cover-preview" style="margin-top:.5rem;display:none">
+        <img id="cover-preview-img" style="max-height:80px;border-radius:4px;border:1px solid var(--border);display:block">
+      </div>
     </div>
     <div class="form-group">
       <label>TAGS <span style="color:var(--muted);font-size:.6rem">(press Enter or comma to add)</span></label>
@@ -625,7 +634,8 @@ tr:hover td{background:#f8fafc}
         <button class="editor-btn" onclick="insertTag('pre')">pre</button>
         <button class="editor-btn" onclick="insertUl()">UL</button>
         <button class="editor-btn" onclick="insertTag('blockquote')">❝</button>
-        <button class="editor-btn" onclick="insertImg()">IMG</button>
+        <button class="editor-btn" onclick="insertImg()" title="Insert image by URL">IMG</button>
+        <button class="editor-btn" onclick="insertImgUpload()" title="Upload image file">IMG↑</button>
         <button class="editor-btn" onclick="insertHr()">HR</button>
       </div>
       <textarea class="blog-editor" id="post-content" placeholder="Write your article in HTML...&#10;&#10;Example:&#10;&lt;h2&gt;Section Title&lt;/h2&gt;&#10;&lt;p&gt;Your content here...&lt;/p&gt;"></textarea>
@@ -982,6 +992,7 @@ function openPostEditor(post) {
   document.getElementById('post-slug').value = post ? post.slug : '';
   document.getElementById('post-excerpt').value = post ? (post.excerpt||'') : '';
   document.getElementById('post-cover').value = post ? (post.cover_url||'') : '';
+  updateCoverPreview(post ? (post.cover_url||'') : '');
   document.getElementById('post-author').value = post ? (post.author||'PCBAForge Team') : 'PCBAForge Team';
   document.getElementById('post-content').value = post ? (post.content||'') : '';
   renderTags();
@@ -1104,6 +1115,73 @@ function insertImg() {
   const insert = `<img src="${url}" alt="" style="max-width:100%">`;
   ta.value = ta.value.substring(0, pos) + insert + ta.value.substring(pos);
   ta.focus();
+}
+
+// 上传图片文件并插入到文章内容
+async function insertImgUpload() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/jpeg,image/png,image/webp,image/gif,image/avif';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('image', file);
+    try {
+      showToast('Uploading image...');
+      const r = await fetch('/api/admin/upload/image', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + adminToken },
+        body: form
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error);
+      const ta = document.getElementById('post-content');
+      const pos = ta.selectionStart;
+      const insert = `<img src="${data.url}" alt="" style="max-width:100%;height:auto">`;
+      ta.value = ta.value.substring(0, pos) + insert + ta.value.substring(pos);
+      ta.focus();
+      showToast('Image uploaded & inserted ✅');
+    } catch (err) {
+      showToast('Upload failed: ' + err.message);
+    }
+  };
+  input.click();
+}
+
+// 上传封面图
+async function uploadCoverImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append('image', file);
+  try {
+    showToast('Uploading cover image...');
+    const r = await fetch('/api/admin/upload/image', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + adminToken },
+      body: form
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    document.getElementById('post-cover').value = data.url;
+    updateCoverPreview(data.url);
+    showToast('Cover image uploaded ✅');
+  } catch (err) {
+    showToast('Upload failed: ' + err.message);
+  }
+}
+
+// 更新封面预览
+function updateCoverPreview(url) {
+  const preview = document.getElementById('cover-preview');
+  const img = document.getElementById('cover-preview-img');
+  if (url && url.startsWith('http')) {
+    img.src = url;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
 }
 
 function insertHr() {
