@@ -1128,7 +1128,7 @@ async function insertImgUpload() {
     const form = new FormData();
     form.append('image', file);
     try {
-      showToast('Uploading image...');
+      toast('Uploading image...');
       const r = await fetch('/api/admin/upload/image', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + adminToken },
@@ -1141,9 +1141,9 @@ async function insertImgUpload() {
       const insert = `<img src="${data.url}" alt="" style="max-width:100%;height:auto">`;
       ta.value = ta.value.substring(0, pos) + insert + ta.value.substring(pos);
       ta.focus();
-      showToast('Image uploaded & inserted ✅');
+      toast('✅ Image uploaded & inserted');
     } catch (err) {
-      showToast('Upload failed: ' + err.message);
+      toast('Upload failed: ' + err.message, 'error');
     }
   };
   input.click();
@@ -1156,7 +1156,7 @@ async function uploadCoverImage(input) {
   const form = new FormData();
   form.append('image', file);
   try {
-    showToast('Uploading cover image...');
+    toast('Uploading cover image...');
     const r = await fetch('/api/admin/upload/image', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + adminToken },
@@ -1166,9 +1166,9 @@ async function uploadCoverImage(input) {
     if (!r.ok) throw new Error(data.error);
     document.getElementById('post-cover').value = data.url;
     updateCoverPreview(data.url);
-    showToast('Cover image uploaded ✅');
+    toast('✅ Cover image uploaded');
   } catch (err) {
-    showToast('Upload failed: ' + err.message);
+    toast('Upload failed: ' + err.message, 'error');
   }
 }
 
