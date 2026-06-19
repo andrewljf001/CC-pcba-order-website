@@ -58,4 +58,5 @@
 | 日期 | 操作 | 说明 |
 |------|------|------|
 | 2026-06-12 | Google 收录修复 | 线上热修复并提交 GitHub：为公开页面添加 canonical，`/index.html` 301 到 `/`，清理站内 `index.html#...` 链接；已在 Search Console 请求验证修复与重新编入索引。 |
-| 2026-06-19 | 博客图片上传功能 | server.js：新增  接口（uploadImage multer，支持 jpg/png/webp/gif/avif，10MB 限制，上传到 R2 返回公开 URL）。admin/index.html：封面图区域加「↑ UPLOAD」上传按钮+预览缩略图；文章工具栏新增「IMG↑」按钮直接上传图片并插入。 |
+| 2026-06-19 | 博客图片上传功能 | server.js：新增 `POST /api/admin/upload/image` 接口（uploadImage multer，支持 jpg/png/webp/gif/avif，10MB 限制，上传到 R2 返回公开 URL）。admin/index.html：封面图区域加「↑ UPLOAD」上传按钮+预览缩略图；文章工具栏新增「IMG↑」按钮直接上传图片并插入。 |
+| 2026-06-19 | 修复博客图片上传 BUG | admin/index.html：uploadCoverImage() 和 insertImgUpload() 中 showToast() 改为 toast()（前者不存在导致静默失败）。 |
