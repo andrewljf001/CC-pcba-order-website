@@ -43,12 +43,12 @@ async function run() {
   try {
     const r = await get('/'); const html = await r.text();
     if (r.ok && html.includes('PCBAForge')) ok('首页可访问', `HTTP ${r.status}`); else no('首页可访问', `HTTP ${r.status}`);
-    if (html.includes('images/hero-banner.jpg')) ok('首页使用本地图片');
+    if (html.includes('images/hero-banner-20260607.webp')) ok('首页使用本地图片');
     else if (html.includes('unsplash.com')) no('首页使用本地图片', '仍是 unsplash！'); else no('首页使用本地图片', '未找到路径');
   } catch (e) { no('首页可访问', e.message); }
 
   // ── 2. 4张本地图片 ──
-  for (const img of ['hero-banner.jpg','pcb-fabrication.jpg','smt-assembly.jpg','turnkey-testing.jpg']) {
+  for (const img of ['hero-banner-20260607.webp','pcb-fabrication-20260607.webp','smt-assembly-20260607.webp','turnkey-testing-20260607.webp']) {
     try { const r = await get('/images/'+img); const ct = r.headers.get('content-type')||'';
       if (r.ok && ct.startsWith('image/')) ok(`图片 ${img}`, ct); else no(`图片 ${img}`, `HTTP ${r.status}`);
     } catch (e) { no(`图片 ${img}`, e.message); }
