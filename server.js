@@ -8,7 +8,13 @@ const jwt      = require('jsonwebtoken');
 const bcrypt   = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
+const os = require('os');
+const { execFile } = require('child_process');
+const { promisify } = require('util');
+const execFileAsync = promisify(execFile);
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+
+const WEBP_VARIANT_WIDTHS = [480, 768, 1200];
 
 // ── AES-256-GCM 加解密 ───────────────────────────────────
 const ENC_KEY_RAW = process.env.SETTINGS_ENCRYPT_KEY || '';
@@ -232,7 +238,12 @@ function renderArticleBody(post) {
     .map((tag) => `<span class="article-tag">${htmlEscape(tag)}</span>`)
     .join('');
   const coverHtml = post.cover_url
-    ? `<img class="article-cover" src="${htmlEscape(post.cover_url)}" alt="${htmlEscape(post.title)}">`
+    ? renderResponsiveImage({
+        className: 'article-cover',
+        src: post.cover_url,
+        alt: post.title,
+        sizes: '(max-width: 760px) 92vw, 920px'
+      })
     : '';
 
   return [
@@ -314,7 +325,13 @@ function renderBlogCards(posts) {
       .map((tag) => `<span class="post-tag">${htmlEscape(tag)}</span>`)
       .join('');
     const coverHtml = post.cover_url
-      ? `<img class="post-cover" src="${htmlEscape(post.cover_url)}" alt="${htmlEscape(post.title)}" loading="lazy">`
+      ? renderResponsiveImage({
+          className: 'post-cover',
+          src: post.cover_url,
+          alt: post.title,
+          loading: 'lazy',
+          sizes: '(max-width: 760px) 92vw, (max-width: 1100px) 45vw, 360px'
+        })
       : '<div class="post-cover-ph">// NO COVER</div>';
     return [
       `<a class="post-card" href="blog-post.html?slug=${encodeURIComponent(post.slug)}">`,
@@ -525,6 +542,96 @@ async function uploadToR2(buffer, filename, mimetype) {
     ContentType: mimetype || 'application/octet-stream',
   }));
   return { key, url: `${process.env.R2_PUBLIC_URL || 'https://static.pcbaforge.com'}/${key}` };
+}
+
+function publicR2Url(key) {
+  return `${process.env.R2_PUBLIC_URL || 'https://static.pcbaforge.com'}/${key}`;
+}
+
+function uploadedWebpSrcset(url) {
+  const value = String(url || '');
+  if (!value.includes('/uploads/') || !/\.webp$/i.test(value)) return '';
+  return WEBP_VARIANT_WIDTHS
+    .map((width) => `${value.replace(/\.webp$/i, `-${width}.webp`)} ${width}w`)
+    .join(', ');
+}
+
+function renderResponsiveImage({ className, src, alt, loading = '', sizes = '' }) {
+  const srcset = uploadedWebpSrcset(src);
+  return [
+    `<img class="${htmlEscape(className)}"`,
+    `src="${htmlEscape(src)}"`,
+    srcset ? `srcset="${htmlEscape(srcset)}"` : '',
+    srcset && sizes ? `sizes="${htmlEscape(sizes)}"` : '',
+    `alt="${htmlEscape(alt)}"`,
+    loading ? `loading="${htmlEscape(loading)}"` : '',
+    'decoding="async">',
+  ].filter(Boolean).join(' ');
+}
+
+async function uploadImageSetToR2(imageSet) {
+  const stamp = Date.now();
+  const uploaded = [];
+  for (const file of imageSet.files) {
+    const safeName = file.filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const key = `uploads/${stamp}_${safeName}`;
+    await r2Client.send(new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET || 'pcbaforge-files',
+      Key: key,
+      Body: file.buffer,
+      ContentType: 'image/webp',
+    }));
+    uploaded.push({ width: file.width || null, key, url: publicR2Url(key) });
+  }
+  const primary = uploaded.find((file) => !file.width) || uploaded[0];
+  const variants = uploaded.filter((file) => file.width);
+  return {
+    url: primary.url,
+    variants,
+    srcset: variants.map((file) => `${file.url} ${file.width}w`).join(', '),
+  };
+}
+
+async function convertImageToWebpSet(buffer, originalName) {
+  const sourceExt = path.extname(originalName).toLowerCase() || '.img';
+  const baseName = path.basename(originalName, sourceExt).replace(/[^a-zA-Z0-9._-]/g, '_') || 'image';
+  const workDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'pcbaforge-webp-'));
+  const inputPath = path.join(workDir, `source${sourceExt}`);
+  const files = [];
+  try {
+    await fs.promises.writeFile(inputPath, buffer);
+    const outputPath = path.join(workDir, `${baseName}.webp`);
+    await execFileAsync('cwebp', ['-quiet', '-q', process.env.WEBP_QUALITY || '82', inputPath, '-o', outputPath], { timeout: 30000 });
+    files.push({
+      filename: `${baseName}.webp`,
+      buffer: await fs.promises.readFile(outputPath),
+      width: null,
+    });
+
+    for (const width of WEBP_VARIANT_WIDTHS) {
+      const variantPath = path.join(workDir, `${baseName}-${width}.webp`);
+      await execFileAsync('cwebp', [
+        '-quiet',
+        '-q',
+        process.env.WEBP_QUALITY || '82',
+        '-resize',
+        String(width),
+        '0',
+        inputPath,
+        '-o',
+        variantPath,
+      ], { timeout: 30000 });
+      files.push({
+        filename: `${baseName}-${width}.webp`,
+        buffer: await fs.promises.readFile(variantPath),
+        width,
+      });
+    }
+
+    return { baseName, files };
+  } finally {
+    await fs.promises.rm(workDir, { recursive: true, force: true }).catch(() => {});
+  }
 }
 
 // ── 文件上传 ──────────────────────────────────────────────
@@ -1607,8 +1714,9 @@ app.get('/api/posts/:slug', async (req, res) => {
 app.post('/api/admin/upload/image', adminAuth, uploadImage.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image file provided' });
-    const { url } = await uploadToR2(req.file.buffer, req.file.originalname, req.file.mimetype);
-    res.json({ success: true, url });
+    const webpSet = await convertImageToWebpSet(req.file.buffer, req.file.originalname);
+    const uploaded = await uploadImageSetToR2(webpSet);
+    res.json({ success: true, format: 'webp', ...uploaded });
   } catch (err) {
     console.error('[IMAGE UPLOAD ERROR]', err.message);
     res.status(500).json({ error: err.message });

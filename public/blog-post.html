@@ -15,7 +15,8 @@
   --text:#334155;--muted:#64748b;--white:#142033;--ink:#142033;
   --amber:#b7791f;--red:#dc2626;--wa:#25d366;
   --shadow:0 16px 44px rgba(20,32,51,.08);--shadow-sm:0 8px 22px rgba(20,32,51,.06);
-  --max:780px;
+  --max:920px;
+  --article-pad:clamp(24px,4vw,56px);
   --font:'DM Sans',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -29,15 +30,15 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .nav-links{list-style:none;display:flex;gap:1.8rem}
 .nav-links a{font-size:.9rem;color:var(--muted);font-weight:700;transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--ink)}
 .nav-cta{background:var(--green);color:#fff;border-radius:7px;font-size:.85rem;font-weight:800;padding:.55rem 1.15rem;box-shadow:0 12px 22px rgba(22,163,74,.18);transition:background .2s}.nav-cta:hover{background:var(--green2)}
-.article-wrap{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:3rem 5% 4rem}
+.article-wrap{position:relative;z-index:1;max-width:calc(var(--max) + var(--article-pad) + var(--article-pad));margin:0 auto;padding:3.5rem var(--article-pad) 4.5rem}
 .back-link{display:inline-flex;align-items:center;gap:.4rem;font-size:.84rem;color:var(--muted);font-weight:700;margin-bottom:2rem;transition:color .2s}
 .back-link:hover{color:var(--green2)}
 .article-tags{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .article-tag{font-size:.66rem;font-weight:800;color:var(--green2);background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:.2rem .6rem}
-.article-title{color:var(--ink);font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.1;letter-spacing:-.035em;font-weight:900;margin-bottom:1rem}
+.article-title{color:var(--ink);font-size:clamp(2.2rem,4vw,3.35rem);line-height:1.08;letter-spacing:-.035em;font-weight:900;margin-bottom:1rem;max-width:980px}
 .article-meta{display:flex;gap:1.5rem;font-size:.8rem;color:var(--muted);font-weight:600;margin-bottom:2rem;flex-wrap:wrap}
-.article-cover{width:100%;max-height:420px;object-fit:cover;border-radius:14px;margin-bottom:2.5rem;box-shadow:var(--shadow)}
-.article-content{font-size:1.05rem;line-height:1.85;color:var(--text)}
+.article-cover{width:100%;max-height:500px;object-fit:cover;border-radius:14px;margin-bottom:2.5rem;box-shadow:var(--shadow)}
+.article-content{font-size:1.08rem;line-height:1.85;color:var(--text)}
 .article-content h2{color:var(--ink);font-size:1.5rem;font-weight:900;letter-spacing:-.02em;margin:2.2rem 0 .9rem}
 .article-content h3{color:var(--ink);font-size:1.2rem;font-weight:800;margin:1.8rem 0 .7rem}
 .article-content p{margin-bottom:1.3rem}
@@ -72,7 +73,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 .flinks2 a{font-size:.75rem;color:var(--muted)}.flinks2 a:hover{color:var(--ink)}
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px rgba(37,211,102,.25);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.08)}
-@media(max-width:768px){nav{height:60px;padding:0 4%}.nav-links{display:none}.article-wrap{padding:2rem 5% 3rem}.article-content{font-size:1rem}.article-cta{padding:2rem 1.5rem}}
+@media(max-width:768px){nav{height:60px;padding:0 4%}.nav-links{display:none}.article-wrap{padding:2rem 5% 3rem}.article-title{font-size:2rem}.article-content{font-size:1rem}.article-cover{max-height:320px}.article-cta{padding:2rem 1.5rem}}
 
 
 /* ===== 移动导航(汉堡+常驻Blog+SignIn) ===== */
@@ -173,6 +174,21 @@ function fmtDate(d){ return d ? new Date(d).toLocaleDateString('en-US',{year:'nu
 
 function esc(s){ var d=document.createElement('div');d.textContent=s;return d.innerHTML; }
 
+function uploadedWebpSrcset(url){
+  var value=String(url||'');
+  if(value.indexOf('/uploads/')===-1 || !/\.webp$/i.test(value)) return '';
+  return [480,768,1200].map(function(w){
+    return value.replace(/\.webp$/i,'-'+w+'.webp')+' '+w+'w';
+  }).join(', ');
+}
+
+function responsiveImage(cls,url,alt,sizes){
+  var srcset=uploadedWebpSrcset(url);
+  return '<img class="'+esc(cls)+'" src="'+esc(url)+'"'+
+    (srcset?' srcset="'+esc(srcset)+'" sizes="'+esc(sizes)+'"':'')+
+    ' alt="'+esc(alt)+'" decoding="async">';
+}
+
 async function loadPost(){
   var params=new URLSearchParams(location.search);
   var slug=params.get('slug');
@@ -208,7 +224,7 @@ async function loadPost(){
         '<span>📅 '+fmtDate(p.published_at)+'</span>'+
         '<span>👁 '+((p.views||0))+'</span>'+
       '</div>'+
-      (p.cover_url?'<img class="article-cover" src="'+esc(p.cover_url)+'" alt="'+esc(p.title)+'">':'')+
+      (p.cover_url?responsiveImage('article-cover',p.cover_url,p.title,'(max-width: 760px) 92vw, 920px'):'')+
       '<div class="article-content" id="post-content"></div>'+
       '<div class="article-cta">'+
         '<div class="article-cta-title">Ready to build your PCBA?</div>'+

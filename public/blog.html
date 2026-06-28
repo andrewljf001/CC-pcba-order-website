@@ -16,7 +16,7 @@
   --text:#334155;--muted:#64748b;--white:#142033;--ink:#142033;
   --amber:#b7791f;--red:#dc2626;--wa:#25d366;
   --shadow:0 16px 44px rgba(20,32,51,.08);--shadow-sm:0 8px 22px rgba(20,32,51,.06);
-  --max:1200px;
+  --max:1360px;
   --font:'DM Sans',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -35,25 +35,25 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .nav-cta{background:var(--green);color:#fff;border-radius:7px;font-size:.85rem;font-weight:800;padding:.55rem 1.15rem;box-shadow:0 12px 22px rgba(22,163,74,.18);transition:background .2s}
 .nav-cta:hover{background:var(--green2)}
 
-.sec{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:4rem 5%}
+.sec{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:4.5rem clamp(24px,4vw,56px)}
 .slabel{display:inline-flex;align-items:center;background:#dcfce7;border:1px solid #bbf7d0;color:var(--green2);border-radius:999px;padding:.35rem .75rem;margin-bottom:.9rem;font-size:.78rem;font-weight:800;letter-spacing:0}
 .stitle{color:var(--ink);font-size:clamp(2rem,3.4vw,2.8rem);line-height:1.04;letter-spacing:-.04em;font-weight:900;margin-bottom:.5rem}
-.stitle-sub{color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:2.2rem;max-width:620px}
+.stitle-sub{color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:2.2rem;max-width:780px}
 
 .tag-bar{display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:2.2rem}
 .tag-bar .active,.tag-bar button.active{background:var(--green);color:#fff;border-color:var(--green)}
 .tag-bar button,.tag-bar a{font-size:.8rem;color:var(--muted);border:1px solid var(--line);background:#fff;border-radius:999px;padding:.4rem .9rem;cursor:pointer;font-weight:700;font-family:var(--font);transition:all .2s}
 .tag-bar button:hover{border-color:#9edcb2;color:var(--green2)}
 
-.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.blog-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.5rem}
 .post-card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:var(--shadow-sm);transition:all .2s}
 .post-card:hover{border-color:#9edcb2;box-shadow:0 14px 28px rgba(22,163,74,.09);transform:translateY(-2px)}
-.post-cover{width:100%;height:170px;object-fit:cover;display:block;filter:brightness(1.02)}
-.post-cover-ph{width:100%;height:170px;display:grid;place-items:center;background:linear-gradient(135deg,#dcfce7,#f0fdf4);color:var(--green2);font-size:2rem}
+.post-cover{width:100%;height:190px;object-fit:cover;display:block;filter:brightness(1.02)}
+.post-cover-ph{width:100%;height:190px;display:grid;place-items:center;background:linear-gradient(135deg,#dcfce7,#f0fdf4);color:var(--green2);font-size:2rem}
 .post-body{display:flex;flex-direction:column;flex:1;padding:1.3rem}
 .post-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem}
 .post-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.02em;color:var(--green2);background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:.18rem .5rem}
-.post-title{font-size:1.02rem;color:var(--ink);font-weight:900;letter-spacing:-.015em;line-height:1.35;margin-bottom:.5rem}
+.post-title{font-size:1.08rem;color:var(--ink);font-weight:900;letter-spacing:-.015em;line-height:1.35;margin-bottom:.5rem}
 .post-excerpt{font-size:.86rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .post-meta{font-size:.74rem;color:var(--muted);margin-top:auto}
 
@@ -78,8 +78,9 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px rgba(37,211,102,.25);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.08)}
 
-@media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:768px){nav{height:60px;padding:0 4%}.nav-links{display:none}.sec{padding:2.5rem 4%}.stitle{font-size:2rem}.blog-grid{grid-template-columns:1fr}}
+@media(max-width:1280px){.blog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:768px){nav{height:60px;padding:0 4%}.nav-links{display:none}.sec{padding:2.5rem 4%}.stitle{font-size:2rem}.blog-grid{grid-template-columns:1fr}.post-cover,.post-cover-ph{height:170px}}
 
 /* ===== 移动导航 ===== */
 .nav-right{display:flex;align-items:center;gap:.7rem}
@@ -186,6 +187,27 @@ var currentTag='', currentPage=1, totalPosts=0, limit=12, allTags=new Set();
 
 function fmtDate(d){ return d ? new Date(d).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) : ''; }
 
+function escAttr(s){
+  return String(s||'').replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function uploadedWebpSrcset(url){
+  var value=String(url||'');
+  if(value.indexOf('/uploads/')===-1 || !/\.webp$/i.test(value)) return '';
+  return [480,768,1200].map(function(w){
+    return value.replace(/\.webp$/i,'-'+w+'.webp')+' '+w+'w';
+  }).join(', ');
+}
+
+function responsiveImage(cls,url,alt,sizes,loading){
+  var srcset=uploadedWebpSrcset(url);
+  return '<img class="'+escAttr(cls)+'" src="'+escAttr(url)+'"'+
+    (srcset?' srcset="'+escAttr(srcset)+'" sizes="'+escAttr(sizes)+'"':'')+
+    ' alt="'+escAttr(alt)+'"'+(loading?' loading="'+escAttr(loading)+'"':'')+' decoding="async">';
+}
+
 function renderCards(posts){
   var grid=document.getElementById('blog-grid');
   if(!posts.length){
@@ -195,7 +217,7 @@ function renderCards(posts){
   grid.innerHTML=posts.map(function(p){
     var tags=[];try{tags=JSON.parse(p.tags||'[]');}catch(e){}
     var tagsHtml=tags.map(function(t){return '<span class="post-tag">'+t+'</span>';}).join('');
-    var cover=p.cover_url?'<img class="post-cover" src="'+p.cover_url+'" alt="'+p.title+'" loading="lazy">'
+    var cover=p.cover_url?responsiveImage('post-cover',p.cover_url,p.title,'(max-width: 760px) 92vw, (max-width: 1100px) 45vw, 360px','lazy')
       :'<div class="post-cover-ph">// NO COVER</div>';
     return '<div class="post-card" onclick="location.href=\'blog-post.html?slug='+p.slug+'\'">'+
       cover+'<div class="post-body">'+
