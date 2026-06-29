@@ -170,18 +170,6 @@ async function initDB() {
   try { await query(`ALTER TABLE users ADD COLUMN deletion_reason TEXT`); } catch(e) {}
   try { await query(`ALTER TABLE orders ADD COLUMN payment_intent TEXT`); } catch(e) {}
 
-  const { rows } = await query('SELECT COUNT(*) as cnt FROM admin_users');
-  if (!rows[0] || rows[0].cnt === 0) {
-    const bcrypt = require('bcryptjs');
-    const { v4: uuidv4 } = require('uuid');
-    const hash = await bcrypt.hash('pcbaforge2026', 12);
-    await query(
-      `INSERT INTO admin_users (id, email, password_hash, name, role) VALUES (?, ?, ?, ?, ?)`,
-      [uuidv4(), 'admin@pcbaforge.com', hash, 'PCBAForge Admin', 'superadmin']
-    );
-    console.log('✅ Default admin created: admin@pcbaforge.com / pcbaforge2026');
-  }
-
   console.log('✅ D1 Database ready.');
 }
 

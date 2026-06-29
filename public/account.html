@@ -498,6 +498,12 @@ function showForgotPassword(){
   document.getElementById('auth-panel-forgot').classList.add('active');
 }
 
+function getTurnstileToken(panelSelector){
+  if(typeof turnstile === 'undefined') return '';
+  var box = document.querySelector(panelSelector + ' .cf-turnstile');
+  return (box ? turnstile.getResponse(box) : '') || turnstile.getResponse() || '';
+}
+
 async function doLogin(){
   const email=document.getElementById('login-email').value;
   const pwd  =document.getElementById('login-pwd').value;
@@ -505,7 +511,7 @@ async function doLogin(){
   const btn  =document.getElementById('login-btn');
   errEl.textContent='';
   if(!email||!pwd){errEl.textContent='Please fill in all fields';return;}
-  const cfToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+  const cfToken = getTurnstileToken('#auth-panel-login');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span>SIGNING IN...';
   try{
     const d=await api('/api/auth/login',{method:'POST',body:JSON.stringify({email,password:pwd,cf_turnstile:cfToken})});
@@ -558,7 +564,7 @@ async function doResetPassword(){
 }
 
 async function doRegister(){
-  const cfToken = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+  const cfToken = getTurnstileToken('#auth-panel-register');
   const name    =document.getElementById('reg-name').value;
   const email   =document.getElementById('reg-email').value;
   const pwd     =document.getElementById('reg-pwd').value;

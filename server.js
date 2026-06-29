@@ -1,13 +1,15 @@
 require('dotenv').config();
 const express  = require('express');
 const cors     = require('cors');
+const compression = require('compression');
 const path     = require('path');
 const fs       = require('fs');
 const multer   = require('multer');
 const jwt      = require('jsonwebtoken');
 const bcrypt   = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
+const sanitizeHtml = require('sanitize-html');
 const crypto = require('crypto');
+const { randomUUID } = crypto;
 const os = require('os');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
@@ -15,6 +17,16 @@ const execFileAsync = promisify(execFile);
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 const WEBP_VARIANT_WIDTHS = [480, 768, 1200];
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://pcbaforge.com',
+  'https://www.pcbaforge.com',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001'
+];
+
+function uuidv4() {
+  return randomUUID();
+}
 
 // ── AES-256-GCM 加解密 ───────────────────────────────────
 const ENC_KEY_RAW = process.env.SETTINGS_ENCRYPT_KEY || '';
@@ -56,22 +68,148 @@ if (!JWT_SECRET || !JWT_ADMIN_SECRET) {
   process.exit(1);
 }
 
+function csvEnv(name) {
+  return String(process.env[name] || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function allowedOrigins() {
+  return new Set([
+    ...DEFAULT_ALLOWED_ORIGINS,
+    ...csvEnv('CORS_ORIGINS'),
+    ...(process.env.SITE_URL ? [process.env.SITE_URL.replace(/\/$/, '')] : [])
+  ]);
+}
+
+function securityHeaders(req, res, next) {
+  const scriptSrc = [
+    "'self'",
+    "'unsafe-inline'",
+    'https://challenges.cloudflare.com',
+    'https://www.googletagmanager.com',
+    'https://www.google-analytics.com',
+    'https://www.paypal.com',
+    'https://www.sandbox.paypal.com',
+    'https://www.paypalobjects.com',
+    'https://pay.google.com',
+    'https://applepay.cdn-apple.com'
+  ].join(' ');
+  const csp = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'self'",
+    "form-action 'self'",
+    `script-src ${scriptSrc}`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com data:",
+    "img-src 'self' data: https:",
+    "media-src 'self' https:",
+    "connect-src 'self' https://challenges.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://pay.google.com",
+    "frame-src 'self' https://challenges.cloudflare.com https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://pay.google.com",
+    "worker-src 'self'",
+    'upgrade-insecure-requests'
+  ].join('; ');
+
+  res.set('Content-Security-Policy', csp);
+  res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('X-Frame-Options', 'SAMEORIGIN');
+  res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(self "https://www.paypal.com" "https://www.sandbox.paypal.com" "https://pay.google.com")');
+  next();
+}
+
+function createRateLimiter({ windowMs, max, message }) {
+  const buckets = new Map();
+  return (req, res, next) => {
+    const now = Date.now();
+    const ip = req.ip || req.headers['cf-connecting-ip'] || req.socket.remoteAddress || 'unknown';
+    const key = `${ip}:${req.path}`;
+    const bucket = buckets.get(key) || { count: 0, resetAt: now + windowMs };
+    if (bucket.resetAt <= now) {
+      bucket.count = 0;
+      bucket.resetAt = now + windowMs;
+    }
+    bucket.count += 1;
+    buckets.set(key, bucket);
+    if (buckets.size > 5000) {
+      for (const [bucketKey, value] of buckets) {
+        if (value.resetAt <= now) buckets.delete(bucketKey);
+      }
+    }
+    res.set('RateLimit-Limit', String(max));
+    res.set('RateLimit-Remaining', String(Math.max(0, max - bucket.count)));
+    res.set('RateLimit-Reset', String(Math.ceil(bucket.resetAt / 1000)));
+    if (bucket.count > max) {
+      res.set('Retry-After', String(Math.ceil((bucket.resetAt - now) / 1000)));
+      return res.status(429).json({ error: message || 'Too many requests. Please try again later.' });
+    }
+    next();
+  };
+}
+
+const publicWriteLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: 'Too many submissions from this network. Please try again later.'
+});
+
+const authLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many sign-in attempts. Please wait and try again.'
+});
+
 // ── Turnstile 人机验证 ────────────────────────────────────
 async function verifyTurnstile(token) {
   if (process.env.E2E_BYPASS_TURNSTILE === '1') return true;
-  if (!token) return false;
   const secret = process.env.TURNSTILE_SECRET;
-  if (!secret) return true;
-  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ secret, response: token })
-  });
-  const data = await res.json();
-  return data.success === true;
+  if (!secret) {
+    console.error('[TURNSTILE] TURNSTILE_SECRET is required for protected writes.');
+    return false;
+  }
+  if (!token) return false;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, response: token }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.success === true;
+  } catch (err) {
+    console.error('[TURNSTILE]', err.message);
+    return false;
+  }
 }
 
-app.use(cors());
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+app.use(securityHeaders);
+app.use(compression({
+  threshold: 1024,
+  filter(req, res) {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  }
+}));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins().has(origin)) return callback(null, true);
+    return callback(null, false);
+  },
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -234,6 +372,81 @@ function htmlEscape(value) {
   return xmlEscape(value);
 }
 
+function sanitizeBlogHtml(value) {
+  return sanitizeHtml(String(value || ''), {
+    allowedTags: [
+      'p','br','strong','b','em','i','u','s','a','ul','ol','li','blockquote','pre','code',
+      'h2','h3','h4','hr','table','thead','tbody','tr','th','td','img','figure','figcaption',
+      'span','div'
+    ],
+    allowedAttributes: {
+      a: ['href', 'name', 'target', 'rel'],
+      img: ['src', 'srcset', 'sizes', 'alt', 'title', 'width', 'height', 'loading'],
+      span: ['class'],
+      div: ['class'],
+      table: ['class'],
+      th: ['colspan', 'rowspan'],
+      td: ['colspan', 'rowspan'],
+      code: ['class'],
+      pre: ['class']
+    },
+    allowedSchemes: ['http', 'https', 'mailto'],
+    allowedSchemesByTag: { img: ['http', 'https', 'data'] },
+    allowProtocolRelative: false,
+    transformTags: {
+      a(tagName, attribs) {
+        const out = { ...attribs };
+        if (out.target === '_blank') out.rel = 'noopener noreferrer';
+        return { tagName, attribs: out };
+      },
+      img(tagName, attribs) {
+        return {
+          tagName,
+          attribs: {
+            ...attribs,
+            loading: attribs.loading || 'lazy'
+          }
+        };
+      }
+    }
+  });
+}
+
+function hasMagic(buffer, hex) {
+  return buffer.subarray(0, hex.length / 2).toString('hex').toLowerCase() === hex.toLowerCase();
+}
+
+function isAllowedArchive(file) {
+  const ext = path.extname(file.originalname || '').toLowerCase();
+  const buffer = file.buffer || Buffer.alloc(0);
+  if (ext === '.zip') {
+    return ['504b0304', '504b0506', '504b0708'].some((sig) => hasMagic(buffer, sig));
+  }
+  if (ext === '.rar') {
+    return hasMagic(buffer, '526172211a0700') || hasMagic(buffer, '526172211a070100');
+  }
+  if (ext === '.7z') {
+    return hasMagic(buffer, '377abcaf271c');
+  }
+  return false;
+}
+
+function isAllowedImage(file) {
+  const ext = path.extname(file.originalname || '').toLowerCase();
+  const buffer = file.buffer || Buffer.alloc(0);
+  const signatures = {
+    '.jpg': ['ffd8ff'],
+    '.jpeg': ['ffd8ff'],
+    '.png': ['89504e470d0a1a0a'],
+    '.gif': ['474946383761', '474946383961'],
+    '.webp': ['52494646'],
+    '.avif': ['000000', '6674797061766966']
+  };
+  if (ext === '.webp') return buffer.length > 12 && hasMagic(buffer, '52494646') && buffer.subarray(8, 12).toString('ascii') === 'WEBP';
+  if (ext === '.avif') return buffer.length > 12 && buffer.subarray(4, 12).toString('ascii').includes('ftyp');
+  return (signatures[ext] || []).some((sig) => hasMagic(buffer, sig));
+}
+
 function stripHtml(value) {
   return String(value || '')
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
@@ -326,7 +539,7 @@ function renderArticleBody(post) {
     `<span>${htmlEscape(formatDisplayDate(post.published_at))}</span>`,
     '</div>',
     coverHtml,
-    `<div class="article-content" id="post-content">${post.content || ''}</div>`,
+    `<div class="article-content" id="post-content">${sanitizeBlogHtml(post.content)}</div>`,
     '<div class="article-cta">',
     '<div class="article-cta-title">Ready to build your PCBA?</div>',
     '<div class="article-cta-sub">Get an instant quote or submit your Gerber + BOM files to our engineers.</div>',
@@ -568,6 +781,8 @@ for (const [route, fileName] of PUBLIC_PAGE_ROUTES.entries()) {
   app.get(route, (req, res) => sendPublicPage(req, res, fileName));
 }
 
+app.get('/', (req, res) => sendPublicPage(req, res, 'index.html'));
+
 app.get('/blog', sendBlogList);
 
 app.get('/blog/:slug', async (req, res) => {
@@ -597,7 +812,13 @@ app.get('/index.html', (req, res) => {
 app.get(/^\/[^/]+\.html$/, (req, res) => {
   res.status(404).send('Not found');
 });
-app.use(express.static('public'));
+app.use(express.static('public', {
+  setHeaders(res, filePath) {
+    if (/\.(?:js|css|svg|webp|jpe?g|png|gif|woff2)$/i.test(filePath)) {
+      setPublicCache(res, 7 * 24 * 60 * 60);
+    }
+  }
+}));
 app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.set('Pragma', 'no-cache');
@@ -883,10 +1104,10 @@ app.get('/api/settings/public', async (req, res) => {
 });
 
 // 提交询价（文件上传到 R2）
-app.post('/api/inquiry', upload.array('files', 3), async (req, res) => {
+app.post('/api/inquiry', publicWriteLimiter, upload.array('files', 3), async (req, res) => {
   try {
     const { mode, name, email, whatsapp, company, notes, estimate, cf_turnstile } = req.body;
-    if (cf_turnstile && !await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
+    if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
     if (!name || !email || !mode) return res.status(400).json({ error: 'name, email, mode required' });
 
     const params = {};
@@ -918,6 +1139,9 @@ app.post('/api/inquiry', upload.array('files', 3), async (req, res) => {
     const files = [];
     if (req.files && req.files.length > 0) {
       for (const f of req.files) {
+        if (!isAllowedArchive(f)) {
+          return res.status(400).json({ error: 'Invalid archive file. Please upload a real .zip, .rar, or .7z package.' });
+        }
         try {
           const { key, url } = await uploadToR2(f.buffer, f.originalname, f.mimetype);
           files.push({ name: f.originalname, key, url, size: f.size });
@@ -984,7 +1208,7 @@ app.post('/api/order/lookup', async (req, res) => {
 // ═══════════════════════════════════════════════════════
 
 // 公开接口：提交数据删除申请（发邮件通知管理员，软删除标记）
-app.post('/api/gdpr/delete-request', async (req, res) => {
+app.post('/api/gdpr/delete-request', publicWriteLimiter, async (req, res) => {
   try {
     const { email, reason } = req.body;
     if (!email) return res.status(400).json({ error: 'Email required' });
@@ -1229,10 +1453,10 @@ app.get('/api/payment/config', async (req, res) => {
 // AUTH APIS
 // ═══════════════════════════════════════════════════════
 
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', authLimiter, async (req, res) => {
   try {
     const { email, password, name, cf_turnstile } = req.body;
-    if (cf_turnstile && !await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
+    if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
     if (!email || !password || !name) return res.status(400).json({ error: 'email, password, name required' });
     if (password.length < 8) return res.status(400).json({ error: 'Password min 8 characters' });
 
@@ -1240,7 +1464,7 @@ app.post('/api/auth/register', async (req, res) => {
     if (exists.length) {
       if (exists[0].email_verified) return res.status(409).json({ error: 'Email already registered. Please sign in.' });
       // 未验证账号：重新生成token并补发验证邮件
-      const new_token = require('uuid').v4();
+      const new_token = uuidv4();
       await pool.query('UPDATE users SET verify_token=$1, name=$2 WHERE email=$3', [new_token, name, email.toLowerCase()]);
       const verifyUrl2 = (process.env.SITE_URL || 'https://pcbaforge.com') + '/api/auth/verify?token=' + new_token;
       await sendMail({ to: email, subject: 'Verify your PCBAForge account', html: '<h2>Welcome to PCBAForge</h2><p>Hi ' + name + ', please verify your email:</p><p><a href="' + verifyUrl2 + '" style="background:#16a34a;color:#fff;padding:10px 20px;text-decoration:none;font-weight:bold">VERIFY EMAIL</a></p><p>Link expires in 24 hours.</p>' });
@@ -1280,7 +1504,7 @@ app.get('/api/auth/verify', async (req, res) => {
   } catch (err) { res.status(500).send('Server error'); }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { email, password, cf_turnstile } = req.body;
     if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
@@ -1300,7 +1524,7 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/auth/forgot-password', async (req, res) => {
+app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email required' });
@@ -1326,7 +1550,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/api/auth/reset-password', async (req, res) => {
+app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
   try {
     const { token, password } = req.body;
     if (!token || !password) return res.status(400).json({ error: 'Token and password required' });
@@ -1508,7 +1732,7 @@ app.delete('/api/me/addresses/:id', userAuth, async (req, res) => {
 // ADMIN APIs
 // ═══════════════════════════════════════════════════════
 
-app.post('/api/admin/login', async (req, res) => {
+app.post('/api/admin/login', authLimiter, async (req, res) => {
   try {
     const { email, password, cf_turnstile } = req.body;
     if (!await verifyTurnstile(cf_turnstile)) return res.status(400).json({ error: 'Human verification failed. Please try again.' });
@@ -1801,7 +2025,7 @@ app.get('/api/posts/:slug', async (req, res) => {
     const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [req.params.slug]);
     if (!rows.length) return res.status(404).json({ error: 'Post not found' });
     await pool.query(`UPDATE posts SET views=views+1 WHERE slug=?`, [req.params.slug]);
-    res.json(rows[0]);
+    res.json({ ...rows[0], content: sanitizeBlogHtml(rows[0].content) });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -1813,6 +2037,7 @@ app.get('/api/posts/:slug', async (req, res) => {
 app.post('/api/admin/upload/image', adminAuth, uploadImage.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No image file provided' });
+    if (!isAllowedImage(req.file)) return res.status(400).json({ error: 'Invalid image file signature.' });
     const webpSet = await convertImageToWebpSet(req.file.buffer, req.file.originalname);
     const uploaded = await uploadImageSetToR2(webpSet);
     res.json({ success: true, format: 'webp', ...uploaded });
@@ -1856,7 +2081,7 @@ app.post('/api/admin/posts', adminAuth, async (req, res) => {
     const { rows } = await pool.query(
       `INSERT INTO posts (id, slug, title, excerpt, content, cover_url, tags, status, author, published_at)
        VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING *`,
-      [uuidv4(), slug, title, excerpt||'', content||'', cover_url||'',
+      [uuidv4(), slug, title, excerpt||'', sanitizeBlogHtml(content), cover_url||'',
        JSON.stringify(tags||[]), status||'draft', author||'PCBAForge Team', published_at]
     );
     res.json(rows[0]);
@@ -1878,7 +2103,7 @@ app.put('/api/admin/posts/:id', adminAuth, async (req, res) => {
       `UPDATE posts SET title=COALESCE(?,title), slug=COALESCE(?,slug), excerpt=COALESCE(?,excerpt),
        content=COALESCE(?,content), cover_url=COALESCE(?,cover_url), tags=COALESCE(?,tags),
        status=COALESCE(?,status), author=COALESCE(?,author), published_at=?, updated_at=datetime('now') WHERE id=?`,
-      [title, slug, excerpt, content, cover_url, tags ? JSON.stringify(tags) : null, status, author, published_at, req.params.id]
+      [title, slug, excerpt, content == null ? null : sanitizeBlogHtml(content), cover_url, tags ? JSON.stringify(tags) : null, status, author, published_at, req.params.id]
     );
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -1889,6 +2114,18 @@ app.delete('/api/admin/posts/:id', adminAuth, async (req, res) => {
     await pool.query(`DELETE FROM posts WHERE id=?`, [req.params.id]);
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.use((err, req, res, next) => {
+  if (!err) return next();
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ error: err.message });
+  }
+  if (/Only .* accepted|Invalid .* file|File too large/i.test(err.message || '')) {
+    return res.status(400).json({ error: err.message });
+  }
+  console.error('[UNHANDLED ERROR]', err);
+  res.status(500).json({ error: 'Server error' });
 });
 
 app.listen(PORT, () => {
