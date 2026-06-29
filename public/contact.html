@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact Us — PCBAForge | PCBA Assembly Experts</title>
-<link rel="canonical" href="https://pcbaforge.com/contact.html">
+<link rel="canonical" href="https://pcbaforge.com/contact">
 <meta name="description" content="Contact PCBAForge for PCB fabrication, SMT assembly, and full turnkey PCBA services. Talk to our engineers directly via WhatsApp, email, or submit an inquiry.">
 
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -178,30 +178,30 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 <nav>
   <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <ul class="nav-links">
-    <li><a href="quote.html">Quote</a></li>
+    <li><a href="/quote">Quote</a></li>
     <li><a href="/#services">Services</a></li>
     <li><a href="/#capabilities">Capabilities</a></li>
     <li><a href="/#process">Process</a></li>
-    <li><a href="contact.html" class="active">Contact</a></li>
-    <li><a href="blog.html">Blog</a></li>
-    <li><a href="track.html">Track Order</a></li>
+    <li><a href="/contact" class="active">Contact</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/track">Track Order</a></li>
   </ul>
   <div class="nav-right">
-    <a href="blog.html" class="nav-blog-m">Blog</a>
-    <a href="account.html" class="nav-signin">Sign In</a>
-    <a href="quote.html" class="nav-cta">GET QUOTE</a>
+    <a href="/blog" class="nav-blog-m">Blog</a>
+    <a href="/account" class="nav-signin">Sign In</a>
+    <a href="/quote" class="nav-cta">GET QUOTE</a>
     <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="quote.html">Quote</a>
+  <a href="/quote">Quote</a>
   <a href="/#services">Services</a>
   <a href="/#capabilities">Capabilities</a>
   <a href="/#process">Process</a>
-  <a href="contact.html">Contact</a>
-  <a href="blog.html">Blog</a>
-  <a href="track.html">Track Order</a>
-  <a href="account.html">Sign In</a>
+  <a href="/contact">Contact</a>
+  <a href="/blog">Blog</a>
+  <a href="/track">Track Order</a>
+  <a href="/account">Sign In</a>
 </div>
 
 <div class="page-hero">
@@ -258,7 +258,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
           <div class="ch-label">SUBMIT INQUIRY</div>
           <div class="ch-title">Online Inquiry Form</div>
           <div class="ch-desc">Upload your Gerber, BOM, and placement files directly. Our system generates an order number and our engineers quote within 24 hours.</div>
-          <a href="quote.html" class="ch-btn ch-btn-go">
+          <a href="/quote" class="ch-btn ch-btn-go">
             ⬆ SUBMIT FILES & GET QUOTE
           </a>
           <div class="ch-meta" style="margin-top:.7rem">
@@ -274,7 +274,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
           <div class="ch-label">EXISTING ORDERS</div>
           <div class="ch-title">Track Your Order</div>
           <div class="ch-desc">Already submitted an inquiry? Track your order status, view your quote, and pay online using your order number and email.</div>
-          <a href="track.html" class="ch-btn ch-btn-tr">
+          <a href="/track" class="ch-btn ch-btn-tr">
             → VIEW ORDER STATUS
           </a>
         </div>
@@ -329,7 +329,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
             <span>SEND MESSAGE</span>
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </button>
-          <div class="form-note">By submitting, you agree to our <a href="privacy.html" style="color:var(--green2)">Privacy Policy</a>. We never share your data.</div>
+          <div class="form-note">By submitting, you agree to our <a href="/privacy" style="color:var(--green2)">Privacy Policy</a>. We never share your data.</div>
         </form>
       </div>
     </div>
@@ -395,15 +395,15 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
       <a href="/#services">Services</a>
       <a href="/#quote">Quick Estimator</a>
       <a href="/#capabilities">Capabilities</a>
-      <a href="quote.html">Submit Inquiry</a>
-      <a href="blog.html">Blog</a>
-      <a href="track.html">Track Order</a>
-      <a href="contact.html">Contact</a>
+      <a href="/quote">Submit Inquiry</a>
+      <a href="/blog">Blog</a>
+      <a href="/track">Track Order</a>
+      <a href="/contact">Contact</a>
     </div>
     <div class="flinks2">
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="shipping.html">Shipping Policy</a>
-      <a href="terms.html">Terms of Service</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/shipping">Shipping Policy</a>
+      <a href="/terms">Terms of Service</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
@@ -472,7 +472,7 @@ document.getElementById('contactForm').addEventListener('submit', async function
       document.getElementById('formSuccess').style.display='block';
       if(data.order_no){
         document.querySelector('.form-success-sub').innerHTML =
-          'Your inquiry #<strong>'+data.order_no+'</strong> has been received.<br>Our engineers will reply within 24h. <a href="track.html?order='+data.order_no+'" style="color:var(--green2);font-weight:700">Track your inquiry →</a>';
+          'Your inquiry #<strong>'+data.order_no+'</strong> has been received.<br>Our engineers will reply within 24h. <a href="/track?order='+data.order_no+'" style="color:var(--green2);font-weight:700">Track your inquiry →</a>';
       }
     } else {
       throw new Error(data.error || 'Send failed');

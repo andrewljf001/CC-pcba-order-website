@@ -95,17 +95,71 @@ const SITEMAP_PAGE_ORDER = [
 
 const SITEMAP_PAGE_META = {
   'index.html': { loc: '/', priority: '1.0', freq: 'weekly' },
-  'quote.html': { loc: '/quote.html', priority: '0.9', freq: 'monthly' },
-  'contact.html': { loc: '/contact.html', priority: '0.8', freq: 'monthly' },
-  'track.html': { loc: '/track.html', priority: '0.7', freq: 'monthly' },
-  'blog.html': { loc: '/blog.html', priority: '0.8', freq: 'weekly' },
-  'shipping.html': { loc: '/shipping.html', priority: '0.4', freq: 'yearly' },
-  'privacy.html': { loc: '/privacy.html', priority: '0.3', freq: 'yearly' },
-  'terms.html': { loc: '/terms.html', priority: '0.3', freq: 'yearly' }
+  'quote.html': { loc: '/quote', priority: '0.9', freq: 'monthly' },
+  'contact.html': { loc: '/contact', priority: '0.8', freq: 'monthly' },
+  'track.html': { loc: '/track', priority: '0.7', freq: 'monthly' },
+  'blog.html': { loc: '/blog', priority: '0.8', freq: 'weekly' },
+  'shipping.html': { loc: '/shipping', priority: '0.4', freq: 'yearly' },
+  'privacy.html': { loc: '/privacy', priority: '0.3', freq: 'yearly' },
+  'terms.html': { loc: '/terms', priority: '0.3', freq: 'yearly' }
 };
+
+const PUBLIC_PAGE_ROUTES = new Map([
+  ['/quote', 'quote.html'],
+  ['/contact', 'contact.html'],
+  ['/track', 'track.html'],
+  ['/shipping', 'shipping.html'],
+  ['/privacy', 'privacy.html'],
+  ['/terms', 'terms.html'],
+  ['/account', 'account.html'],
+  ['/gdpr-delete', 'gdpr-delete.html'],
+  ['/payment-success', 'payment-success.html']
+]);
+
+// Google indexed these legacy URLs on 2026-06-29; keep 301s only for this SEO migration set.
+const INDEXED_LEGACY_HTML_REDIRECTS = new Map([
+  ['/quote.html', '/quote'],
+  ['/contact.html', '/contact'],
+  ['/track.html', '/track'],
+  ['/blog.html', '/blog'],
+  ['/shipping.html', '/shipping'],
+  ['/privacy.html', '/privacy'],
+  ['/terms.html', '/terms']
+]);
+
+const PRIVATE_LEGACY_HTML_REDIRECTS = new Map([
+  ['/account.html', '/account'],
+  ['/gdpr-delete.html', '/gdpr-delete'],
+  ['/payment-success.html', '/payment-success']
+]);
+
+const INDEXED_LEGACY_BLOG_SLUGS = new Set([
+  'ai-generated-pcb-dfm-functional-test-review',
+  '2026-pcba-rfq-approved-alternates-inventory-windows',
+  'functional-testing-pcba-worth-the-cost'
+]);
 
 function canonicalSiteUrl() {
   return (process.env.SITE_URL || 'https://pcbaforge.com').replace(/\/$/, '');
+}
+
+function blogPostPath(slug) {
+  return `/blog/${encodeURIComponent(slug)}`;
+}
+
+function redirectPreservingQuery(req, res, targetPath, status = 301) {
+  const queryIndex = req.originalUrl.indexOf('?');
+  const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : '';
+  res.redirect(status, `${targetPath}${query}`);
+}
+
+function sendPublicPage(req, res, fileName) {
+  if (fileName === 'account.html') {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+  res.sendFile(path.join(__dirname, 'public', fileName));
 }
 
 function xmlEscape(value) {
@@ -247,7 +301,7 @@ function renderArticleBody(post) {
     : '';
 
   return [
-    '<a href="blog.html" class="back-link">&larr; BACK TO BLOG</a>',
+    '<a href="/blog" class="back-link">&larr; BACK TO BLOG</a>',
     tagsHtml ? `<div class="article-tags">${tagsHtml}</div>` : '',
     `<h1 class="article-title">${htmlEscape(post.title)}</h1>`,
     '<div class="article-meta">',
@@ -261,7 +315,7 @@ function renderArticleBody(post) {
     '<div class="article-cta-sub">Get an instant quote or submit your Gerber + BOM files to our engineers.</div>',
     '<div class="article-cta-btns">',
     '<a href="/#quote" class="btn-green">GET INSTANT QUOTE</a>',
-    '<a href="quote.html" class="btn-outline">SUBMIT INQUIRY &rarr;</a>',
+    '<a href="/quote" class="btn-outline">SUBMIT INQUIRY &rarr;</a>',
     '</div>',
     '</div>'
   ].join('\n');
@@ -271,7 +325,7 @@ function renderArticleStatus(title, message) {
   return [
     '<div class="state-wrap">',
     '<div class="state-title">ARTICLE NOT FOUND</div>',
-    `<div class="state-sub">${htmlEscape(message)}<br><br><a href="blog.html" style="color:var(--green)">&larr; Back to Blog</a></div>`,
+    `<div class="state-sub">${htmlEscape(message)}<br><br><a href="/blog" style="color:var(--green)">&larr; Back to Blog</a></div>`,
     '</div>'
   ].join('\n');
 }
@@ -279,7 +333,7 @@ function renderArticleStatus(title, message) {
 function renderBlogPostPage(post) {
   const base = canonicalSiteUrl();
   const description = truncateText(post.excerpt || stripHtml(post.content) || post.title);
-  const canonical = `${base}/blog-post.html?slug=${encodeURIComponent(post.slug)}`;
+  const canonical = `${base}${blogPostPath(post.slug)}`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -308,7 +362,7 @@ function renderBlogPostNotFound(message) {
   html = injectPageHead(html, {
     title: 'Article Not Found — PCBAForge Blog',
     description: 'The requested PCBAForge blog article was not found.',
-    canonical: `${canonicalSiteUrl()}/blog.html`,
+    canonical: `${canonicalSiteUrl()}/blog`,
     robots: 'noindex,follow'
   });
   return replaceArticleWrap(html, renderArticleStatus('Article Not Found', message));
@@ -334,7 +388,7 @@ function renderBlogCards(posts) {
         })
       : '<div class="post-cover-ph">// NO COVER</div>';
     return [
-      `<a class="post-card" href="blog-post.html?slug=${encodeURIComponent(post.slug)}">`,
+      `<a class="post-card" href="${blogPostPath(post.slug)}">`,
       coverHtml,
       '<div class="post-body">',
       tagsHtml ? `<div class="post-tags">${tagsHtml}</div>` : '',
@@ -348,10 +402,10 @@ function renderBlogCards(posts) {
 }
 
 function renderBlogTagBar(tags, activeTag) {
-  const allLink = `<a class="${activeTag ? '' : 'active'}" href="blog.html">ALL</a>`;
+  const allLink = `<a class="${activeTag ? '' : 'active'}" href="/blog">ALL</a>`;
   const tagLinks = tags.map((tag) => {
     const activeClass = tag === activeTag ? ' class="active"' : '';
-    return `<a${activeClass} href="blog.html?tag=${encodeURIComponent(tag)}">${htmlEscape(tag)}</a>`;
+    return `<a${activeClass} href="/blog?tag=${encodeURIComponent(tag)}">${htmlEscape(tag)}</a>`;
   });
   return [allLink, ...tagLinks].join('\n');
 }
@@ -362,7 +416,7 @@ function renderBlogPagination(page, total, limit, activeTag) {
   const tagQuery = activeTag ? `&tag=${encodeURIComponent(activeTag)}` : '';
   const links = [];
   for (let i = 1; i <= pages; i++) {
-    links.push(`<a class="page-btn${i === page ? ' active' : ''}" href="blog.html?page=${i}${tagQuery}">${i}</a>`);
+    links.push(`<a class="page-btn${i === page ? ' active' : ''}" href="/blog?page=${i}${tagQuery}">${i}</a>`);
   }
   return links.join('\n');
 }
@@ -409,7 +463,7 @@ app.get('/sitemap.xml', async (req, res) => {
     }
     for (const post of posts) {
       const lm = formatSitemapDate(post.updated_at || post.published_at);
-      const postLoc = `${base}/blog-post.html?slug=${encodeURIComponent(post.slug)}`;
+      const postLoc = `${base}${blogPostPath(post.slug)}`;
       xml += `  <url><loc>${xmlEscape(postLoc)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.6</priority></url>\n`;
     }
     xml += '</urlset>';
@@ -428,13 +482,8 @@ app.use('/api', (req, res, next) => {
   res.set('Expires', '0');
   next();
 });
-app.get('/account.html', (req, res) => {
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.set('Pragma', 'no-cache');
-  res.sendFile(require('path').join(__dirname, 'public', 'account.html'));
-});
 
-app.get('/blog.html', async (req, res) => {
+async function sendBlogList(req, res) {
   try {
     const page = Math.max(1, Number(req.query.page || 1) || 1);
     const limit = 12;
@@ -460,7 +509,7 @@ app.get('/blog.html', async (req, res) => {
     html = injectPageHead(html, {
       title: 'PCBAForge Blog — PCBA Engineering Insights & Guides',
       description: 'Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.',
-      canonical: `${canonicalSiteUrl()}/blog.html`
+      canonical: `${canonicalSiteUrl()}/blog`
     });
     html = injectBlogList(html, {
       posts,
@@ -475,17 +524,17 @@ app.get('/blog.html', async (req, res) => {
   } catch (err) {
     res.status(500).send('blog error');
   }
-});
+}
 
-app.get('/blog-post.html', async (req, res) => {
+async function sendBlogPost(req, res, slug) {
   try {
-    const slug = String(req.query.slug || '').trim();
-    if (!slug) {
+    const normalizedSlug = String(slug || '').trim();
+    if (!normalizedSlug) {
       res.status(404).send(renderBlogPostNotFound('No article slug was provided.'));
       return;
     }
 
-    const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [slug]);
+    const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [normalizedSlug]);
     if (!rows.length) {
       res.status(404).send(renderBlogPostNotFound('The requested article was not found.'));
       return;
@@ -496,10 +545,40 @@ app.get('/blog-post.html', async (req, res) => {
   } catch (err) {
     res.status(500).send('blog post error');
   }
+}
+
+for (const [route, fileName] of PUBLIC_PAGE_ROUTES.entries()) {
+  app.get(route, (req, res) => sendPublicPage(req, res, fileName));
+}
+
+app.get('/blog', sendBlogList);
+
+app.get('/blog/:slug', async (req, res) => {
+  await sendBlogPost(req, res, req.params.slug);
+});
+
+for (const [legacyPath, targetPath] of INDEXED_LEGACY_HTML_REDIRECTS.entries()) {
+  app.get(legacyPath, (req, res) => redirectPreservingQuery(req, res, targetPath, 301));
+}
+
+for (const [legacyPath, targetPath] of PRIVATE_LEGACY_HTML_REDIRECTS.entries()) {
+  app.get(legacyPath, (req, res) => redirectPreservingQuery(req, res, targetPath, 302));
+}
+
+app.get('/blog-post.html', async (req, res) => {
+  const slug = String(req.query.slug || '').trim();
+  if (slug && INDEXED_LEGACY_BLOG_SLUGS.has(slug)) {
+    res.redirect(301, blogPostPath(slug));
+    return;
+  }
+  res.status(404).send(renderBlogPostNotFound('The requested article has moved to the new blog URL format.'));
 });
 
 app.get('/index.html', (req, res) => {
   res.redirect(301, '/');
+});
+app.get(/^\/[^/]+\.html$/, (req, res) => {
+  res.status(404).send('Not found');
 });
 app.use(express.static('public'));
 app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => {
@@ -930,7 +1009,7 @@ app.post('/api/gdpr/delete-request', async (req, res) => {
           <p>Hi ${user.name || 'there'},</p>
           <p>We have received your request to delete your personal data from PCBAForge.</p>
           <p>We will process your request within <strong>30 days</strong> and send a confirmation email once complete.</p>
-          <p>If you have active orders in production or shipment, those records may be retained for legal/accounting purposes as outlined in our <a href="${process.env.SITE_URL || 'https://pcbaforge.com'}/privacy.html">Privacy Policy</a>.</p>
+          <p>If you have active orders in production or shipment, those records may be retained for legal/accounting purposes as outlined in our <a href="${process.env.SITE_URL || 'https://pcbaforge.com'}/privacy">Privacy Policy</a>.</p>
           <p style="color:#999;font-size:12px">Requested at: ${new Date().toISOString()}</p>`
       });
     }
@@ -1030,8 +1109,8 @@ app.post('/api/payment/create', async (req, res) => {
           brand_name: 'PCBAForge',
           landing_page: 'BILLING',
           user_action: 'PAY_NOW',
-          return_url: `${siteUrl}/payment-success.html?order=${order.order_no}&token=PAYPAL_TOKEN`,
-          cancel_url: `${siteUrl}/track.html?order=${order.order_no}&cancelled=1`,
+          return_url: `${siteUrl}/payment-success?order=${order.order_no}&token=PAYPAL_TOKEN`,
+          cancel_url: `${siteUrl}/track?order=${order.order_no}&cancelled=1`,
         }
       })
     });
@@ -1096,7 +1175,7 @@ app.post('/api/payment/capture', async (req, res) => {
         html: `<h2 style="color:#00C832">✅ Payment Confirmed!</h2>
           <p>Thank you! Your payment of <b>USD $${amountPaid.toFixed(2)}</b> for order <b>${order.order_no}</b> has been received.</p>
           <p>Our engineers will begin production shortly. You will receive shipping updates by email.</p>
-          <p><a href="${process.env.SITE_URL || ''}/track.html?order=${order.order_no}" style="background:#00C832;color:#000;padding:10px 20px;text-decoration:none;font-weight:bold;font-family:monospace">TRACK ORDER →</a></p>`
+          <p><a href="${process.env.SITE_URL || ''}/track?order=${order.order_no}" style="background:#00C832;color:#000;padding:10px 20px;text-decoration:none;font-weight:bold;font-family:monospace">TRACK ORDER →</a></p>`
       });
     }
 
@@ -1178,7 +1257,7 @@ app.get('/api/auth/verify', async (req, res) => {
       [token]
     );
     if (!rows.length) return res.status(400).send('Invalid or expired verification link.');
-    res.redirect('/account.html?verified=1');
+    res.redirect('/account?verified=1');
   } catch (err) { res.status(500).send('Server error'); }
 });
 
@@ -1214,7 +1293,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         `UPDATE users SET reset_token=$1, reset_token_expires=$2 WHERE id=$3`,
         [reset_token, expires, rows[0].id]
       );
-      const resetUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/account.html?reset_token=${reset_token}`;
+      const resetUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/account?reset_token=${reset_token}`;
       await sendMail({
         to: email,
         subject: '[PCBAForge] Password Reset Request',
@@ -1511,7 +1590,7 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
     const order = rows[0];
     if (!order.quoted_price) return res.status(400).json({ error: 'Please set quoted_price first' });
     await pool.query(`UPDATE orders SET status='quoted', payment_link_sent=1, updated_at=datetime('now') WHERE id=$1`, [order.id]);
-    const trackUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/track.html?order=${order.order_no}`;
+    const trackUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/track?order=${order.order_no}`;
     await sendMail({
       to: order.customer_email,
       subject: `[PCBAForge] Your Quote is Ready — ${order.order_no}`,
@@ -1594,7 +1673,7 @@ app.post('/api/admin/customers/:id/reset-password', adminAuth, async (req, res) 
       `UPDATE users SET reset_token=$1, reset_token_expires=$2 WHERE id=$3`,
       [reset_token, expires, req.params.id]
     );
-    const resetUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/account.html?reset_token=${reset_token}`;
+    const resetUrl = `${process.env.SITE_URL || 'https://pcbaforge.com'}/account?reset_token=${reset_token}`;
     await sendMail({
       to: rows[0].email,
       subject: '[PCBAForge] Password Reset — Admin Action',

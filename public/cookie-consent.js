@@ -25,7 +25,7 @@
     '<div id="cb-inner">',
     '  <div id="cb-text">',
     '    <span id="cb-title">🍪 We use cookies</span>',
-    '    <span id="cb-desc">We use analytics cookies to understand how visitors use our site and improve your experience. See our <a href="/privacy.html">Privacy Policy</a>.</span>',
+    '    <span id="cb-desc">We use analytics cookies to understand how visitors use our site and improve your experience. See our <a href="/privacy">Privacy Policy</a>.</span>',
     '  </div>',
     '  <div id="cb-btns">',
     '    <button id="cb-decline">Decline</button>',

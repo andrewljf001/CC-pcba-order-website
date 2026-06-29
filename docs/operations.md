@@ -141,7 +141,20 @@ which node
 
 ---
 
-## 5. 注意事项
+## 5. SEO URL / Sitemap 规范
+
+公开 URL、博客文章 URL、legacy 301、robots、sitemap 和搜索引擎提交流程以 `docs/seo-url-indexing.md` 为准。
+
+关键规则：
+
+- 公开静态页面统一使用无 `.html` URL，例如 `/quote`、`/contact`、`/blog`。
+- 博客文章统一使用 `/blog/:slug`，不能再用 `blog-post.html?slug=...` 作为公开/ canonical / sitemap URL。
+- 只有 Google Search Console 已确认收录的旧 URL 才做 SEO `301` 迁移。
+- 线上 sitemap 确认无 `.html`、无 `blog-post.html?slug=` 后，才能重新提交到 Google / Bing。
+
+---
+
+## 6. 注意事项
 
 - `.env` 文件**绝不能提交到 Git**，里面是所有密钥。确认 `.gitignore` 已包含 `.env`。
 - 恢复操作（restore.js）有风险，务必先 `--dry-run` 预览再 `--confirm`。
@@ -150,9 +163,10 @@ which node
 
 ---
 
-## 6. 维护记录
+## 7. 维护记录
 
 | 日期 | 操作 | 说明 |
 |------|------|------|
+| 2026-06-29 | 建立 SEO URL / Sitemap 规范 | 新增 `docs/seo-url-indexing.md`：公开 URL 去 `.html`、博客改 `/blog/:slug`、仅对 GSC 已收录旧地址做 301、提交前先验证线上 sitemap。 |
 | 2026-06-12 | 修复 Google 收录规范化问题 | 在 VPS 线上热修复后提交 GitHub：添加页面 canonical、设置 `/index.html` 301 到 `/`、清理站内 `index.html#...` 链接；PM2 重启 `ccpcba` 并验证线上返回正常。 |
 | 2026-05-29 | 建立备份+恢复机制 | backup.js / restore.js / cron 每日 3:00 / 保留30天 |

@@ -233,3 +233,4 @@ CONTACT_EMAIL=你的邮箱
 - 前台风格必须保持一致（绿黑极客风）
 - 后台 token 上线前要加强验证
 - 文件上传目前存本地，上线后迁移到 Cloudflare R2
+- 改公开页面 URL、博客、canonical、robots 或 sitemap 前，必须先读 `docs/seo-url-indexing.md`，按其中的无 `.html` URL、`/blog/:slug`、legacy 301 和 sitemap 提交流程执行。

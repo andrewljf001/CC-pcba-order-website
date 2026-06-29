@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Submit Inquiry — PCBAForge</title>
 <meta name="description" content="Submit a PCB fabrication, SMT assembly, or full turnkey PCBA inquiry to PCBAForge for engineering review and pricing.">
-<link rel="canonical" href="https://pcbaforge.com/quote.html">
+<link rel="canonical" href="https://pcbaforge.com/quote">
 
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
@@ -209,30 +209,30 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 <nav>
   <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <ul class="nav-links">
-    <li><a href="quote.html">Quote</a></li>
+    <li><a href="/quote">Quote</a></li>
     <li><a href="/#services">Services</a></li>
     <li><a href="/#capabilities">Capabilities</a></li>
     <li><a href="/#process">Process</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="blog.html">Blog</a></li>
-    <li><a href="track.html">Track Order</a></li>
+    <li><a href="/contact">Contact</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/track">Track Order</a></li>
   </ul>
   <div class="nav-right">
-    <a href="blog.html" class="nav-blog-m">Blog</a>
-    <a href="account.html" class="nav-signin">Sign In</a>
-    <a href="quote.html" class="nav-cta">GET QUOTE</a>
+    <a href="/blog" class="nav-blog-m">Blog</a>
+    <a href="/account" class="nav-signin">Sign In</a>
+    <a href="/quote" class="nav-cta">GET QUOTE</a>
     <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="quote.html">Quote</a>
+  <a href="/quote">Quote</a>
   <a href="/#services">Services</a>
   <a href="/#capabilities">Capabilities</a>
   <a href="/#process">Process</a>
-  <a href="contact.html">Contact</a>
-  <a href="blog.html">Blog</a>
-  <a href="track.html">Track Order</a>
-  <a href="account.html">Sign In</a>
+  <a href="/contact">Contact</a>
+  <a href="/blog">Blog</a>
+  <a href="/track">Track Order</a>
+  <a href="/account">Sign In</a>
 </div>
 <div style="background:var(--dim);border-bottom:1px solid var(--border);padding:.35rem 5%;display:flex;justify-content:flex-end;align-items:center;gap:.8rem">
   <div id="auth-bar" style="font-family:'Inter',sans-serif;letter-spacing:.06em"></div>
@@ -908,9 +908,9 @@ function updateAuthUI() {
     if (currentUser.whatsapp) { var w=document.getElementById('whatsapp'); if(w&&!w.value) w.value=currentUser.whatsapp; }
     if (currentUser.company)  { var c=document.getElementById('company');  if(c&&!c.value) c.value=currentUser.company; }
   } else {
-    bar.innerHTML = '<a href="/account.html" style="font-size:.8rem;color:var(--muted)">Sign In</a>' +
+    bar.innerHTML = '<a href="/account" style="font-size:.8rem;color:var(--muted)">Sign In</a>' +
       ' <span style="color:var(--border);margin:0 .4rem">|</span>' +
-      '<a href="/account.html?tab=register" style="font-size:.8rem;color:var(--green)">Register</a>';
+      '<a href="/account?tab=register" style="font-size:.8rem;color:var(--green)">Register</a>';
   }
 }
 function logout() {
@@ -1022,7 +1022,7 @@ function doSubmit(fd) {
         document.getElementById('inquiry-form').style.display = 'none';
         var sb = document.getElementById('success-box'); sb.classList.add('show');
         document.getElementById('success-order').textContent = 'Order #' + data.order_no;
-        document.getElementById('track-link').href = 'track.html?order=' + data.order_no;
+        document.getElementById('track-link').href = '/track?order=' + data.order_no;
       } else {
         alert('Error: ' + (data.error || 'Submission failed.'));
         btn.disabled = false; btn.innerHTML = 'SUBMIT INQUIRY →';
@@ -1223,7 +1223,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="flogo">▶ PCBAForge</div>
     <div class="flinks">
       <a href="/#services">Services</a><a href="/#quote">Quick Estimator</a><a href="/#capabilities">Capabilities</a>
-      <a href="/#process">Process</a><a href="quote.html">Submit Inquiry</a><a href="track.html">Track Order</a>
+      <a href="/#process">Process</a><a href="/quote">Submit Inquiry</a><a href="/track">Track Order</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>

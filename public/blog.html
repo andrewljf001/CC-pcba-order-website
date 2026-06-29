@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PCBAForge Blog — PCBA Engineering Insights & Guides</title>
-<link rel="canonical" href="https://pcbaforge.com/blog.html">
+<link rel="canonical" href="https://pcbaforge.com/blog">
 <meta name="description" content="Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.">
 
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -119,30 +119,30 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
 <nav>
   <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <ul class="nav-links">
-    <li><a href="quote.html">Quote</a></li>
+    <li><a href="/quote">Quote</a></li>
     <li><a href="/#services">Services</a></li>
     <li><a href="/#capabilities">Capabilities</a></li>
     <li><a href="/#process">Process</a></li>
-    <li><a href="contact.html">Contact</a></li>
-    <li><a href="blog.html" class="active">Blog</a></li>
-    <li><a href="track.html">Track Order</a></li>
+    <li><a href="/contact">Contact</a></li>
+    <li><a href="/blog" class="active">Blog</a></li>
+    <li><a href="/track">Track Order</a></li>
   </ul>
   <div class="nav-right">
-    <a href="blog.html" class="nav-blog-m">Blog</a>
-    <a href="account.html" class="nav-signin">Sign In</a>
-    <a href="quote.html" class="nav-cta">GET QUOTE</a>
+    <a href="/blog" class="nav-blog-m">Blog</a>
+    <a href="/account" class="nav-signin">Sign In</a>
+    <a href="/quote" class="nav-cta">GET QUOTE</a>
     <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="quote.html">Quote</a>
+  <a href="/quote">Quote</a>
   <a href="/#services">Services</a>
   <a href="/#capabilities">Capabilities</a>
   <a href="/#process">Process</a>
-  <a href="contact.html">Contact</a>
-  <a href="blog.html">Blog</a>
-  <a href="track.html">Track Order</a>
-  <a href="account.html">Sign In</a>
+  <a href="/contact">Contact</a>
+  <a href="/blog">Blog</a>
+  <a href="/track">Track Order</a>
+  <a href="/account">Sign In</a>
 </div>
 
 <section class="sec">
@@ -165,14 +165,14 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
       <a href="/#services">Services</a>
       <a href="/#quote">Quick Estimator</a>
       <a href="/#capabilities">Capabilities</a>
-      <a href="blog.html">Blog</a>
-      <a href="quote.html">Submit Inquiry</a>
-      <a href="track.html">Track Order</a>
+      <a href="/blog">Blog</a>
+      <a href="/quote">Submit Inquiry</a>
+      <a href="/track">Track Order</a>
     </div>
     <div class="flinks2">
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="shipping.html">Shipping Policy</a>
-      <a href="terms.html">Terms of Service</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/shipping">Shipping Policy</a>
+      <a href="/terms">Terms of Service</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
@@ -219,7 +219,7 @@ function renderCards(posts){
     var tagsHtml=tags.map(function(t){return '<span class="post-tag">'+t+'</span>';}).join('');
     var cover=p.cover_url?responsiveImage('post-cover',p.cover_url,p.title,'(max-width: 760px) 92vw, (max-width: 1100px) 45vw, 360px','lazy')
       :'<div class="post-cover-ph">// NO COVER</div>';
-    return '<div class="post-card" onclick="location.href=\'blog-post.html?slug='+p.slug+'\'">'+
+    return '<div class="post-card" onclick="location.href=\'/blog/'+encodeURIComponent(p.slug)+'\'">'+
       cover+'<div class="post-body">'+
       (tagsHtml?'<div class="post-tags">'+tagsHtml+'</div>':'')+
       '<div class="post-title">'+p.title+'</div>'+

@@ -110,21 +110,21 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 <nav>
   <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <div class="nav-right">
-    <a href="blog.html" class="nav-blog-m">Blog</a>
-    <a href="account.html" class="nav-signin">Sign In</a>
-    <a href="quote.html" class="nav-cta">GET QUOTE</a>
+    <a href="/blog" class="nav-blog-m">Blog</a>
+    <a href="/account" class="nav-signin">Sign In</a>
+    <a href="/quote" class="nav-cta">GET QUOTE</a>
     <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="quote.html">Quote</a>
+  <a href="/quote">Quote</a>
   <a href="/#services">Services</a>
   <a href="/#capabilities">Capabilities</a>
   <a href="/#process">Process</a>
   <a href="/#contact">Contact</a>
-  <a href="blog.html">Blog</a>
-  <a href="track.html">Track Order</a>
-  <a href="account.html">Sign In</a>
+  <a href="/blog">Blog</a>
+  <a href="/track">Track Order</a>
+  <a href="/account">Sign In</a>
 </div>
 
 <div class="wrap" id="wrap">
@@ -139,13 +139,13 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     <div class="flinks">
       <a href="/#services">Services</a>
       <a href="/#quote">Quick Estimator</a>
-      <a href="blog.html">Blog</a>
-      <a href="track.html">Track Order</a>
+      <a href="/blog">Blog</a>
+      <a href="/track">Track Order</a>
     </div>
     <div class="flinks2">
-      <a href="privacy.html">Privacy Policy</a>
-      <a href="shipping.html">Shipping Policy</a>
-      <a href="terms.html">Terms of Service</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/shipping">Shipping Policy</a>
+      <a href="/terms">Terms of Service</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
@@ -201,7 +201,7 @@ async function init() {
       </div>
 
       <div class="btn-group">
-        <a href="track.html?order=${o.order_no}" class="btn-green">📦 TRACK ORDER →</a>
+        <a href="/track?order=${o.order_no}" class="btn-green">📦 TRACK ORDER →</a>
         <a href="/" class="btn-outline">← BACK TO HOME</a>
       </div>`;
 

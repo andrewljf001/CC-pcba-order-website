@@ -387,7 +387,7 @@ tr:hover td{background:#f8fafc}
           </div>
           <div class="card-body">
             <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem;line-height:1.7">
-              以下设置直接影响 <strong style="color:var(--green)">contact.html</strong> 联系页面的显示内容及跳转链接。
+              以下设置直接影响 <strong style="color:var(--green)">/contact</strong> 联系页面的显示内容及跳转链接。
             </div>
             <div class="settings-grid">
               <div class="setting-item">
@@ -440,7 +440,7 @@ tr:hover td{background:#f8fafc}
               </div>
             </div>
             <div style="margin-top:.8rem;padding:.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:.76rem;color:var(--muted);line-height:1.7">
-              💡 保存后立即生效，无需重启服务器。前台 contact.html 会自动读取最新值。
+              💡 保存后立即生效，无需重启服务器。前台 /contact 会自动读取最新值。
             </div>
           </div>
         </div>
@@ -976,7 +976,7 @@ async function loadPosts() {
         <td style="white-space:nowrap">
           <button class="btn btn-outline btn-sm" onclick="editPost('${p.id}')">EDIT</button>
           <button class="btn btn-red btn-sm" style="margin-left:.4rem" onclick="deletePost('${p.id}','${esc(p.title)}')">DEL</button>
-          <a href="/blog-post.html?slug=${p.slug}" target="_blank" class="btn btn-outline btn-sm" style="margin-left:.4rem">VIEW</a>
+          <a href="/blog/${encodeURIComponent(p.slug)}" target="_blank" class="btn btn-outline btn-sm" style="margin-left:.4rem">VIEW</a>
         </td>
       </tr>`;
     }).join('');

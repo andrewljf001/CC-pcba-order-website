@@ -193,30 +193,30 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2rem 5%;margin-t
 <nav>
   <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <ul class="nav-links">
-    <li><a href="quote.html">Quote</a></li>
+    <li><a href="/quote">Quote</a></li>
     <li><a href="/#services">Services</a></li>
     <li><a href="/#capabilities">Capabilities</a></li>
     <li><a href="/#process">Process</a></li>
     <li><a href="/#contact">Contact</a></li>
-    <li><a href="blog.html">Blog</a></li>
-    <li><a href="track.html">Track Order</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/track">Track Order</a></li>
   </ul>
   <div class="nav-right">
-    <a href="blog.html" class="nav-blog-m">Blog</a>
-    <a href="account.html" class="nav-signin">Sign In</a>
-    <a href="quote.html" class="nav-cta">GET QUOTE</a>
+    <a href="/blog" class="nav-blog-m">Blog</a>
+    <a href="/account" class="nav-signin">Sign In</a>
+    <a href="/quote" class="nav-cta">GET QUOTE</a>
     <button class="nav-burger" id="navBurger" aria-label="Menu">☰</button>
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="quote.html">Quote</a>
+  <a href="/quote">Quote</a>
   <a href="/#services">Services</a>
   <a href="/#capabilities">Capabilities</a>
   <a href="/#process">Process</a>
   <a href="/#contact">Contact</a>
-  <a href="blog.html">Blog</a>
-  <a href="track.html">Track Order</a>
-  <a href="account.html">Sign In</a>
+  <a href="/blog">Blog</a>
+  <a href="/track">Track Order</a>
+  <a href="/account">Sign In</a>
 </div>
 
 <div class="page-wrap">
@@ -432,11 +432,11 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2rem 5%;margin-t
     <div class="flogo">▶ PCBAForge</div>
     <div class="flinks">
       <a href="/#services">Services</a><a href="/#quote">Quick Estimator</a>
-      <a href="/#capabilities">Capabilities</a><a href="blog.html">Blog</a>
-      <a href="quote.html">Submit Inquiry</a><a href="track.html">Track Order</a>
+      <a href="/#capabilities">Capabilities</a><a href="/blog">Blog</a>
+      <a href="/quote">Submit Inquiry</a><a href="/track">Track Order</a>
     </div>
     <div class="flinks2">
-      <a href="privacy.html">Privacy Policy</a><a href="shipping.html">Shipping Policy</a><a href="terms.html">Terms of Service</a>
+      <a href="/privacy">Privacy Policy</a><a href="/shipping">Shipping Policy</a><a href="/terms">Terms of Service</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
@@ -684,7 +684,7 @@ async function loadOrders(){
   try{
     const orders=await api('/api/me/orders');
     if(!orders.length){
-      el.innerHTML=`<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">NO ORDERS YET</div><a href="quote.html" style="display:inline-block;margin-top:.5rem;background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.6rem 1.4rem">GET A QUOTE →</a></div>`;
+      el.innerHTML=`<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">NO ORDERS YET</div><a href="/quote" style="display:inline-block;margin-top:.5rem;background:var(--green);color:#fff;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.1em;padding:.6rem 1.4rem">GET A QUOTE →</a></div>`;
       return;
     }
     const statusClass={pending:'sb-pending',quoted:'sb-quoted',paid:'sb-paid',production:'sb-production',shipped:'sb-shipped',completed:'sb-completed',cancelled:'sb-cancelled'};
@@ -701,7 +701,7 @@ async function loadOrders(){
           <div class="om-item">Quoted <span style="color:var(--green)">${o.quoted_price?'$'+Number(o.quoted_price).toFixed(2):'Pending'}</span></div>
         </div>
         <div style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap">
-          ${o.status==='quoted'&&o.quoted_price&&o.payment_link_sent?`<a href="track.html?order=${o.order_no}&email=${encodeURIComponent(window.currentUserEmail||'')}" class="btn-outline" style="font-size:.72rem;padding:.35rem .8rem;text-decoration:none;background:var(--amber);color:#000;border-color:var(--amber);font-weight:700">⚡ PAY NOW</a>`:''}
+          ${o.status==='quoted'&&o.quoted_price&&o.payment_link_sent?`<a href="/track?order=${o.order_no}&email=${encodeURIComponent(window.currentUserEmail||'')}" class="btn-outline" style="font-size:.72rem;padding:.35rem .8rem;text-decoration:none;background:var(--amber);color:#000;border-color:var(--amber);font-weight:700">⚡ PAY NOW</a>`:''}
         </div>
       </div>`).join('');
   }catch(e){ el.innerHTML=`<div class="empty"><div class="empty-text">Failed to load orders</div></div>`; }
