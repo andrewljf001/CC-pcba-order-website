@@ -133,6 +133,12 @@ const PRIVATE_LEGACY_HTML_REDIRECTS = new Map([
   ['/payment-success.html', '/payment-success']
 ]);
 
+const PRIVATE_PUBLIC_PAGES = new Set([
+  'account.html',
+  'gdpr-delete.html',
+  'payment-success.html'
+]);
+
 const INDEXED_LEGACY_BLOG_SLUGS = new Set([
   'ai-generated-pcb-dfm-functional-test-review',
   '2026-pcba-rfq-approved-alternates-inventory-windows',
@@ -153,12 +159,23 @@ function redirectPreservingQuery(req, res, targetPath, status = 301) {
   res.redirect(status, `${targetPath}${query}`);
 }
 
+function setNoStore(res) {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+}
+
+function setPublicCache(res, seconds = 300) {
+  res.removeHeader('Pragma');
+  res.removeHeader('Expires');
+  res.set('Cache-Control', `public, max-age=${seconds}, stale-while-revalidate=86400`);
+  res.set('CDN-Cache-Control', `public, s-maxage=${seconds}, stale-while-revalidate=86400`);
+  res.set('Cloudflare-CDN-Cache-Control', `public, max-age=${seconds}`);
+}
+
 function sendPublicPage(req, res, fileName) {
-  if (fileName === 'account.html') {
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    res.set('Pragma', 'no-cache');
-    res.set('Expires', '0');
-  }
+  if (PRIVATE_PUBLIC_PAGES.has(fileName)) setNoStore(res);
+  else setPublicCache(res, 300);
   res.sendFile(path.join(__dirname, 'public', fileName));
 }
 
@@ -519,7 +536,7 @@ async function sendBlogList(req, res) {
       tags,
       activeTag
     });
-    res.set('Cache-Control', 'public, max-age=300');
+    setPublicCache(res, 300);
     res.send(html);
   } catch (err) {
     res.status(500).send('blog error');
@@ -540,7 +557,7 @@ async function sendBlogPost(req, res, slug) {
       return;
     }
 
-    res.set('Cache-Control', 'public, max-age=300');
+    setPublicCache(res, 300);
     res.send(renderBlogPostPage(rows[0]));
   } catch (err) {
     res.status(500).send('blog post error');
@@ -860,6 +877,7 @@ app.get('/api/settings/public', async (req, res) => {
     );
     const cfg = {};
     rows.forEach(r => { cfg[r.key] = r.value; });
+    setPublicCache(res, 300);
     res.json(cfg);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1202,6 +1220,7 @@ app.post('/api/payment/capture', async (req, res) => {
 app.get('/api/payment/config', async (req, res) => {
   try {
     const cfg = await getPayPalConfig();
+    setPublicCache(res, 300);
     res.json({ client_id: cfg.clientId, mode: cfg.mode });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1772,6 +1791,7 @@ app.get('/api/posts', async (req, res) => {
       [...params, Number(limit), Number(offset)]
     );
     const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
+    setPublicCache(res, 300);
     res.json({ posts: rows, total: Number(countRows[0]?.total || 0) });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
