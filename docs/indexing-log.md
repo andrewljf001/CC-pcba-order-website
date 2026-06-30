@@ -1,5 +1,38 @@
 # Indexing Log
 
+## 2026-07-01 Sitemap Cleanup Follow-up
+
+Site: `https://pcbaforge.com`
+
+Issue found:
+
+- The live sitemap had started including macOS AppleDouble files such as `https://pcbaforge.com/._index.html`.
+- Public backup files such as `https://pcbaforge.com/blog.html.bak-soft404` were reachable from `public/`.
+- Five published blog posts still contained legacy `.html` or `blog-post.html?slug=` links.
+
+Actions:
+
+- Deployed commit `1094d2c6b70607a468cd35e7fd5939759dce185d` (`Clean sitemap and public SEO files`).
+- Changed sitemap generation to use the explicit canonical page allowlist only.
+- Added a public-file guard for `._*`, backup/original files, and editor backup suffixes before `express.static`.
+- Updated `/blog` to expose its visible page title as an `h1`.
+- Updated five published article bodies to use canonical `/quote`, `/blog`, and `/blog/:slug` links.
+- Moved VPS-only public junk files to `backups/public-junk-20260630122119/`.
+- Removed the GitHub token from the VPS `origin` remote URL.
+
+Live verification:
+
+- `https://pcbaforge.com/sitemap.xml` contains canonical extensionless static URLs and `/blog/:slug` article URLs only.
+- No `._*.html`, `.html`, or `blog-post.html?slug=` URLs remain in the sitemap.
+- `https://pcbaforge.com/._index.html` returns `404`.
+- `https://pcbaforge.com/blog.html.bak-soft404` returns `404`.
+- `https://pcbaforge.com/blog` has `h1`: `Engineering Insights & Guides`.
+- The tested blog article had zero legacy `.html`/`blog-post.html?slug=` links after the content update.
+
+Note:
+
+- `https://pcbaforge.com/fonts/dm-sans-subset.woff2` was removed from the origin and returns `404` on `127.0.0.1:3001`, but Cloudflare may continue serving the cached file until that edge object is purged or expires. The file is not referenced by `fonts.css`.
+
 ## 2026-06-29 SEO URL Migration Sitemap Resubmission
 
 Site: `https://pcbaforge.com`
