@@ -7,6 +7,23 @@
   var STORAGE_KEY = 'pcbaf_cookie_consent';
   var stored = localStorage.getItem(STORAGE_KEY);
 
+  function hydrateEmailLinks() {
+    document.querySelectorAll('[data-email-user][data-email-domain]').forEach(function (link) {
+      var user = link.getAttribute('data-email-user') || '';
+      var domain = link.getAttribute('data-email-domain') || '';
+      if (!user || !domain) return;
+      var email = user + '@' + domain;
+      link.textContent = email;
+      link.setAttribute('href', 'mailto:' + email);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hydrateEmailLinks);
+  } else {
+    hydrateEmailLinks();
+  }
+
   // Default: deny analytics until user accepts
   if (typeof window.gtag === 'function') {
     window.gtag('consent', 'default', {
