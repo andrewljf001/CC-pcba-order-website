@@ -277,6 +277,35 @@ const PRIVATE_PUBLIC_PAGES = new Set([
   'payment-success.html'
 ]);
 
+const PUBLIC_SETTINGS_KEYS = [
+  'whatsapp_number',
+  'engineer_whatsapp',
+  'shipping_address',
+  'company_name',
+  'contact_address',
+  'contact_hours',
+  'smt_single_price',
+  'smt_double_price',
+  'pcb_tier1_price',
+  'pcb_tier2_price',
+  'pcb_tier3_price',
+  'smt_max_parts',
+  'smt_max_ic',
+  'smt_max_dip',
+  'google_oauth_enabled',
+  'github_oauth_enabled',
+  'paypal_client_id',
+  'paypal_mode',
+  'pcb_qty_split',
+  'pcb_qty_max',
+  'pcb_size_max',
+  'pcb_layer_max'
+];
+
+const PUBLIC_MEMORY_CACHE_MS = Number(process.env.PUBLIC_MEMORY_CACHE_MS || 6 * 60 * 60 * 1000);
+const PUBLIC_MEMORY_CACHE_MAX_ENTRIES = Number(process.env.PUBLIC_MEMORY_CACHE_MAX_ENTRIES || 200);
+const publicMemoryCache = new Map();
+
 const INDEXED_LEGACY_BLOG_SLUGS = new Set([
   'ai-generated-pcb-dfm-functional-test-review',
   '2026-pcba-rfq-approved-alternates-inventory-windows',
@@ -309,6 +338,114 @@ function setPublicCache(res, seconds = 300) {
   res.set('Cache-Control', `public, max-age=${seconds}, stale-while-revalidate=86400`);
   res.set('CDN-Cache-Control', `public, s-maxage=${seconds}, stale-while-revalidate=86400`);
   res.set('Cloudflare-CDN-Cache-Control', `public, max-age=${seconds}`);
+}
+
+function publicMemoryCacheKey(...parts) {
+  return parts.map((part) => String(part ?? '')).join('|');
+}
+
+function getPublicMemoryCache(key) {
+  const entry = publicMemoryCache.get(key);
+  if (!entry) return { hit: false };
+  if (entry.expiresAt <= Date.now()) {
+    publicMemoryCache.delete(key);
+    return { hit: false };
+  }
+  publicMemoryCache.delete(key);
+  publicMemoryCache.set(key, entry);
+  return { hit: true, value: entry.value };
+}
+
+function setPublicMemoryCache(key, value, ttlMs = PUBLIC_MEMORY_CACHE_MS) {
+  if (!Number.isFinite(ttlMs) || ttlMs <= 0) return;
+  publicMemoryCache.set(key, { value, expiresAt: Date.now() + ttlMs });
+  while (publicMemoryCache.size > PUBLIC_MEMORY_CACHE_MAX_ENTRIES) {
+    const oldestKey = publicMemoryCache.keys().next().value;
+    if (!oldestKey) break;
+    publicMemoryCache.delete(oldestKey);
+  }
+}
+
+async function getOrSetPublicMemoryCache(key, loader, ttlMs = PUBLIC_MEMORY_CACHE_MS) {
+  const cached = getPublicMemoryCache(key);
+  if (cached.hit) return cached;
+  const value = await loader();
+  setPublicMemoryCache(key, value, ttlMs);
+  return { hit: false, value };
+}
+
+function clearPublicMemoryCache(prefix) {
+  if (!prefix) {
+    publicMemoryCache.clear();
+    return;
+  }
+  for (const key of publicMemoryCache.keys()) {
+    if (key.startsWith(prefix)) publicMemoryCache.delete(key);
+  }
+}
+
+function setOriginCacheHeader(res, hit) {
+  res.set('X-Origin-Cache', hit ? 'HIT' : 'MISS');
+}
+
+async function loadPublicSettingsConfig() {
+  const placeholders = PUBLIC_SETTINGS_KEYS.map((_, i) => `$${i + 1}`).join(',');
+  const { rows } = await pool.query(
+    `SELECT key, value FROM settings WHERE key IN (${placeholders})`,
+    PUBLIC_SETTINGS_KEYS
+  );
+  const cfg = {};
+  rows.forEach((row) => { cfg[row.key] = row.value; });
+  return cfg;
+}
+
+async function loadPublicPostsPage({ tag, page, limit }) {
+  const offset = (page - 1) * limit;
+  let where = "WHERE status='published'";
+  const params = [];
+  if (tag) {
+    where += ' AND tags LIKE ?';
+    params.push('%' + tag + '%');
+  }
+  const { rows } = await pool.query(
+    `SELECT id, slug, title, excerpt, cover_url, tags, author, views, published_at, created_at
+     FROM posts ${where} ORDER BY published_at DESC LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
+  );
+  const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
+  return { posts: rows, total: Number(countRows[0]?.total || 0) };
+}
+
+async function renderBlogListHtml({ page, activeTag }) {
+  const limit = 12;
+  const [{ posts, total }, { rows: tagRows }] = await Promise.all([
+    loadPublicPostsPage({ tag: activeTag, page, limit }),
+    pool.query("SELECT tags FROM posts WHERE status='published'")
+  ]);
+  const tags = [...new Set(tagRows.flatMap((row) => parsePostTags(row.tags)))].sort();
+
+  let html = readPublicHtml('blog.html');
+  html = injectPageHead(html, {
+    title: 'PCBAForge Blog — PCBA Engineering Insights & Guides',
+    description: 'Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.',
+    canonical: `${canonicalSiteUrl()}/blog`
+  });
+  return injectBlogList(html, {
+    posts,
+    total,
+    page,
+    limit,
+    tags,
+    activeTag
+  });
+}
+
+async function renderBlogPostHtml(slug) {
+  const normalizedSlug = String(slug || '').trim();
+  if (!normalizedSlug) return null;
+  const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [normalizedSlug]);
+  if (!rows.length) return null;
+  return renderBlogPostPage(rows[0]);
 }
 
 function sendPublicPage(req, res, fileName) {
@@ -511,8 +648,8 @@ function injectPageHead(html, { title, description, canonical, robots, jsonLd })
 
 function replaceArticleWrap(html, contentHtml) {
   return html.replace(
-    /<div class="article-wrap" id="article-wrap">[\s\S]*?<\/div>\s*<\/div>\s*(?=<footer>)/,
-    `<div class="article-wrap" id="article-wrap">\n${contentHtml}\n</div>\n\n`
+    /<div class="article-wrap" id="article-wrap">[\s\S]*?(?=<footer>)/,
+    `<div class="article-wrap" id="article-wrap" data-server-rendered="1">\n${contentHtml}\n</div>\n\n`
   );
 }
 
@@ -554,7 +691,7 @@ function renderArticleBody(post) {
 function renderArticleStatus(title, message) {
   return [
     '<div class="state-wrap">',
-    '<div class="state-title">ARTICLE NOT FOUND</div>',
+    `<div class="state-title">${htmlEscape(title).toUpperCase()}</div>`,
     `<div class="state-sub">${htmlEscape(message)}<br><br><a href="/blog" style="color:var(--green)">&larr; Back to Blog</a></div>`,
     '</div>'
   ].join('\n');
@@ -596,6 +733,17 @@ function renderBlogPostNotFound(message) {
     robots: 'noindex,follow'
   });
   return replaceArticleWrap(html, renderArticleStatus('Article Not Found', message));
+}
+
+function renderBlogPostUnavailable(message) {
+  let html = readPublicHtml('blog-post.html');
+  html = injectPageHead(html, {
+    title: 'Blog Temporarily Unavailable — PCBAForge Blog',
+    description: 'PCBAForge blog articles are temporarily unavailable.',
+    canonical: `${canonicalSiteUrl()}/blog`,
+    robots: 'noindex,follow'
+  });
+  return replaceArticleWrap(html, renderArticleStatus('Blog Temporarily Unavailable', message));
 }
 
 function renderBlogCards(posts) {
@@ -663,6 +811,27 @@ function injectBlogList(html, { posts, total, page, limit, tags, activeTag }) {
     );
 }
 
+function renderBlogListUnavailable() {
+  let html = readPublicHtml('blog.html');
+  html = injectPageHead(html, {
+    title: 'PCBAForge Blog — PCBA Engineering Insights & Guides',
+    description: 'Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.',
+    canonical: `${canonicalSiteUrl()}/blog`,
+    robots: 'noindex,follow'
+  });
+  html = injectBlogList(html, {
+    posts: [],
+    total: 0,
+    page: 1,
+    limit: 12,
+    tags: [],
+    activeTag: ''
+  });
+  return html
+    .replace('NO ARTICLES YET', 'BLOG TEMPORARILY UNAVAILABLE')
+    .replace('Check back soon. New PCBA engineering content is coming.', 'Articles cannot be loaded right now. The page layout remains available while content is restored.');
+}
+
 // ── Sitemap ─────────────────────────────────
 app.get('/sitemap_index.xml', (req, res) => {
   const base = canonicalSiteUrl();
@@ -716,43 +885,18 @@ app.use('/api', (req, res, next) => {
 async function sendBlogList(req, res) {
   try {
     const page = Math.max(1, Number(req.query.page || 1) || 1);
-    const limit = 12;
-    const offset = (page - 1) * limit;
     const activeTag = String(req.query.tag || '').trim();
-    let where = "WHERE status='published'";
-    const params = [];
-    if (activeTag) {
-      where += ' AND tags LIKE ?';
-      params.push('%' + activeTag + '%');
-    }
-
-    const { rows: posts } = await pool.query(
-      `SELECT id, slug, title, excerpt, cover_url, tags, author, views, published_at, created_at
-       FROM posts ${where} ORDER BY published_at DESC LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
-    );
-    const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
-    const { rows: tagRows } = await pool.query("SELECT tags FROM posts WHERE status='published'");
-    const tags = [...new Set(tagRows.flatMap((row) => parsePostTags(row.tags)))].sort();
-
-    let html = readPublicHtml('blog.html');
-    html = injectPageHead(html, {
-      title: 'PCBAForge Blog — PCBA Engineering Insights & Guides',
-      description: 'Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.',
-      canonical: `${canonicalSiteUrl()}/blog`
-    });
-    html = injectBlogList(html, {
-      posts,
-      total: Number(countRows[0]?.total || 0),
-      page,
-      limit,
-      tags,
-      activeTag
-    });
+    const cacheKey = publicMemoryCacheKey('blog-list', page, activeTag);
+    const { hit, value: html } = await getOrSetPublicMemoryCache(cacheKey, () => (
+      renderBlogListHtml({ page, activeTag })
+    ));
     setPublicCache(res, 300);
+    setOriginCacheHeader(res, hit);
     res.send(html);
   } catch (err) {
-    res.status(500).send('blog error');
+    console.error('[BLOG_LIST]', err.message);
+    setPublicCache(res, 60);
+    res.status(200).send(renderBlogListUnavailable());
   }
 }
 
@@ -764,16 +908,22 @@ async function sendBlogPost(req, res, slug) {
       return;
     }
 
-    const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [normalizedSlug]);
-    if (!rows.length) {
+    const cacheKey = publicMemoryCacheKey('blog-post', normalizedSlug);
+    const { hit, value: html } = await getOrSetPublicMemoryCache(cacheKey, () => (
+      renderBlogPostHtml(normalizedSlug)
+    ));
+    if (!html) {
       res.status(404).send(renderBlogPostNotFound('The requested article was not found.'));
       return;
     }
 
     setPublicCache(res, 300);
-    res.send(renderBlogPostPage(rows[0]));
+    setOriginCacheHeader(res, hit);
+    res.send(html);
   } catch (err) {
-    res.status(500).send('blog post error');
+    console.error('[BLOG_POST]', err.message);
+    setPublicCache(res, 60);
+    res.status(200).send(renderBlogPostUnavailable('Articles cannot be loaded right now. Please return to the blog index or try again later.'));
   }
 }
 
@@ -1086,19 +1236,9 @@ function adminAuth(req, res, next) {
 
 app.get('/api/settings/public', async (req, res) => {
   try {
-    const PUBLIC_KEYS = ['whatsapp_number','engineer_whatsapp','shipping_address','company_name','contact_address','contact_hours',
-                         'smt_single_price','smt_double_price','pcb_tier1_price',
-                         'pcb_tier2_price','pcb_tier3_price','smt_max_parts',
-                         'smt_max_ic','smt_max_dip','google_oauth_enabled','github_oauth_enabled',
-                         'paypal_client_id','paypal_mode',
-                         'pcb_qty_split','pcb_qty_max','pcb_size_max','pcb_layer_max'];
-    const placeholders = PUBLIC_KEYS.map((_,i) => `$${i+1}`).join(',');
-    const { rows } = await pool.query(
-      `SELECT key, value FROM settings WHERE key IN (${placeholders})`, PUBLIC_KEYS
-    );
-    const cfg = {};
-    rows.forEach(r => { cfg[r.key] = r.value; });
+    const { hit, value: cfg } = await getOrSetPublicMemoryCache('settings|public', loadPublicSettingsConfig);
     setPublicCache(res, 300);
+    setOriginCacheHeader(res, hit);
     res.json(cfg);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -1939,6 +2079,7 @@ app.get('/api/admin/settings', adminAuth, async (req, res) => {
 app.put('/api/admin/settings/:key', adminAuth, async (req, res) => {
   try {
     await pool.query("UPDATE settings SET value=$1, updated_at=datetime('now') WHERE key=$2", [req.body.value, req.params.key]);
+    clearPublicMemoryCache('settings|');
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -2004,19 +2145,16 @@ app.post('/api/admin/mail/test', adminAuth, async (req, res) => {
 
 app.get('/api/posts', async (req, res) => {
   try {
-    const { tag, page = 1, limit = 12 } = req.query;
-    const offset = (page - 1) * limit;
-    let where = "WHERE status='published'";
-    const params = [];
-    if (tag) { where += ` AND tags LIKE ?`; params.push('%' + tag + '%'); }
-    const { rows } = await pool.query(
-      `SELECT id, slug, title, excerpt, cover_url, tags, author, views, published_at, created_at
-       FROM posts ${where} ORDER BY published_at DESC LIMIT ? OFFSET ?`,
-      [...params, Number(limit), Number(offset)]
-    );
-    const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
+    const tag = String(req.query.tag || '').trim();
+    const page = Math.max(1, Number(req.query.page || 1) || 1);
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit || 12) || 12));
+    const cacheKey = publicMemoryCacheKey('api-posts', tag, page, limit);
+    const { hit, value } = await getOrSetPublicMemoryCache(cacheKey, () => (
+      loadPublicPostsPage({ tag, page, limit })
+    ));
     setPublicCache(res, 300);
-    res.json({ posts: rows, total: Number(countRows[0]?.total || 0) });
+    setOriginCacheHeader(res, hit);
+    res.json(value);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -2084,6 +2222,8 @@ app.post('/api/admin/posts', adminAuth, async (req, res) => {
       [uuidv4(), slug, title, excerpt||'', sanitizeBlogHtml(content), cover_url||'',
        JSON.stringify(tags||[]), status||'draft', author||'PCBAForge Team', published_at]
     );
+    clearPublicMemoryCache('blog-');
+    clearPublicMemoryCache('api-posts|');
     res.json(rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -2105,6 +2245,8 @@ app.put('/api/admin/posts/:id', adminAuth, async (req, res) => {
        status=COALESCE(?,status), author=COALESCE(?,author), published_at=?, updated_at=datetime('now') WHERE id=?`,
       [title, slug, excerpt, content == null ? null : sanitizeBlogHtml(content), cover_url, tags ? JSON.stringify(tags) : null, status, author, published_at, req.params.id]
     );
+    clearPublicMemoryCache('blog-');
+    clearPublicMemoryCache('api-posts|');
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -2112,6 +2254,8 @@ app.put('/api/admin/posts/:id', adminAuth, async (req, res) => {
 app.delete('/api/admin/posts/:id', adminAuth, async (req, res) => {
   try {
     await pool.query(`DELETE FROM posts WHERE id=?`, [req.params.id]);
+    clearPublicMemoryCache('blog-');
+    clearPublicMemoryCache('api-posts|');
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -2128,6 +2272,39 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Server error' });
 });
 
+async function warmPublicMemoryCache() {
+  const tasks = [
+    getOrSetPublicMemoryCache('settings|public', loadPublicSettingsConfig),
+    getOrSetPublicMemoryCache(publicMemoryCacheKey('blog-list', 1, ''), () => (
+      renderBlogListHtml({ page: 1, activeTag: '' })
+    )),
+    getOrSetPublicMemoryCache(publicMemoryCacheKey('api-posts', '', 1, 12), () => (
+      loadPublicPostsPage({ tag: '', page: 1, limit: 12 })
+    ))
+  ];
+
+  try {
+    const { rows } = await pool.query("SELECT slug FROM posts WHERE status='published' ORDER BY published_at DESC LIMIT 50");
+    for (const row of rows || []) {
+      tasks.push(getOrSetPublicMemoryCache(publicMemoryCacheKey('blog-post', row.slug), () => (
+        renderBlogPostHtml(row.slug)
+      )));
+    }
+  } catch (err) {
+    console.warn('[PUBLIC CACHE WARMUP] post slug preload skipped:', err.message);
+  }
+
+  const results = await Promise.allSettled(tasks);
+  const failed = results.filter((result) => result.status === 'rejected');
+  if (failed.length) {
+    console.warn(`[PUBLIC CACHE WARMUP] ${failed.length} entries failed`);
+  }
+  console.log(`[PUBLIC CACHE WARMUP] ${results.length - failed.length} entries ready`);
+}
+
 app.listen(PORT, () => {
   console.log(`✅ PCBAForge server running on http://localhost:${PORT}`);
+  warmPublicMemoryCache().catch((err) => {
+    console.warn('[PUBLIC CACHE WARMUP]', err.message);
+  });
 });
