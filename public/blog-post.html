@@ -38,13 +38,13 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .article-title{color:var(--ink);font-size:clamp(2.2rem,4vw,3.35rem);line-height:1.08;letter-spacing:-.035em;font-weight:900;margin-bottom:1rem;max-width:980px}
 .article-meta{display:flex;gap:1.5rem;font-size:.8rem;color:var(--muted);font-weight:600;margin-bottom:2rem;flex-wrap:wrap}
 .article-cover{width:100%;max-height:500px;object-fit:cover;border-radius:14px;margin-bottom:2.5rem;box-shadow:var(--shadow)}
-.article-content{font-size:1.08rem;line-height:1.85;color:var(--text)}
+.article-content{font-size:1.08rem;line-height:1.85;color:var(--text);overflow-wrap:anywhere}
 .article-content h2{color:var(--ink);font-size:1.5rem;font-weight:900;letter-spacing:-.02em;margin:2.2rem 0 .9rem}
 .article-content h3{color:var(--ink);font-size:1.2rem;font-weight:800;margin:1.8rem 0 .7rem}
 .article-content p{margin-bottom:1.3rem}
 .article-content ul,.article-content ol{margin:0 0 1.3rem 1.4rem}
 .article-content li{margin-bottom:.5rem}
-.article-content a{color:var(--green2);font-weight:600;text-decoration:underline}
+.article-content a{color:var(--green2);font-weight:600;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word}
 .article-content strong{color:var(--ink);font-weight:700}
 .article-content img{max-width:100%;border-radius:12px;margin:1.5rem 0}
 .article-content blockquote{border-left:3px solid var(--green);background:#f0fdf4;padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin:1.5rem 0;color:var(--text)}
@@ -65,7 +65,7 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .loading-dot:nth-child(2){animation-delay:.2s}.loading-dot:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
 footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
-.fi{max-width:var(--max);margin:0 auto;text-align:center}
+.fi{max-width:1200px;margin:0 auto;text-align:center}
 .flogo{color:var(--green2);font-size:1rem;font-weight:900;margin-bottom:.8rem}
 .flinks{display:flex;justify-content:center;gap:1.5rem;margin-bottom:.6rem;flex-wrap:wrap}
 .flinks a{font-size:.84rem;color:var(--muted)}.flinks a:hover{color:var(--ink)}
@@ -118,7 +118,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     <li><a href="/#capabilities">Capabilities</a></li>
     <li><a href="/#process">Process</a></li>
     <li><a href="/contact">Contact</a></li>
-    <li><a href="/blog" class="active">Blog</a></li>
+    <li><a href="/blog">Blog</a></li>
     <li><a href="/track">Track Order</a></li>
   </ul>
   <div class="nav-right">
@@ -152,16 +152,18 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
       <a href="/#services">Services</a>
       <a href="/#quote">Quick Estimator</a>
       <a href="/#capabilities">Capabilities</a>
-      <a href="/blog">Blog</a>
+      <a href="/#process">Process</a>
       <a href="/quote">Submit Inquiry</a>
+      <a href="/blog">Blog</a>
       <a href="/track">Track Order</a>
+      <a href="/contact">Contact</a>
     </div>
     <div class="flinks2">
       <a href="/privacy">Privacy Policy</a>
       <a href="/shipping">Shipping Policy</a>
       <a href="/terms">Terms of Service</a>
     </div>
-    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
 </footer>
 
@@ -194,7 +196,7 @@ async function loadPost(){
   var slug=params.get('slug');
   var wrap=document.getElementById('article-wrap');
   var renderedContent=document.getElementById('post-content');
-  if(renderedContent && renderedContent.textContent.trim()){
+  if((wrap && wrap.getAttribute('data-server-rendered') === '1') || (renderedContent && renderedContent.textContent.trim())){
     return;
   }
 
@@ -276,7 +278,7 @@ loadPost();
   }
 })();
 </script>
-<script src="/cookie-consent.js"></script>
+<script src="/cookie-consent.js?v=20260630"></script>
 <script>(function(){var t=localStorage.getItem("cc_token");if(t){document.querySelectorAll(".nav-signin").forEach(function(el){el.textContent="My Account";});}})();</script>
 </body>
 </html>

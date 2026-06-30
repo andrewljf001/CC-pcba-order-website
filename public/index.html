@@ -193,7 +193,7 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 
 /* ===== FOOTER ===== */
 footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
-.fi{max-width:var(--max);margin:0 auto;text-align:center}
+.fi{max-width:1200px;margin:0 auto;text-align:center}
 .flogo{color:var(--green2);font-size:1rem;font-weight:900;margin-bottom:.8rem}
 .flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
 .flinks a{font-size:.84rem;color:var(--muted);transition:color .2s}
@@ -238,6 +238,18 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   .psteps{grid-template-columns:1fr}
   .frow{grid-template-columns:1fr}
   .svc-selector{grid-template-columns:1fr}
+  .twrap{overflow:visible}
+  .sptbl{display:block;width:100%;white-space:normal;background:transparent;border-radius:0}
+  .sptbl thead{display:none}
+  .sptbl tbody{display:grid;gap:.8rem}
+  .sptbl tr{display:grid;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow-sm);overflow:hidden}
+  .sptbl td{display:grid;grid-template-columns:6.6rem minmax(0,1fr);gap:.75rem;align-items:start;border:0;border-bottom:1px solid var(--line);padding:.7rem .85rem;white-space:normal;word-break:break-word}
+  .sptbl td:last-child{border-bottom:0}
+  .sptbl td::before{font-size:.65rem;line-height:1.4;text-transform:uppercase;font-weight:900;color:var(--muted);letter-spacing:0}
+  .sptbl td:nth-child(1)::before{content:"Category"}
+  .sptbl td:nth-child(2)::before{content:"Parameter"}
+  .sptbl td:nth-child(3)::before{content:"Standard"}
+  .sptbl td:nth-child(4)::before{content:"Advanced"}
   .ctasec{max-width:none;margin:2rem 4%;padding:2.5rem 5%}
   .swap-wrap{display:flex;flex-direction:column}
   .swap-quote{order:1}
@@ -289,9 +301,9 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
   <ul class="nav-links">
     <li><a href="/quote">Quote</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="#capabilities">Capabilities</a></li>
-    <li><a href="#process">Process</a></li>
+    <li><a href="/#services">Services</a></li>
+    <li><a href="/#capabilities">Capabilities</a></li>
+    <li><a href="/#process">Process</a></li>
     <li><a href="/contact">Contact</a></li>
     <li><a href="/blog">Blog</a></li>
     <li><a href="/track">Track Order</a></li>
@@ -659,14 +671,19 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   <div class="fi">
     <div class="flogo">▶ PCBAForge</div>
     <div class="flinks">
-      <a href="#services">Services</a><a href="#quote">Quick Estimator</a><a href="#capabilities">Capabilities</a>
-      <a href="#process">Process</a><a href="/quote">Submit Inquiry</a><a href="/blog">Blog</a>
-      <a href="/track">Track Order</a><a href="/contact">Contact</a>
+      <a href="/#services">Services</a>
+      <a href="/#quote">Quick Estimator</a>
+      <a href="/#capabilities">Capabilities</a>
+      <a href="/#process">Process</a>
+      <a href="/quote">Submit Inquiry</a>
+      <a href="/blog">Blog</a>
+      <a href="/track">Track Order</a>
+      <a href="/contact">Contact</a>
     </div>
-    <div class="flinks2" style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap">
-      <a href="/privacy" style="font-size:.75rem;color:var(--muted)">Privacy Policy</a>
-      <a href="/shipping" style="font-size:.75rem;color:var(--muted)">Shipping Policy</a>
-      <a href="/terms" style="font-size:.75rem;color:var(--muted)">Terms of Service</a>
+    <div class="flinks2">
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/shipping">Shipping Policy</a>
+      <a href="/terms">Terms of Service</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
@@ -875,7 +892,7 @@ var ENGINEER_WHATSAPP = '';
   }
 })();
 </script>
-<script src="/cookie-consent.js"></script>
+<script src="/cookie-consent.js?v=20260630"></script>
 <script>(function(){var t=localStorage.getItem("cc_token");if(t){document.querySelectorAll(".nav-signin").forEach(function(el){el.textContent="My Account";});}})();</script>
 </body>
 </html>

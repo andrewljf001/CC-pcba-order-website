@@ -213,13 +213,6 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const SITEMAP_EXCLUDED_HTML = new Set([
-  'account.html',
-  'blog-post.html',
-  'gdpr-delete.html',
-  'payment-success.html'
-]);
-
 const SITEMAP_PAGE_ORDER = [
   'index.html',
   'quote.html',
@@ -472,31 +465,14 @@ function formatSitemapDate(value) {
 
 function getPublicSitemapPages() {
   const publicDir = path.join(__dirname, 'public');
-  let files = [];
-  try {
-    files = fs.readdirSync(publicDir).filter((file) => file.endsWith('.html'));
-  } catch {
-    files = [];
-  }
-
-  const orderedFiles = [
-    ...SITEMAP_PAGE_ORDER,
-    ...files.filter((file) => !SITEMAP_PAGE_ORDER.includes(file)).sort()
-  ];
-
-  return orderedFiles
-    .filter((file, index) => orderedFiles.indexOf(file) === index)
-    .filter((file) => !SITEMAP_EXCLUDED_HTML.has(file))
+  return SITEMAP_PAGE_ORDER
     .map((file) => {
       const filePath = path.join(publicDir, file);
       if (!fs.existsSync(filePath)) return null;
       const html = fs.readFileSync(filePath, 'utf8');
       if (/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)) return null;
-      const meta = SITEMAP_PAGE_META[file] || {
-        loc: `/${file}`,
-        priority: '0.5',
-        freq: 'monthly'
-      };
+      const meta = SITEMAP_PAGE_META[file];
+      if (!meta) return null;
       return {
         ...meta,
         lastmod: formatSitemapDate(fs.statSync(filePath).mtime)
@@ -960,6 +936,16 @@ app.get('/index.html', (req, res) => {
   res.redirect(301, '/');
 });
 app.get(/^\/[^/]+\.html$/, (req, res) => {
+  res.status(404).send('Not found');
+});
+app.use((req, res, next) => {
+  const baseName = path.basename(req.path || '');
+  const isSystemOrBackupFile = (
+    baseName.startsWith('._') ||
+    /\.(?:bak|backup|orig)(?:[-.][^/]*)?$/i.test(baseName) ||
+    /~$/.test(baseName)
+  );
+  if (!isSystemOrBackupFile) return next();
   res.status(404).send('Not found');
 });
 app.use(express.static('public', {

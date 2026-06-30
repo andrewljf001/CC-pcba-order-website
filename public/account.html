@@ -139,7 +139,7 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .empty-icon{font-size:2.5rem;margin-bottom:.8rem;opacity:.4}
 .empty-text{font-size:.82rem;font-weight:700;margin-bottom:1rem}
 footer{background:#fff;border-top:1px solid var(--line);padding:2rem 5%;margin-top:auto}
-.fi{max-width:var(--max);margin:0 auto;text-align:center}
+.fi{max-width:1200px;margin:0 auto;text-align:center}
 .flogo{color:var(--green2);font-size:1rem;font-weight:900;margin-bottom:.8rem}
 .flinks{display:flex;justify-content:center;gap:1.5rem;margin-bottom:.6rem;flex-wrap:wrap}
 .flinks a{font-size:.82rem;color:var(--muted)}.flinks a:hover{color:var(--ink)}
@@ -176,7 +176,20 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2rem 5%;margin-t
 }
 
 </style>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+    document.documentElement.classList.add('local-turnstile-bypass');
+    var st=document.createElement('style');
+    st.textContent='.cf-turnstile{display:none!important}';
+    document.head.appendChild(st);
+    return;
+  }
+  var s=document.createElement('script');
+  s.src='https://challenges.cloudflare.com/turnstile/v0/api.js';
+  s.async=true;s.defer=true;document.head.appendChild(s);
+})();
+</script>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7966B84XT6"></script>
@@ -197,7 +210,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2rem 5%;margin-t
     <li><a href="/#services">Services</a></li>
     <li><a href="/#capabilities">Capabilities</a></li>
     <li><a href="/#process">Process</a></li>
-    <li><a href="/#contact">Contact</a></li>
+    <li><a href="/contact">Contact</a></li>
     <li><a href="/blog">Blog</a></li>
     <li><a href="/track">Track Order</a></li>
   </ul>
@@ -213,7 +226,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2rem 5%;margin-t
   <a href="/#services">Services</a>
   <a href="/#capabilities">Capabilities</a>
   <a href="/#process">Process</a>
-  <a href="/#contact">Contact</a>
+  <a href="/contact">Contact</a>
   <a href="/blog">Blog</a>
   <a href="/track">Track Order</a>
   <a href="/account">Sign In</a>
@@ -431,14 +444,21 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2rem 5%;margin-t
   <div class="fi">
     <div class="flogo">▶ PCBAForge</div>
     <div class="flinks">
-      <a href="/#services">Services</a><a href="/#quote">Quick Estimator</a>
-      <a href="/#capabilities">Capabilities</a><a href="/blog">Blog</a>
-      <a href="/quote">Submit Inquiry</a><a href="/track">Track Order</a>
+      <a href="/#services">Services</a>
+      <a href="/#quote">Quick Estimator</a>
+      <a href="/#capabilities">Capabilities</a>
+      <a href="/#process">Process</a>
+      <a href="/quote">Submit Inquiry</a>
+      <a href="/blog">Blog</a>
+      <a href="/track">Track Order</a>
+      <a href="/contact">Contact</a>
     </div>
     <div class="flinks2">
-      <a href="/privacy">Privacy Policy</a><a href="/shipping">Shipping Policy</a><a href="/terms">Terms of Service</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/shipping">Shipping Policy</a>
+      <a href="/terms">Terms of Service</a>
     </div>
-    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
 </footer>
 
@@ -834,6 +854,6 @@ if(token){ loadAccount(); }else{ showAuth(); }
   }
 })();
 </script>
-<script src="/cookie-consent.js"></script>
+<script src="/cookie-consent.js?v=20260630"></script>
 </body>
 </html>

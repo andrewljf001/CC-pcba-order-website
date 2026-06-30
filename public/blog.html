@@ -69,7 +69,7 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .loading{text-align:center;padding:4rem 0;color:var(--muted);grid-column:1/-1}
 
 footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
-.fi{max-width:var(--max);margin:0 auto;text-align:center}
+.fi{max-width:1200px;margin:0 auto;text-align:center}
 .flogo{color:var(--green2);font-size:1rem;font-weight:900;margin-bottom:.8rem}
 .flinks{display:flex;justify-content:center;gap:2rem;margin-bottom:1rem;flex-wrap:wrap}
 .flinks a{font-size:.84rem;color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--ink)}
@@ -124,7 +124,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
     <li><a href="/#capabilities">Capabilities</a></li>
     <li><a href="/#process">Process</a></li>
     <li><a href="/contact">Contact</a></li>
-    <li><a href="/blog" class="active">Blog</a></li>
+    <li><a href="/blog">Blog</a></li>
     <li><a href="/track">Track Order</a></li>
   </ul>
   <div class="nav-right">
@@ -147,7 +147,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
 
 <section class="sec">
   <div class="slabel">// PCBAFORGE BLOG</div>
-  <div class="stitle">Engineering Insights & Guides</div>
+  <h1 class="stitle">Engineering Insights & Guides</h1>
   <div class="stitle-sub">Technical articles on PCB fabrication, SMT assembly, DFM, testing and PCBA best practices.</div>
   <div class="tag-bar" id="tag-bar">
     <button class="tag-btn active" data-tag="">ALL</button>
@@ -165,16 +165,18 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
       <a href="/#services">Services</a>
       <a href="/#quote">Quick Estimator</a>
       <a href="/#capabilities">Capabilities</a>
-      <a href="/blog">Blog</a>
+      <a href="/#process">Process</a>
       <a href="/quote">Submit Inquiry</a>
+      <a href="/blog">Blog</a>
       <a href="/track">Track Order</a>
+      <a href="/contact">Contact</a>
     </div>
     <div class="flinks2">
       <a href="/privacy">Privacy Policy</a>
       <a href="/shipping">Shipping Policy</a>
       <a href="/terms">Terms of Service</a>
     </div>
-    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
 </footer>
 
@@ -302,7 +304,7 @@ if(!serverRenderedGrid || !serverRenderedGrid.querySelector('.post-card,.empty-s
   }
 })();
 </script>
-<script src="/cookie-consent.js"></script>
+<script src="/cookie-consent.js?v=20260630"></script>
 <script>(function(){var t=localStorage.getItem("cc_token");if(t){document.querySelectorAll(".nav-signin").forEach(function(el){el.textContent="My Account";});}})();</script>
 </body>
 </html>

@@ -2,5 +2,9 @@ node_modules/
 .env
 cc_pcba.db
 uploads/
+backups/
+logs/
 *.log
 .DS_Store
+._*
+*.bak*

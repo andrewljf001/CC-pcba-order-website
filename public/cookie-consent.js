@@ -19,13 +19,14 @@
   if (stored) return; // already decided
 
   // Build banner
+  var compact = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
   var banner = document.createElement('div');
   banner.id = 'cookie-banner';
   banner.innerHTML = [
     '<div id="cb-inner">',
     '  <div id="cb-text">',
     '    <span id="cb-title">🍪 We use cookies</span>',
-    '    <span id="cb-desc">We use analytics cookies to understand how visitors use our site and improve your experience. See our <a href="/privacy">Privacy Policy</a>.</span>',
+    '    <span id="cb-desc">' + (compact ? 'Analytics cookies improve the site. <a href="/privacy">Privacy</a>.' : 'We use analytics cookies to understand how visitors use our site and improve your experience. See our <a href="/privacy">Privacy Policy</a>.') + '</span>',
     '  </div>',
     '  <div id="cb-btns">',
     '    <button id="cb-decline">Decline</button>',
@@ -37,7 +38,7 @@
   var style = document.createElement('style');
   style.textContent = [
     '#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;',
-    'background:#ffffff;border-top:1px solid #e3e8f0;padding:1rem 1.2rem;',
+    'background:#ffffff;border-top:1px solid #e3e8f0;padding:.75rem 1.2rem;',
     'font-family:"DM Sans",Inter,sans-serif;font-size:.85rem;color:#334155;',
     'box-shadow:0 -8px 24px rgba(20,32,51,.06);animation:cb-slide .3s ease;}',
     '@keyframes cb-slide{from{transform:translateY(100%)}to{transform:translateY(0)}}',
@@ -56,8 +57,13 @@
     'padding:.5rem 1.3rem;font-size:.8rem;font-family:"DM Sans",Inter,sans-serif;',
     'font-weight:800;cursor:pointer;transition:background .2s;box-shadow:0 8px 16px rgba(22,163,74,.18);}',
     '#cb-accept:hover{background:#11843d;}',
-    '@media(max-width:600px){#cb-inner{flex-direction:column;align-items:flex-start;}',
-    '#cb-btns{width:100%;justify-content:flex-end;}}'
+    '@media(max-width:600px){#cookie-banner{padding:.65rem .85rem;}',
+    '#cb-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.65rem;}',
+    '#cb-text{min-width:0;gap:.1rem;}',
+    '#cb-title{font-size:.82rem;}',
+    '#cb-desc{font-size:.72rem;line-height:1.35;}',
+    '#cb-btns{width:auto;justify-content:flex-end;gap:.45rem;}',
+    '#cb-decline,#cb-accept{padding:.42rem .7rem;font-size:.74rem;}}'
   ].join('');
 
   document.head.appendChild(style);

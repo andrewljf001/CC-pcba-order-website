@@ -46,10 +46,12 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .success{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:1.1rem;font-size:.86rem;color:var(--green2);line-height:1.6}
 .error{background:#fef2f2;border:1px solid #f5c2c2;border-radius:10px;padding:1.1rem;font-size:.86rem;color:#9b1c1c;line-height:1.6}
 footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%;margin-top:2rem}
-.fi{max-width:var(--max);margin:0 auto;text-align:center}
+.fi{max-width:1200px;margin:0 auto;text-align:center}
 .flogo{color:var(--green2);font-size:1rem;font-weight:900;margin-bottom:.8rem}
 .flinks{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
 .flinks a{font-size:.82rem;color:var(--muted)}.flinks a:hover{color:var(--ink)}
+.flinks2{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.flinks2 a{font-size:.75rem;color:var(--muted)}.flinks2 a:hover{color:var(--ink)}
 .fcopy{font-size:.75rem;color:var(--muted)}
 @media(max-width:768px){nav{height:60px;padding:0 4%}.wrap{padding:2.5rem 4% 3rem}.card{padding:1.3rem}}
 
@@ -90,6 +92,15 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 <body>
 <nav>
   <a href="/" class="nav-logo"><span class="ldot"></span>PCBAForge</a>
+  <ul class="nav-links">
+    <li><a href="/quote">Quote</a></li>
+    <li><a href="/#services">Services</a></li>
+    <li><a href="/#capabilities">Capabilities</a></li>
+    <li><a href="/#process">Process</a></li>
+    <li><a href="/contact">Contact</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/track">Track Order</a></li>
+  </ul>
   <div class="nav-right">
     <a href="/blog" class="nav-blog-m">Blog</a>
     <a href="/account" class="nav-signin">Sign In</a>
@@ -102,12 +113,12 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   <a href="/#services">Services</a>
   <a href="/#capabilities">Capabilities</a>
   <a href="/#process">Process</a>
-  <a href="/#contact">Contact</a>
+  <a href="/contact">Contact</a>
   <a href="/blog">Blog</a>
   <a href="/track">Track Order</a>
   <a href="/account">Sign In</a>
 </div>
-<main>
+<main class="wrap">
   <div class="page-title">Delete My Data</div>
   <p class="page-sub">Under GDPR and applicable privacy laws, you have the right to request deletion of your personal data. Enter your email below — we will permanently delete your account and associated data within 30 days.</p>
 
@@ -134,7 +145,27 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
     <a href="/privacy" class="back-link">← Back to Privacy Policy</a>
   </div>
 </main>
-<footer>© 2026 PCBAForge · <a href="/privacy" style="color:var(--muted)">Privacy Policy</a> · <a href="/terms" style="color:var(--muted)">Terms</a></footer>
+<footer>
+  <div class="fi">
+    <div class="flogo">▶ PCBAForge</div>
+    <div class="flinks">
+      <a href="/#services">Services</a>
+      <a href="/#quote">Quick Estimator</a>
+      <a href="/#capabilities">Capabilities</a>
+      <a href="/#process">Process</a>
+      <a href="/quote">Submit Inquiry</a>
+      <a href="/blog">Blog</a>
+      <a href="/track">Track Order</a>
+      <a href="/contact">Contact</a>
+    </div>
+    <div class="flinks2">
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/shipping">Shipping Policy</a>
+      <a href="/terms">Terms of Service</a>
+    </div>
+    <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
+  </div>
+</footer>
 
 <script>
 async function submitDelete() {
@@ -181,7 +212,7 @@ function showResult(type, msg) {
   el.style.display = 'block';
 }
 </script>
-<script src="/cookie-consent.js"></script>
+<script src="/cookie-consent.js?v=20260630"></script>
 <script>
 (function(){
   var b=document.getElementById('navBurger'), m=document.getElementById('mobileMenu');
