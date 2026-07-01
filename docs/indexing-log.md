@@ -1,5 +1,25 @@
 # Indexing Log
 
+## 2026-07-01 Structured Data and Page Head Upgrade
+
+Site: `https://pcbaforge.com`
+
+Actions:
+
+- Added server-rendered Open Graph and Twitter card metadata for public SEO pages.
+- Added JSON-LD graph output for the homepage, quote page, contact page, tracking page, blog list, blog posts, and policy pages.
+- Added `Organization`, `WebSite`, `Service`, `ContactPage`, `FAQPage`, `Blog`, `ItemList`, `BlogPosting`, and `BreadcrumbList` structured data where relevant.
+- Added homepage hero image preload and high fetch priority for the LCP image.
+- Added `/index.html` to the canonical 301 redirect set so the homepage has one public URL.
+
+Local verification:
+
+- `node --check server.js` passed.
+- `node --check public/cookie-consent.js` passed.
+- HTTP checks passed for `/`, `/quote`, `/contact`, `/track`, `/blog`, `/shipping`, `/privacy`, and `/terms`.
+- Each checked page had one title, one description, one canonical, one H1, Open Graph metadata, Twitter metadata, and parseable JSON-LD.
+- `/index.html` returned `301` to `/`.
+
 ## 2026-07-01 Sitemap Cleanup Follow-up
 
 Site: `https://pcbaforge.com`

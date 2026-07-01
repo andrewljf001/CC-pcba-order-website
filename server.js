@@ -249,6 +249,7 @@ const PUBLIC_PAGE_ROUTES = new Map([
 
 // Google indexed these legacy URLs on 2026-06-29; keep 301s only for this SEO migration set.
 const INDEXED_LEGACY_HTML_REDIRECTS = new Map([
+  ['/index.html', '/'],
   ['/quote.html', '/quote'],
   ['/contact.html', '/contact'],
   ['/track.html', '/track'],
@@ -311,6 +312,80 @@ function canonicalSiteUrl() {
 
 function blogPostPath(slug) {
   return `/blog/${encodeURIComponent(slug)}`;
+}
+
+function absoluteSiteUrl(pathname = '/') {
+  const pathValue = String(pathname || '/');
+  if (/^https?:\/\//i.test(pathValue)) return pathValue;
+  return `${canonicalSiteUrl()}${pathValue.startsWith('/') ? pathValue : `/${pathValue}`}`;
+}
+
+function organizationStructuredData(base = canonicalSiteUrl()) {
+  return {
+    '@type': 'Organization',
+    '@id': `${base}/#organization`,
+    name: 'PCBAForge',
+    url: base,
+    logo: `${base}/favicon.svg`,
+    areaServed: 'Worldwide',
+    contactPoint: [{
+      '@type': 'ContactPoint',
+      contactType: 'sales and engineering support',
+      availableLanguage: ['English'],
+      url: `${base}/contact`
+    }]
+  };
+}
+
+function websiteStructuredData(base = canonicalSiteUrl()) {
+  return {
+    '@type': 'WebSite',
+    '@id': `${base}/#website`,
+    name: 'PCBAForge',
+    url: base,
+    publisher: { '@id': `${base}/#organization` },
+    inLanguage: 'en'
+  };
+}
+
+function pcbaServiceStructuredData(base = canonicalSiteUrl()) {
+  return {
+    '@type': 'Service',
+    '@id': `${base}/#pcba-service`,
+    name: 'PCB fabrication, SMT assembly, turnkey PCBA and functional testing',
+    serviceType: 'PCBA manufacturing and assembly',
+    provider: { '@id': `${base}/#organization` },
+    areaServed: 'Worldwide',
+    url: `${base}/quote`,
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'PCBAForge services',
+      itemListElement: [
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'PCB fabrication' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'SMT and DIP assembly' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Full turnkey PCBA with functional testing' } }
+      ]
+    }
+  };
+}
+
+function breadcrumbStructuredData(items) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url
+    }))
+  };
+}
+
+function jsonLdGraph(nodes) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': nodes.filter(Boolean)
+  };
 }
 
 function redirectPreservingQuery(req, res, targetPath, status = 301) {
@@ -416,12 +491,42 @@ async function renderBlogListHtml({ page, activeTag }) {
     pool.query("SELECT tags FROM posts WHERE status='published'")
   ]);
   const tags = [...new Set(tagRows.flatMap((row) => parsePostTags(row.tags)))].sort();
+  const base = canonicalSiteUrl();
+  const blogUrl = `${base}/blog`;
+  const description = 'Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.';
 
   let html = readPublicHtml('blog.html');
   html = injectPageHead(html, {
-    title: 'PCBAForge Blog — PCBA Engineering Insights & Guides',
-    description: 'Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.',
-    canonical: `${canonicalSiteUrl()}/blog`
+    title: 'PCBAForge Blog - PCBA Engineering Insights & Guides',
+    description,
+    canonical: blogUrl,
+    jsonLd: jsonLdGraph([
+      organizationStructuredData(base),
+      websiteStructuredData(base),
+      {
+        '@type': 'Blog',
+        '@id': `${blogUrl}#blog`,
+        url: blogUrl,
+        name: 'PCBAForge Blog',
+        description,
+        publisher: { '@id': `${base}/#organization` },
+        inLanguage: 'en'
+      },
+      {
+        '@type': 'ItemList',
+        '@id': `${blogUrl}#posts`,
+        itemListElement: posts.map((post, index) => ({
+          '@type': 'ListItem',
+          position: ((page - 1) * limit) + index + 1,
+          url: `${base}${blogPostPath(post.slug)}`,
+          name: post.title
+        }))
+      },
+      breadcrumbStructuredData([
+        { name: 'Home', url: `${base}/` },
+        { name: 'Blog', url: blogUrl }
+      ])
+    ])
   });
   return injectBlogList(html, {
     posts,
@@ -441,10 +546,228 @@ async function renderBlogPostHtml(slug) {
   return renderBlogPostPage(rows[0]);
 }
 
+function contactFaqStructuredData() {
+  return {
+    '@type': 'FAQPage',
+    '@id': `${canonicalSiteUrl()}/contact#faq`,
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'What files do I need to submit?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Pack your Gerber files, BOM, and component placement files into a single ZIP, RAR, or 7z archive. PCBAForge provides free DFM review.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'What is the minimum order quantity?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'The minimum is 5 pieces for PCB fabrication and SMT assembly, with support for prototype and small batch production.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'How long does production take?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Standard lead time is 7 to 10 business days for PCB plus SMT. Turnkey component sourcing is typically 10 to 15 days, with express options available.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'Do you supply components?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. PCBAForge supports customer-supplied materials and full turnkey sourcing when a complete BOM with manufacturer part numbers is provided.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'What payment methods are accepted?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'PCBAForge accepts PayPal, Apple Pay, Google Pay, and wire transfer for larger orders after engineer quote confirmation.'
+        }
+      },
+      {
+        '@type': 'Question',
+        name: 'How does functional testing work?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'An engineer performs power-on and functional verification according to your test specification, and can validate complex boards with you remotely before shipping.'
+        }
+      }
+    ]
+  };
+}
+
+function getStaticPageHead(fileName) {
+  const base = canonicalSiteUrl();
+  const image = `${base}/images/hero-banner-20260607.webp`;
+  const pageMap = {
+    'index.html': {
+      title: 'PCBAForge - Tested & Verified PCBA, Worldwide Shipping',
+      description: 'One-stop PCBA service. PCB fabrication, SMT+DIP assembly, full turnkey with functional testing. Small batch from 5 pcs. Worldwide shipping.',
+      canonical: `${base}/`,
+      jsonLd: jsonLdGraph([
+        organizationStructuredData(base),
+        websiteStructuredData(base),
+        pcbaServiceStructuredData(base)
+      ])
+    },
+    'quote.html': {
+      title: 'Submit Inquiry - PCBAForge',
+      description: 'Submit a PCB fabrication, SMT assembly, or full turnkey PCBA inquiry to PCBAForge for engineering review and pricing.',
+      canonical: `${base}/quote`,
+      jsonLd: jsonLdGraph([
+        organizationStructuredData(base),
+        websiteStructuredData(base),
+        pcbaServiceStructuredData(base),
+        {
+          '@type': 'WebPage',
+          '@id': `${base}/quote#webpage`,
+          url: `${base}/quote`,
+          name: 'Submit Inquiry - PCBAForge',
+          description: 'Submit a PCB fabrication, SMT assembly, or full turnkey PCBA inquiry to PCBAForge for engineering review and pricing.',
+          isPartOf: { '@id': `${base}/#website` },
+          about: { '@id': `${base}/#pcba-service` },
+          inLanguage: 'en'
+        },
+        breadcrumbStructuredData([
+          { name: 'Home', url: `${base}/` },
+          { name: 'Submit Inquiry', url: `${base}/quote` }
+        ])
+      ])
+    },
+    'contact.html': {
+      title: 'Contact Us - PCBAForge | PCBA Assembly Experts',
+      description: 'Contact PCBAForge for PCB fabrication, SMT assembly, and full turnkey PCBA services. Talk to our engineers directly via WhatsApp, email, or submit an inquiry.',
+      canonical: `${base}/contact`,
+      jsonLd: jsonLdGraph([
+        organizationStructuredData(base),
+        websiteStructuredData(base),
+        {
+          '@type': 'ContactPage',
+          '@id': `${base}/contact#webpage`,
+          url: `${base}/contact`,
+          name: 'Contact PCBAForge',
+          description: 'Contact PCBAForge for PCB fabrication, SMT assembly, and full turnkey PCBA services.',
+          isPartOf: { '@id': `${base}/#website` },
+          about: { '@id': `${base}/#organization` },
+          inLanguage: 'en'
+        },
+        contactFaqStructuredData(),
+        breadcrumbStructuredData([
+          { name: 'Home', url: `${base}/` },
+          { name: 'Contact', url: `${base}/contact` }
+        ])
+      ])
+    },
+    'track.html': {
+      title: 'Track Order - PCBAForge',
+      description: 'Track your PCBAForge inquiry, quote, payment, production, testing, and shipping status by order number and email.',
+      canonical: `${base}/track`,
+      jsonLd: jsonLdGraph([
+        organizationStructuredData(base),
+        websiteStructuredData(base),
+        {
+          '@type': 'WebPage',
+          '@id': `${base}/track#webpage`,
+          url: `${base}/track`,
+          name: 'Track Order - PCBAForge',
+          description: 'Track your PCBAForge order and inquiry status.',
+          isPartOf: { '@id': `${base}/#website` },
+          inLanguage: 'en'
+        },
+        breadcrumbStructuredData([
+          { name: 'Home', url: `${base}/` },
+          { name: 'Track Order', url: `${base}/track` }
+        ])
+      ])
+    },
+    'shipping.html': {
+      title: 'Shipping Policy - PCBAForge',
+      description: 'PCBAForge shipping policy for PCB fabrication, assembly, turnkey PCBA, and international delivery.',
+      canonical: `${base}/shipping`,
+      jsonLd: jsonLdGraph([
+        organizationStructuredData(base),
+        websiteStructuredData(base),
+        {
+          '@type': 'WebPage',
+          '@id': `${base}/shipping#webpage`,
+          url: `${base}/shipping`,
+          name: 'Shipping Policy - PCBAForge',
+          description: 'PCBAForge shipping policy for PCB fabrication, assembly, turnkey PCBA, and international delivery.',
+          isPartOf: { '@id': `${base}/#website` },
+          inLanguage: 'en'
+        },
+        breadcrumbStructuredData([
+          { name: 'Home', url: `${base}/` },
+          { name: 'Shipping Policy', url: `${base}/shipping` }
+        ])
+      ])
+    },
+    'privacy.html': {
+      title: 'Privacy Policy - PCBAForge',
+      description: 'PCBAForge privacy policy covering customer data, order files, account information, and communications.',
+      canonical: `${base}/privacy`,
+      jsonLd: jsonLdGraph([
+        organizationStructuredData(base),
+        websiteStructuredData(base),
+        {
+          '@type': 'WebPage',
+          '@id': `${base}/privacy#webpage`,
+          url: `${base}/privacy`,
+          name: 'Privacy Policy - PCBAForge',
+          description: 'PCBAForge privacy policy covering customer data, order files, account information, and communications.',
+          isPartOf: { '@id': `${base}/#website` },
+          inLanguage: 'en'
+        },
+        breadcrumbStructuredData([
+          { name: 'Home', url: `${base}/` },
+          { name: 'Privacy Policy', url: `${base}/privacy` }
+        ])
+      ])
+    },
+    'terms.html': {
+      title: 'Terms of Service - PCBAForge',
+      description: 'PCBAForge terms of service for PCB fabrication, PCBA assembly, turnkey manufacturing, quotes, payments, and delivery.',
+      canonical: `${base}/terms`,
+      jsonLd: jsonLdGraph([
+        organizationStructuredData(base),
+        websiteStructuredData(base),
+        {
+          '@type': 'WebPage',
+          '@id': `${base}/terms#webpage`,
+          url: `${base}/terms`,
+          name: 'Terms of Service - PCBAForge',
+          description: 'PCBAForge terms of service for PCB fabrication, PCBA assembly, turnkey manufacturing, quotes, payments, and delivery.',
+          isPartOf: { '@id': `${base}/#website` },
+          inLanguage: 'en'
+        },
+        breadcrumbStructuredData([
+          { name: 'Home', url: `${base}/` },
+          { name: 'Terms of Service', url: `${base}/terms` }
+        ])
+      ])
+    }
+  };
+  const pageHead = pageMap[fileName];
+  return pageHead ? { image, type: 'website', ...pageHead } : null;
+}
+
 function sendPublicPage(req, res, fileName) {
   if (PRIVATE_PUBLIC_PAGES.has(fileName)) setNoStore(res);
   else setPublicCache(res, 300);
-  res.sendFile(path.join(__dirname, 'public', fileName));
+  const pageHead = getStaticPageHead(fileName);
+  if (!pageHead) {
+    res.sendFile(path.join(__dirname, 'public', fileName));
+    return;
+  }
+  const html = injectPageHead(readPublicHtml(fileName), pageHead);
+  res.type('html').send(html);
 }
 
 function xmlEscape(value) {
@@ -600,12 +923,14 @@ function readPublicHtml(fileName) {
   return fs.readFileSync(path.join(__dirname, 'public', fileName), 'utf8');
 }
 
-function injectPageHead(html, { title, description, canonical, robots, jsonLd }) {
+function injectPageHead(html, { title, description, canonical, robots, jsonLd, image, type = 'website' }) {
+  const socialImage = image || `${canonicalSiteUrl()}/images/hero-banner-20260607.webp`;
   let out = html
     .replace(/<link\s+rel=["\']canonical["\'][^>]*>\s*/gi, '')
-    .replace(/<meta\s+property=["\']og:url["\'][^>]*>\s*/gi, '')
+    .replace(/<meta\s+name=["\']robots["\'][^>]*>\s*/gi, '')
+    .replace(/<meta\s+(?:property|name)=["\'](?:og:url|og:title|og:description|og:type|og:site_name|og:image|og:image:alt|twitter:card|twitter:title|twitter:description|twitter:image)["\'][^>]*>\s*/gi, '')
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${htmlEscape(title)}</title>`)
-    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${htmlEscape(description)}">`);
+    .replace(/<meta\s+name=["\']description["\'][^>]*>/i, `<meta name="description" content="${htmlEscape(description)}">`);
 
   const headTags = [];
   if (robots) headTags.push(`<meta name="robots" content="${htmlEscape(robots)}">`);
@@ -613,8 +938,16 @@ function injectPageHead(html, { title, description, canonical, robots, jsonLd })
     headTags.push(`<link rel="canonical" href="${htmlEscape(canonical)}">`);
     headTags.push(`<meta property="og:url" content="${htmlEscape(canonical)}">`);
   }
+  headTags.push(`<meta property="og:type" content="${htmlEscape(type)}">`);
+  headTags.push('<meta property="og:site_name" content="PCBAForge">');
   headTags.push(`<meta property="og:title" content="${htmlEscape(title)}">`);
   headTags.push(`<meta property="og:description" content="${htmlEscape(description)}">`);
+  headTags.push(`<meta property="og:image" content="${htmlEscape(socialImage)}">`);
+  headTags.push(`<meta property="og:image:alt" content="${htmlEscape(title)}">`);
+  headTags.push('<meta name="twitter:card" content="summary_large_image">');
+  headTags.push(`<meta name="twitter:title" content="${htmlEscape(title)}">`);
+  headTags.push(`<meta name="twitter:description" content="${htmlEscape(description)}">`);
+  headTags.push(`<meta name="twitter:image" content="${htmlEscape(socialImage)}">`);
   if (jsonLd) {
     headTags.push(`<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>`);
   }
@@ -677,25 +1010,48 @@ function renderBlogPostPage(post) {
   const base = canonicalSiteUrl();
   const description = truncateText(post.excerpt || stripHtml(post.content) || post.title);
   const canonical = `${base}${blogPostPath(post.slug)}`;
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    description,
-    author: { '@type': 'Organization', name: post.author || 'PCBAForge Team' },
-    publisher: { '@type': 'Organization', name: 'PCBAForge' },
-    datePublished: post.published_at || post.created_at,
-    dateModified: post.updated_at || post.published_at || post.created_at,
-    mainEntityOfPage: canonical
-  };
-  if (post.cover_url) jsonLd.image = post.cover_url;
+  const postImage = post.cover_url ? absoluteSiteUrl(post.cover_url) : `${base}/images/hero-banner-20260607.webp`;
+  const jsonLd = jsonLdGraph([
+    organizationStructuredData(base),
+    websiteStructuredData(base),
+    {
+      '@type': 'Blog',
+      '@id': `${base}/blog#blog`,
+      url: `${base}/blog`,
+      name: 'PCBAForge Blog',
+      publisher: { '@id': `${base}/#organization` },
+      inLanguage: 'en'
+    },
+    {
+      '@type': 'BlogPosting',
+      '@id': `${canonical}#article`,
+      url: canonical,
+      headline: post.title,
+      description,
+      image: postImage,
+      author: { '@type': 'Organization', name: post.author || 'PCBAForge Team' },
+      publisher: { '@id': `${base}/#organization` },
+      datePublished: post.published_at || post.created_at,
+      dateModified: post.updated_at || post.published_at || post.created_at,
+      mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+      isPartOf: { '@id': `${base}/blog#blog` },
+      inLanguage: 'en'
+    },
+    breadcrumbStructuredData([
+      { name: 'Home', url: `${base}/` },
+      { name: 'Blog', url: `${base}/blog` },
+      { name: post.title, url: canonical }
+    ])
+  ]);
 
   let html = readPublicHtml('blog-post.html');
   html = injectPageHead(html, {
-    title: `${post.title} — PCBAForge Blog`,
+    title: `${post.title} - PCBAForge Blog`,
     description,
     canonical,
-    jsonLd
+    jsonLd,
+    image: postImage,
+    type: 'article'
   });
   return replaceArticleWrap(html, renderArticleBody(post));
 }
