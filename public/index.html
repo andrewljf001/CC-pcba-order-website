@@ -8,7 +8,9 @@
 <meta name="description" content="One-stop PCBA service. PCB fabrication, SMT+DIP assembly, full turnkey with functional testing. Small batch from 5 pcs. Worldwide shipping.">
 
 <link rel="preload" as="image" href="/images/hero-banner-20260607.webp" type="image/webp" fetchpriority="high">
-<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css?v=20260703">
+<script src="/site-runtime.js?v=20260703"></script>
 <style>
 :root{
   --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
@@ -19,7 +21,7 @@
   --shadow:0 16px 44px rgba(20,32,51,.08);
   --shadow-sm:0 8px 22px rgba(20,32,51,.06);
   --max:1200px;
-  --font:'DM Sans',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;background:var(--bg)}
@@ -391,15 +393,15 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   <h2 class="stitle">Three Ways We Can Help</h2>
   <div class="sgrd">
     <div class="sc">
-      <img class="sc-img" src="images/pcb-fabrication-20260607.webp" alt="PCB Fabrication">
+      <img class="sc-img" src="/images/pcb-fabrication-20260607.webp" alt="PCB Fabrication" width="360" height="150" loading="lazy" decoding="async">
       <div class="sc-body"><h3 class="sn">PCB FABRICATION</h3><div class="sd">FR4 single to multi-layer boards. Standard prototype pricing from $50. Complex specs quoted manually.</div><span class="stag">FROM $50</span></div>
     </div>
     <div class="sc">
-      <img class="sc-img" src="images/smt-assembly-20260607.webp" alt="SMT DIP Assembly">
+      <img class="sc-img" src="/images/smt-assembly-20260607.webp" alt="SMT DIP Assembly" width="360" height="150" loading="lazy" decoding="async">
       <div class="sc-body"><h3 class="sn">SMT + DIP ASSEMBLY</h3><div class="sd">SMT soldering + through-hole DIP in one run. Supply your own PCBs or let us fabricate. Customer-supplied or sourced components. Up to 10 pcs with standard pricing.</div><span class="stag">FROM $200</span></div>
     </div>
     <div class="sc">
-      <img class="sc-img" src="images/turnkey-testing-20260607.webp" alt="Full Turnkey Testing">
+      <img class="sc-img" src="/images/turnkey-testing-20260607.webp" alt="Full Turnkey Testing" width="360" height="150" loading="lazy" decoding="async">
       <div class="sc-body"><h3 class="sn">FULL TURNKEY + TESTING</h3><div class="sd">Full fabrication, assembly, and functional verification. Our engineer works with you remotely to validate your board before it ships.</div><span class="stag">ENGINEER VERIFIED</span></div>
     </div>
   </div>
@@ -862,7 +864,7 @@ var ENGINEER_WHATSAPP = '';
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
 
-  fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
+  window.PCBAForge.getPublicSettings().then(function(cfg){
     if (window.PCBAPricing) { window.PCBAPricing.loadPricingFromConfig(cfg); if (typeof hCalc==='function') hCalc(); }
     var wa  = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
     var eng = (cfg.engineer_whatsapp||ENGINEER_WHATSAPP||'').replace(/[^0-9]/g,'');

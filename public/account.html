@@ -6,7 +6,9 @@
 <title>My Account — PCBAForge</title>
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="description" content="Manage your PCBAForge account, orders, and shipping addresses.">
-<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css?v=20260703">
+<script src="/site-runtime.js?v=20260703"></script>
 <style>
 :root{
   --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
@@ -16,7 +18,7 @@
   --amber:#b7791f;--red:#dc2626;--wa:#25d366;
   --shadow:0 16px 44px rgba(20,32,51,.08);--shadow-sm:0 8px 22px rgba(20,32,51,.06);
   --max:1100px;
-  --font:'DM Sans',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;background:var(--bg)}
@@ -177,29 +179,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2rem 5%;margin-t
 }
 
 </style>
-<script>
-(function(){
-  if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
-    document.documentElement.classList.add('local-turnstile-bypass');
-    var st=document.createElement('style');
-    st.textContent='.cf-turnstile{display:none!important}';
-    document.head.appendChild(st);
-    return;
-  }
-  var s=document.createElement('script');
-  s.src='https://challenges.cloudflare.com/turnstile/v0/api.js';
-  s.async=true;s.defer=true;document.head.appendChild(s);
-})();
-</script>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-7966B84XT6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-7966B84XT6');
-</script>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
@@ -474,7 +454,7 @@ var userData = null;
 var cfg      = {};
 var resetToken = null;
 
-fetch('/api/settings/public').then(r=>r.json()).then(c=>{
+window.PCBAForge.getPublicSettings().then(c=>{
   cfg = c;
   if(c.whatsapp_number){
     const wa = c.whatsapp_number.replace(/[^0-9]/g,'');
@@ -832,7 +812,7 @@ if(token){ loadAccount(); }else{ showAuth(); }
   // 先隐藏所有 WA 按钮
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
-  fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
+  window.PCBAForge.getPublicSettings().then(function(cfg){
     var wa = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
     if(!wa) return;
     waLinks.forEach(function(el){

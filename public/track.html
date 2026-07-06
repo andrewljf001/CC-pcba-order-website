@@ -7,7 +7,9 @@
 <meta name="description" content="Track your PCBAForge PCB fabrication, SMT assembly, and turnkey PCBA order status online.">
 <link rel="canonical" href="https://pcbaforge.com/track">
 
-<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css?v=20260703">
+<script src="/site-runtime.js?v=20260703"></script>
 <style>
 :root{
   --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
@@ -18,7 +20,7 @@
   --shadow:0 16px 44px rgba(20,32,51,.08);
   --shadow-sm:0 8px 22px rgba(20,32,51,.06);
   --max:820px;
-  --font:'DM Sans',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;background:var(--bg)}
@@ -185,14 +187,6 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 
 </style>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-7966B84XT6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-7966B84XT6');
-</script>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
@@ -613,7 +607,7 @@ if(_p.get('order')){
   var waLinks=document.querySelectorAll('[href^="https://wa.me"]');
   if(wafEl)wafEl.style.display='none';
   if(bwaEl)bwaEl.style.display='none';
-  fetch('/api/settings/public').then(r=>r.json()).then(cfg=>{
+  window.PCBAForge.getPublicSettings().then(cfg=>{
     var wa=(cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
     if(!wa)return;
     waLinks.forEach(el=>{var o=el.href,t=o.includes('?text=')?o.split('?text=')[1]:'';el.href='https://wa.me/'+wa+(t?'?text='+t:'');});

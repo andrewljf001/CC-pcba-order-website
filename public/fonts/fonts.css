@@ -1,11 +1,4 @@
 @font-face {
-  font-family: 'DM Sans';
-  font-style: normal;
-  font-weight: 400 900;
-  font-display: swap;
-  src: url('/fonts/dm-sans.woff2') format('woff2');
-}
-@font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 400 700;

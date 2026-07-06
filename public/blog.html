@@ -7,7 +7,9 @@
 <link rel="canonical" href="https://pcbaforge.com/blog">
 <meta name="description" content="Technical articles on PCB fabrication, SMT assembly, DFM, testing, and PCBA engineering best practices.">
 
-<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css?v=20260703">
+<script src="/site-runtime.js?v=20260703"></script>
 <style>
 :root{
   --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
@@ -17,7 +19,7 @@
   --amber:#b7791f;--red:#dc2626;--wa:#25d366;
   --shadow:0 16px 44px rgba(20,32,51,.08);--shadow-sm:0 8px 22px rgba(20,32,51,.06);
   --max:1360px;
-  --font:'DM Sans',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;background:var(--bg)}
@@ -25,7 +27,7 @@ body{font-family:var(--font);background:radial-gradient(circle at 85% 1%,rgba(22
 a{color:inherit;text-decoration:none}
 
 nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:68px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(10px);box-shadow:0 10px 28px rgba(20,32,51,.05)}
-.nav-logo{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:1.08rem;font-weight:900;letter-spacing:-.02em}
+.nav-logo{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:1.08rem;font-weight:900;letter-spacing:0}
 .ldot{position:relative;width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#16a34a,#22c55e);box-shadow:0 8px 18px rgba(22,163,74,.25);animation:none}
 .ldot::after{content:"P";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:.84rem;font-weight:900;line-height:1}
 .ldot2{display:none}
@@ -37,12 +39,12 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 
 .sec{position:relative;z-index:1;max-width:var(--max);margin:0 auto;padding:4.5rem clamp(24px,4vw,56px)}
 .slabel{display:inline-flex;align-items:center;background:#dcfce7;border:1px solid #bbf7d0;color:var(--green2);border-radius:999px;padding:.35rem .75rem;margin-bottom:.9rem;font-size:.78rem;font-weight:800;letter-spacing:0}
-.stitle{color:var(--ink);font-size:clamp(2rem,3.4vw,2.8rem);line-height:1.04;letter-spacing:-.04em;font-weight:900;margin-bottom:.5rem}
+.stitle{color:var(--ink);font-size:clamp(2rem,3.4vw,2.8rem);line-height:1.04;letter-spacing:0;font-weight:900;margin-bottom:.5rem}
 .stitle-sub{color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:2.2rem;max-width:780px}
 
-.tag-bar{display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:2.2rem}
+.tag-bar{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:2.2rem}
 .tag-bar .active,.tag-bar button.active{background:var(--green);color:#fff;border-color:var(--green)}
-.tag-bar button,.tag-bar a{font-size:.8rem;color:var(--muted);border:1px solid var(--line);background:#fff;border-radius:999px;padding:.4rem .9rem;cursor:pointer;font-weight:700;font-family:var(--font);transition:all .2s}
+.tag-bar button,.tag-bar a{max-width:100%;white-space:nowrap;font-size:.8rem;color:var(--muted);border:1px solid var(--line);background:#fff;border-radius:999px;padding:.4rem .9rem;cursor:pointer;font-weight:700;font-family:var(--font);transition:all .2s}
 .tag-bar button:hover{border-color:#9edcb2;color:var(--green2)}
 
 .blog-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.5rem}
@@ -51,9 +53,10 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .post-cover{width:100%;height:190px;object-fit:cover;display:block;filter:brightness(1.02)}
 .post-cover-ph{width:100%;height:190px;display:grid;place-items:center;background:linear-gradient(135deg,#dcfce7,#f0fdf4);color:var(--green2);font-size:2rem}
 .post-body{display:flex;flex-direction:column;flex:1;padding:1.3rem}
-.post-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem}
-.post-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.02em;color:var(--green2);background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:.18rem .5rem}
-.post-title{font-size:1.08rem;color:var(--ink);font-weight:900;letter-spacing:-.015em;line-height:1.35;margin-bottom:.5rem}
+.post-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.7rem;max-height:3.9rem;overflow:hidden}
+.post-tags .post-tag:nth-child(n+4){display:none}
+.post-tag{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.62rem;font-weight:800;letter-spacing:0;color:var(--green2);background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:.18rem .5rem}
+.post-title{font-size:1.08rem;color:var(--ink);font-weight:900;letter-spacing:0;line-height:1.35;margin-bottom:.5rem}
 .post-excerpt{font-size:.86rem;color:var(--muted);line-height:1.6;margin-bottom:.8rem;flex:1;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .post-meta{font-size:.74rem;color:var(--muted);margin-top:auto}
 
@@ -80,7 +83,11 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
 
 @media(max-width:1280px){.blog-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:768px){nav{height:60px;padding:0 4%}.nav-links{display:none}.sec{padding:2.5rem 4%}.stitle{font-size:2rem}.blog-grid{grid-template-columns:1fr}.post-cover,.post-cover-ph{height:170px}}
+@media(max-width:768px){
+  nav{height:60px;padding:0 4%}.nav-links{display:none}.sec{padding:2.5rem 4%}.stitle{font-size:2rem}.blog-grid{grid-template-columns:1fr}.post-cover,.post-cover-ph{height:170px}
+  .tag-bar{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;padding-bottom:.35rem;margin-bottom:1.4rem;scrollbar-width:none}
+  .tag-bar::-webkit-scrollbar{display:none}
+}
 
 /* ===== 移动导航 ===== */
 .nav-right{display:flex;align-items:center;gap:.7rem}
@@ -102,17 +109,14 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
   .nav-cta{display:inline-flex;align-items:center;height:40px;padding:0 1rem;font-size:.8rem}
   .mobile-menu{top:60px}
 }
+@media(max-width:420px){
+  .nav-blog-m{display:none}
+  .nav-right{gap:.45rem}
+  .nav-cta{padding:0 .85rem}
+}
 
 </style>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-7966B84XT6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-7966B84XT6');
-</script>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
@@ -203,11 +207,15 @@ function uploadedWebpSrcset(url){
   }).join(', ');
 }
 
-function responsiveImage(cls,url,alt,sizes,loading){
+function responsiveImage(cls,url,alt,sizes,loading,fetchPriority,width,height){
   var srcset=uploadedWebpSrcset(url);
   return '<img class="'+escAttr(cls)+'" src="'+escAttr(url)+'"'+
     (srcset?' srcset="'+escAttr(srcset)+'" sizes="'+escAttr(sizes)+'"':'')+
-    ' alt="'+escAttr(alt)+'"'+(loading?' loading="'+escAttr(loading)+'"':'')+' decoding="async">';
+    (width?' width="'+escAttr(width)+'"':'')+
+    (height?' height="'+escAttr(height)+'"':'')+
+    ' alt="'+escAttr(alt)+'"'+
+    (fetchPriority?' fetchpriority="'+escAttr(fetchPriority)+'"':'')+
+    (loading?' loading="'+escAttr(loading)+'"':'')+' decoding="async">';
 }
 
 function renderCards(posts){
@@ -216,10 +224,10 @@ function renderCards(posts){
     grid.innerHTML='<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-t">NO ARTICLES YET</div><div class="empty-s">Check back soon — new PCBA engineering content coming.</div></div>';
     return;
   }
-  grid.innerHTML=posts.map(function(p){
+  grid.innerHTML=posts.map(function(p,index){
     var tags=[];try{tags=JSON.parse(p.tags||'[]');}catch(e){}
     var tagsHtml=tags.map(function(t){return '<span class="post-tag">'+t+'</span>';}).join('');
-    var cover=p.cover_url?responsiveImage('post-cover',p.cover_url,p.title,'(max-width: 760px) 92vw, (max-width: 1100px) 45vw, 360px','lazy')
+    var cover=p.cover_url?responsiveImage('post-cover',p.cover_url,p.title,'(max-width: 760px) 92vw, (max-width: 1100px) 45vw, 360px',index<2?'':'lazy',index===0?'high':'','360','190')
       :'<div class="post-cover-ph">// NO COVER</div>';
     return '<div class="post-card" onclick="location.href=\'/blog/'+encodeURIComponent(p.slug)+'\'">'+
       cover+'<div class="post-body">'+
@@ -281,7 +289,7 @@ if(!serverRenderedGrid || !serverRenderedGrid.querySelector('.post-card,.empty-s
   var waLinks = document.querySelectorAll('[href^="https://wa.me"]');
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
-  fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
+  window.PCBAForge.getPublicSettings().then(function(cfg){
     var wa = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
     if(!wa) return;
     waLinks.forEach(function(el){

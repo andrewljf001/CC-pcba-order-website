@@ -6,7 +6,9 @@
 <title>PCBAForge Blog</title>
 <meta name="description" content="">
 
-<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css?v=20260703">
+<script src="/site-runtime.js?v=20260703"></script>
 <style>
 :root{
   --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
@@ -17,14 +19,14 @@
   --shadow:0 16px 44px rgba(20,32,51,.08);--shadow-sm:0 8px 22px rgba(20,32,51,.06);
   --max:920px;
   --article-pad:clamp(24px,4vw,56px);
-  --font:'DM Sans',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;background:var(--bg)}
 body{font-family:var(--font);background:radial-gradient(circle at 85% 1%,rgba(22,163,74,.08),transparent 24%),linear-gradient(180deg,#fff 0,#f6f8fb 320px,#f6f8fb 100%);color:var(--text);line-height:1.7;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 5%;height:68px;background:rgba(255,255,255,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(10px);box-shadow:0 10px 28px rgba(20,32,51,.05)}
-.nav-logo{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:1.08rem;font-weight:900;letter-spacing:-.02em}
+.nav-logo{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:1.08rem;font-weight:900;letter-spacing:0}
 .ldot{position:relative;width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#16a34a,#22c55e);box-shadow:0 8px 18px rgba(22,163,74,.25);animation:none}
 .ldot::after{content:"P";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:.84rem;font-weight:900;line-height:1}
 .nav-links{list-style:none;display:flex;gap:1.8rem}
@@ -35,22 +37,34 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .back-link:hover{color:var(--green2)}
 .article-tags{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .article-tag{font-size:.66rem;font-weight:800;color:var(--green2);background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:.2rem .6rem}
-.article-title{color:var(--ink);font-size:clamp(2.2rem,4vw,3.35rem);line-height:1.08;letter-spacing:-.035em;font-weight:900;margin-bottom:1rem;max-width:980px}
+.article-title{color:var(--ink);font-size:clamp(2.2rem,4vw,3.35rem);line-height:1.08;letter-spacing:0;font-weight:900;margin-bottom:1rem;max-width:980px}
 .article-meta{display:flex;gap:1.5rem;font-size:.8rem;color:var(--muted);font-weight:600;margin-bottom:2rem;flex-wrap:wrap}
 .article-cover{width:100%;max-height:500px;object-fit:cover;border-radius:14px;margin-bottom:2.5rem;box-shadow:var(--shadow)}
 .article-content{font-size:1.08rem;line-height:1.85;color:var(--text);overflow-wrap:anywhere}
-.article-content h2{color:var(--ink);font-size:1.5rem;font-weight:900;letter-spacing:-.02em;margin:2.2rem 0 .9rem}
+.article-content h2{color:var(--ink);font-size:1.5rem;font-weight:900;letter-spacing:0;margin:2.2rem 0 .9rem}
 .article-content h3{color:var(--ink);font-size:1.2rem;font-weight:800;margin:1.8rem 0 .7rem}
+.article-content h4{color:var(--ink);font-size:1.05rem;font-weight:800;margin:1.5rem 0 .55rem}
 .article-content p{margin-bottom:1.3rem}
 .article-content ul,.article-content ol{margin:0 0 1.3rem 1.4rem}
 .article-content li{margin-bottom:.5rem}
 .article-content a{color:var(--green2);font-weight:600;text-decoration:underline;overflow-wrap:anywhere;word-break:break-word}
 .article-content strong{color:var(--ink);font-weight:700}
-.article-content img{max-width:100%;border-radius:12px;margin:1.5rem 0}
+.article-content img{max-width:100%;height:auto;border-radius:12px;margin:1.5rem 0}
 .article-content blockquote{border-left:3px solid var(--green);background:#f0fdf4;padding:1rem 1.3rem;border-radius:0 10px 10px 0;margin:1.5rem 0;color:var(--text)}
 .article-content code{background:#f1f5f9;border:1px solid var(--line);border-radius:5px;padding:.1rem .4rem;font-size:.9em}
+.article-content pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:1rem 1.15rem;margin:1.5rem 0;overflow-x:auto;line-height:1.65}
+.article-content pre code{background:transparent;border:0;color:inherit;padding:0;white-space:pre}
+.article-content hr{border:0;border-top:1px solid var(--line);margin:2rem 0}
+.article-content figure{margin:1.7rem 0}
+.article-content figcaption{color:var(--muted);font-size:.84rem;line-height:1.5;text-align:center;margin-top:.55rem}
+.article-content table{width:100%;border-collapse:collapse;margin:1.45rem 0 1.7rem;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-sm);font-size:.94rem;line-height:1.55}
+.article-content th,.article-content td{border:1px solid var(--line);padding:.78rem .9rem;text-align:left;vertical-align:top}
+.article-content th{background:#ecfdf3;color:var(--ink);font-weight:900}
+.article-content tbody tr:nth-child(even){background:#f8fafc}
+.article-content .pcba-live-template > strong:first-child{display:block;color:var(--green2);font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:0;margin:0 0 .45rem}
+.article-content .pcba-live-template > strong:first-child + p{background:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid var(--green);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1.6rem;color:var(--ink)}
 .article-cta{background:linear-gradient(135deg,#08331c,#0f5132);border-radius:14px;padding:2.5rem;text-align:center;margin-top:3rem;box-shadow:var(--shadow)}
-.article-cta-title{color:#fff;font-size:1.4rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.6rem}
+.article-cta-title{color:#fff;font-size:1.4rem;font-weight:900;letter-spacing:0;margin-bottom:.6rem}
 .article-cta-sub{color:#d7fbe0;font-size:.95rem;margin-bottom:1.5rem}
 .article-cta-btns{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap}
 .btn-green{display:inline-flex;align-items:center;justify-content:center;background:var(--green);color:#fff;border-radius:8px;font-size:.9rem;font-weight:800;padding:.8rem 1.8rem;box-shadow:0 12px 22px rgba(22,163,74,.25);transition:background .2s}
@@ -73,7 +87,14 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
 .flinks2 a{font-size:.75rem;color:var(--muted)}.flinks2 a:hover{color:var(--ink)}
 .fcopy{font-size:.75rem;color:var(--muted)}
 .waf{position:fixed;bottom:2rem;right:2rem;width:56px;height:56px;background:var(--wa);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 26px rgba(37,211,102,.25);z-index:999;transition:transform .2s}.waf:hover{transform:scale(1.08)}
-@media(max-width:768px){nav{height:60px;padding:0 4%}.nav-links{display:none}.article-wrap{padding:2rem 5% 3rem}.article-title{font-size:2rem}.article-content{font-size:1rem}.article-cover{max-height:320px}.article-cta{padding:2rem 1.5rem}}
+@media(max-width:768px){
+  nav{height:60px;padding:0 4%}.nav-links{display:none}.article-wrap{padding:2rem 5% 3rem}.article-title{font-size:2rem;line-height:1.12}.article-content{font-size:1rem;line-height:1.76}.article-cover{max-height:320px}.article-cta{padding:2rem 1.5rem;border-radius:12px}
+  .article-content h2{font-size:1.32rem;line-height:1.25;margin:2rem 0 .8rem}
+  .article-content h3{font-size:1.08rem}
+  .article-content table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;font-size:.84rem}
+  .article-content th,.article-content td{min-width:8.5rem;padding:.65rem .7rem}
+  .btn-green,.btn-outline{width:100%;max-width:280px}
+}
 
 
 /* ===== 移动导航(汉堡+常驻Blog+SignIn) ===== */
@@ -96,17 +117,14 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
   .nav-cta{display:inline-flex;align-items:center;height:40px;padding:0 1rem;font-size:.8rem}
   .mobile-menu{top:60px}
 }
+@media(max-width:420px){
+  .nav-blog-m{display:none}
+  .nav-right{gap:.45rem}
+  .nav-cta{padding:0 .85rem}
+}
 
 </style>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-7966B84XT6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-7966B84XT6');
-</script>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
 </head>
 <body>
@@ -184,11 +202,14 @@ function uploadedWebpSrcset(url){
   }).join(', ');
 }
 
-function responsiveImage(cls,url,alt,sizes){
+function responsiveImage(cls,url,alt,sizes,fetchPriority,width,height){
   var srcset=uploadedWebpSrcset(url);
   return '<img class="'+esc(cls)+'" src="'+esc(url)+'"'+
     (srcset?' srcset="'+esc(srcset)+'" sizes="'+esc(sizes)+'"':'')+
-    ' alt="'+esc(alt)+'" decoding="async">';
+    (width?' width="'+esc(width)+'"':'')+
+    (height?' height="'+esc(height)+'"':'')+
+    ' alt="'+esc(alt)+'"'+
+    (fetchPriority?' fetchpriority="'+esc(fetchPriority)+'"':'')+' decoding="async">';
 }
 
 async function loadPost(){
@@ -226,7 +247,7 @@ async function loadPost(){
         '<span>📅 '+fmtDate(p.published_at)+'</span>'+
         '<span>👁 '+((p.views||0))+'</span>'+
       '</div>'+
-      (p.cover_url?responsiveImage('article-cover',p.cover_url,p.title,'(max-width: 760px) 92vw, 920px'):'')+
+      (p.cover_url?responsiveImage('article-cover',p.cover_url,p.title,'(max-width: 760px) 92vw, 920px','high','920','500'):'')+
       '<div class="article-content" id="post-content"></div>'+
       '<div class="article-cta">'+
         '<div class="article-cta-title">Ready to build your PCBA?</div>'+
@@ -255,7 +276,7 @@ loadPost();
   // 先隐藏所有 WA 按钮
   if(wafEl) wafEl.style.display='none';
   if(bwaEl) bwaEl.style.display='none';
-  fetch('/api/settings/public').then(function(r){return r.json();}).then(function(cfg){
+  window.PCBAForge.getPublicSettings().then(function(cfg){
     var wa = (cfg.whatsapp_number||'').replace(/[^0-9]/g,'');
     if(!wa) return;
     waLinks.forEach(function(el){

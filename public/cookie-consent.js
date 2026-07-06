@@ -56,7 +56,7 @@
   style.textContent = [
     '#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;',
     'background:#ffffff;border-top:1px solid #e3e8f0;padding:.75rem 1.2rem;',
-    'font-family:"DM Sans",Inter,sans-serif;font-size:.85rem;color:#334155;',
+    'font-family:Inter,sans-serif;font-size:.85rem;color:#334155;',
     'box-shadow:0 -8px 24px rgba(20,32,51,.06);animation:cb-slide .3s ease;}',
     '@keyframes cb-slide{from{transform:translateY(100%)}to{transform:translateY(0)}}',
     '#cb-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;',
@@ -67,11 +67,11 @@
     '#cb-desc a{color:#11843d;font-weight:700;text-decoration:underline;}',
     '#cb-btns{display:flex;gap:.6rem;flex-shrink:0;}',
     '#cb-decline{background:#fff;border:1px solid #cbd5e1;color:#64748b;border-radius:7px;',
-    'padding:.5rem 1.1rem;font-size:.8rem;font-weight:700;font-family:"DM Sans",Inter,sans-serif;',
+    'padding:.5rem 1.1rem;font-size:.8rem;font-weight:700;font-family:Inter,sans-serif;',
     'cursor:pointer;transition:all .2s;}',
     '#cb-decline:hover{border-color:#94a3b8;color:#334155;}',
     '#cb-accept{background:#16a34a;border:none;color:#fff;border-radius:7px;',
-    'padding:.5rem 1.3rem;font-size:.8rem;font-family:"DM Sans",Inter,sans-serif;',
+    'padding:.5rem 1.3rem;font-size:.8rem;font-family:Inter,sans-serif;',
     'font-weight:800;cursor:pointer;transition:background .2s;box-shadow:0 8px 16px rgba(22,163,74,.18);}',
     '#cb-accept:hover{background:#11843d;}',
     '@media(max-width:600px){#cookie-banner{padding:.65rem .85rem;}',
@@ -92,12 +92,17 @@
     banner.style.transform = 'translateY(100%)';
     setTimeout(function () { banner.remove(); }, 320);
 
-    if (accepted && typeof window.gtag === 'function') {
+    if (window.PCBAForge && typeof window.PCBAForge.setAnalyticsConsent === 'function') {
+      window.PCBAForge.setAnalyticsConsent(accepted);
+    } else if (typeof window.gtag === 'function') {
       window.gtag('consent', 'update', {
-        analytics_storage: 'granted',
+        analytics_storage: accepted ? 'granted' : 'denied',
         ad_storage: 'denied'
       });
     }
+    window.dispatchEvent(new CustomEvent('pcbaf:cookie-consent', {
+      detail: { accepted: accepted }
+    }));
   }
 
   document.getElementById('cb-accept').addEventListener('click', function () { dismiss(true); });

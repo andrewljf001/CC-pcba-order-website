@@ -88,6 +88,7 @@ function securityHeaders(req, res, next) {
     "'self'",
     "'unsafe-inline'",
     'https://challenges.cloudflare.com',
+    'https://static.cloudflareinsights.com',
     'https://www.googletagmanager.com',
     'https://www.google-analytics.com',
     'https://www.paypal.com',
@@ -107,7 +108,7 @@ function securityHeaders(req, res, next) {
     "font-src 'self' https://fonts.gstatic.com data:",
     "img-src 'self' data: https:",
     "media-src 'self' https:",
-    "connect-src 'self' https://challenges.cloudflare.com https://www.google-analytics.com https://region1.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://pay.google.com",
+    "connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com https://www.google-analytics.com https://region1.google-analytics.com https://*.paypal.com https://*.paypalobjects.com https://pay.google.com",
     "frame-src 'self' https://challenges.cloudflare.com https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://pay.google.com",
     "worker-src 'self'",
     'upgrade-insecure-requests'
@@ -501,6 +502,7 @@ async function renderBlogListHtml({ page, activeTag }) {
     title: 'PCBAForge Blog - PCBA Engineering Insights & Guides',
     description,
     canonical: blogUrl,
+    preloadImage: posts[0]?.cover_url ? absoluteSiteUrl(posts[0].cover_url) : '',
     jsonLd: jsonLdGraph([
       organizationStructuredData(base),
       websiteStructuredData(base),
@@ -924,7 +926,7 @@ function readPublicHtml(fileName) {
   return fs.readFileSync(path.join(__dirname, 'public', fileName), 'utf8');
 }
 
-function injectPageHead(html, { title, description, canonical, robots, jsonLd, image, type = 'website' }) {
+function injectPageHead(html, { title, description, canonical, robots, jsonLd, image, preloadImage, type = 'website' }) {
   const socialImage = image || `${canonicalSiteUrl()}/images/hero-banner-20260607.webp`;
   let out = html
     .replace(/<link\s+rel=["\']canonical["\'][^>]*>\s*/gi, '')
@@ -949,6 +951,9 @@ function injectPageHead(html, { title, description, canonical, robots, jsonLd, i
   headTags.push(`<meta name="twitter:title" content="${htmlEscape(title)}">`);
   headTags.push(`<meta name="twitter:description" content="${htmlEscape(description)}">`);
   headTags.push(`<meta name="twitter:image" content="${htmlEscape(socialImage)}">`);
+  if (preloadImage) {
+    headTags.push(`<link rel="preload" as="image" href="${htmlEscape(preloadImage)}" fetchpriority="high">`);
+  }
   if (jsonLd) {
     headTags.push(`<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>`);
   }
@@ -973,7 +978,10 @@ function renderArticleBody(post) {
         className: 'article-cover',
         src: post.cover_url,
         alt: post.title,
-        sizes: '(max-width: 760px) 92vw, 920px'
+        sizes: '(max-width: 760px) 92vw, 920px',
+        fetchPriority: 'high',
+        width: '920',
+        height: '500'
       })
     : '';
 
@@ -1052,6 +1060,7 @@ function renderBlogPostPage(post) {
     canonical,
     jsonLd,
     image: postImage,
+    preloadImage: post.cover_url ? postImage : '',
     type: 'article'
   });
   return replaceArticleWrap(html, renderArticleBody(post));
@@ -1084,7 +1093,7 @@ function renderBlogCards(posts) {
     return '<div class="empty-state"><div class="empty-t">NO ARTICLES YET</div><div class="empty-s">Check back soon. New PCBA engineering content is coming.</div></div>';
   }
 
-  return posts.map((post) => {
+  return posts.map((post, index) => {
     const tags = parsePostTags(post.tags);
     const tagsHtml = tags
       .map((tag) => `<span class="post-tag">${htmlEscape(tag)}</span>`)
@@ -1094,8 +1103,11 @@ function renderBlogCards(posts) {
           className: 'post-cover',
           src: post.cover_url,
           alt: post.title,
-          loading: 'lazy',
-          sizes: '(max-width: 760px) 92vw, (max-width: 1100px) 45vw, 360px'
+          loading: index < 2 ? '' : 'lazy',
+          fetchPriority: index === 0 ? 'high' : '',
+          sizes: '(max-width: 760px) 92vw, (max-width: 1100px) 45vw, 360px',
+          width: '360',
+          height: '190'
         })
       : '<div class="post-cover-ph">// NO COVER</div>';
     return [
@@ -1366,14 +1378,17 @@ function uploadedWebpSrcset(url) {
     .join(', ');
 }
 
-function renderResponsiveImage({ className, src, alt, loading = '', sizes = '' }) {
+function renderResponsiveImage({ className, src, alt, loading = '', sizes = '', fetchPriority = '', width = '', height = '' }) {
   const srcset = uploadedWebpSrcset(src);
   return [
     `<img class="${htmlEscape(className)}"`,
     `src="${htmlEscape(src)}"`,
     srcset ? `srcset="${htmlEscape(srcset)}"` : '',
     srcset && sizes ? `sizes="${htmlEscape(sizes)}"` : '',
+    width ? `width="${htmlEscape(width)}"` : '',
+    height ? `height="${htmlEscape(height)}"` : '',
     `alt="${htmlEscape(alt)}"`,
+    fetchPriority ? `fetchpriority="${htmlEscape(fetchPriority)}"` : '',
     loading ? `loading="${htmlEscape(loading)}"` : '',
     'decoding="async">',
   ].filter(Boolean).join(' ');
@@ -1580,7 +1595,7 @@ function adminAuth(req, res, next) {
 app.get('/api/settings/public', async (req, res) => {
   try {
     const { hit, value: cfg } = await getOrSetPublicMemoryCache('settings|public', loadPublicSettingsConfig);
-    setPublicCache(res, 300);
+    setPublicCache(res, 3600);
     setOriginCacheHeader(res, hit);
     res.json(cfg);
   } catch (err) { res.status(500).json({ error: err.message }); }
