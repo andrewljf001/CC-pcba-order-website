@@ -224,7 +224,7 @@ function renderCards(posts){
     return '<div class="post-card" onclick="location.href=\'/blog/'+encodeURIComponent(p.slug)+'\'">'+
       cover+'<div class="post-body">'+
       (tagsHtml?'<div class="post-tags">'+tagsHtml+'</div>':'')+
-      '<div class="post-title">'+p.title+'</div>'+
+      '<h2 class="post-title">'+p.title+'</h2>'+
       (p.excerpt?'<div class="post-excerpt">'+p.excerpt+'</div>':'')+
       '<div class="post-meta"><span>'+fmtDate(p.published_at)+'</span><span>👁 '+(p.views||0)+'</span></div>'+
       '</div></div>';

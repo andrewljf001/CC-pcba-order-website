@@ -398,6 +398,7 @@ function setNoStore(res) {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.set('Pragma', 'no-cache');
   res.set('Expires', '0');
+  res.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
 }
 
 function setPublicCache(res, seconds = 300) {
@@ -1102,7 +1103,7 @@ function renderBlogCards(posts) {
       coverHtml,
       '<div class="post-body">',
       tagsHtml ? `<div class="post-tags">${tagsHtml}</div>` : '',
-      `<div class="post-title">${htmlEscape(post.title)}</div>`,
+      `<h2 class="post-title">${htmlEscape(post.title)}</h2>`,
       post.excerpt ? `<div class="post-excerpt">${htmlEscape(post.excerpt)}</div>` : '',
       `<div class="post-meta"><span>${htmlEscape(formatDisplayDate(post.published_at))}</span></div>`,
       '</div>',
@@ -1208,9 +1209,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
 // ── 敏感内容防缓存(账户页 + 所有API) ─────────────
 app.use('/api', (req, res, next) => {
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.set('Pragma', 'no-cache');
-  res.set('Expires', '0');
+  setNoStore(res);
   next();
 });
 
@@ -1312,11 +1311,13 @@ app.use(express.static('public', {
   }
 }));
 app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => {
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.set('Pragma', 'no-cache');
+  setNoStore(res);
   res.sendFile(require('path').join(__dirname, 'admin', 'index.html'));
 });
-app.use('/admin', express.static('admin'));
+app.use('/admin', (req, res, next) => {
+  res.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  next();
+}, express.static('admin'));
 
 // ── Apple Pay 域名验证文件 ────────────────────────────────
 app.get('/.well-known/apple-developer-merchantid-domain-association', async (req, res) => {
