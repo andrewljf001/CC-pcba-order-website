@@ -110,14 +110,19 @@
   }
 
   function dismiss(banner, accepted) {
+    var previous = readConsent();
     writeConsent(accepted ? 'accepted' : 'declined');
     banner.style.transition = 'transform .3s';
     banner.style.transform = 'translateY(100%)';
+    updateConsent(accepted);
     setTimeout(function () {
+      if (!accepted && previous === 'accepted') {
+        window.location.reload();
+        return;
+      }
       banner.remove();
       ensureSettingsButton().style.display = 'block';
     }, 320);
-    updateConsent(accepted);
   }
 
   function showBanner() {
