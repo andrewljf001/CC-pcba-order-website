@@ -648,7 +648,6 @@ tr:hover td{background:#f8fafc}
 
 <script>
 const API = '';
-var adminToken = localStorage.getItem('cc_admin_token');
 var adminInfo  = null;
 var ordersPage = 1, customersPage = 1;
 var settingsData = [];
@@ -665,9 +664,7 @@ async function doLogin() {
   btn.textContent = 'AUTHENTICATING...'; btn.disabled = true;
   try {
     const r = await apiFetch('/api/admin/login', { method:'POST', body: JSON.stringify({ email, password, cf_turnstile: turnstile.getResponse() }) }, false);
-    adminToken = r.token;
     adminInfo  = r.admin;
-    localStorage.setItem('cc_admin_token', adminToken);
     showApp();
   } catch(e) {
     errEl.textContent = e.message || 'Invalid credentials';
@@ -685,17 +682,18 @@ function showApp() {
   startClock();
 }
 
-function logout() {
-  adminToken = null;
-  localStorage.removeItem('cc_admin_token');
-  location.reload();
+async function logout() {
+  try {
+    await fetch('/api/admin/logout', { method:'POST', credentials:'same-origin' });
+  } finally {
+    location.reload();
+  }
 }
 
 // ── API HELPER ───────────────────────────────────────
 async function apiFetch(url, opts={}, auth=true) {
   const headers = { 'Content-Type':'application/json', ...(opts.headers||{}) };
-  if (auth) headers['Authorization'] = 'Bearer ' + adminToken;
-  const r = await fetch(API + url, { ...opts, headers });
+  const r = await fetch(API + url, { ...opts, headers, credentials:'same-origin' });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || 'Request failed');
   return d;
@@ -739,9 +737,22 @@ function debounce(fn, ms) {
 // ── HELPERS ─────────────────────────────────────────
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'; }
 function fmtMoney(v) { return v ? '$' + parseFloat(v).toFixed(2) : '—'; }
-function badge(status) { return `<span class="badge badge-${status}">${status.toUpperCase()}</span>`; }
-function modeBadge(m) { const map={pcb:'PCB',smt:'SMT',turnkey:'TURNKEY'}; return map[m]||m; }
-function esc(s) { if(!s) return ''; const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+function esc(s) { if(s===null||s===undefined) return ''; const d=document.createElement('div');d.textContent=String(s);return d.innerHTML; }
+function escAttr(s) { return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function jsArg(s) { return escAttr(JSON.stringify(String(s===null||s===undefined?'':s))); }
+function safeDownloadUrl(value) {
+  try {
+    const url = new URL(String(value||''), location.origin);
+    if (url.protocol === 'https:' && (url.origin === location.origin || url.hostname === 'static.pcbaforge.com')) return escAttr(url.href);
+  } catch(e) {}
+  return '#';
+}
+function badge(status) {
+  const allowed=['pending','quoted','paid','production','shipped','completed','cancelled','normal','vip','blacklist','draft','published'];
+  const value=allowed.includes(String(status||'').toLowerCase())?String(status).toLowerCase():'unknown';
+  return `<span class="badge badge-${value}">${esc(value.toUpperCase())}</span>`;
+}
+function modeBadge(m) { const map={pcb:'PCB',smt:'SMT',turnkey:'TURNKEY',general:'GENERAL'}; return map[m]||esc(m||'—'); }
 
 // ── DASHBOARD ───────────────────────────────────────
 async function loadDashboard() {
@@ -764,10 +775,10 @@ async function loadDashboard() {
 
     const recent = await apiFetch('/api/admin/orders?limit=8');
     document.getElementById('recent-orders-list').innerHTML = recent.length ? recent.map(r =>
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.2rem;border-bottom:1px solid #e3e8f0;cursor:pointer" onclick="openOrder('${r.id}')">
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.2rem;border-bottom:1px solid #e3e8f0;cursor:pointer" onclick="openOrder(${jsArg(r.id)})">
         <div>
-          <div class="mono" style="color:var(--white);font-size:.75rem">${r.order_no}</div>
-          <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${r.customer_email||'—'}</div>
+          <div class="mono" style="color:var(--white);font-size:.75rem">${esc(r.order_no)}</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${esc(r.customer_email||'—')}</div>
         </div>
         <div style="text-align:right">
           ${badge(r.status)}
@@ -789,14 +800,14 @@ async function loadOrders() {
     if (!data.length) { tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--muted)">No orders found</td></tr>`; return; }
     tbody.innerHTML = data.map(r => `
       <tr>
-        <td class="mono" style="color:var(--white)">${r.order_no}</td>
-        <td><div>${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
+        <td class="mono" style="color:var(--white)">${esc(r.order_no)}</td>
+        <td><div>${esc(r.customer_name||'—')}</div><div style="font-size:.7rem;color:var(--muted)">${esc(r.customer_email||'—')}</div></td>
         <td><span style="font-family:'Inter',sans-serif;font-size:.72rem">${modeBadge(r.mode)}</span></td>
         <td class="mono">${fmtMoney(r.estimate)}</td>
         <td class="mono" style="color:var(--green)">${fmtMoney(r.quoted_price)}</td>
         <td>${badge(r.status)}</td>
         <td style="color:var(--muted);font-size:.78rem">${fmtDate(r.created_at)}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="openOrder('${r.id}')">VIEW →</button></td>
+        <td><button class="btn btn-outline btn-sm" onclick="openOrder(${jsArg(r.id)})">VIEW →</button></td>
       </tr>`).join('');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -812,25 +823,25 @@ async function openOrder(id) {
     const params = typeof o.params === "string" ? (JSON.parse(o.params || "{}") || {}) : (o.params || {});
     document.getElementById('dp-body').innerHTML = `
       <div class="section-title">// CUSTOMER</div>
-      <div class="info-row"><span class="ir-label">Name</span><span class="ir-value">${o.customer_name||'—'}</span></div>
-      <div class="info-row"><span class="ir-label">Email</span><span class="ir-value">${o.customer_email||'—'}</span></div>
-      <div class="info-row"><span class="ir-label">WhatsApp</span><span class="ir-value">${o.customer_whatsapp||'—'}</span></div>
-      <div class="info-row"><span class="ir-label">Company</span><span class="ir-value">${o.customer_company||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">Name</span><span class="ir-value">${esc(o.customer_name||'—')}</span></div>
+      <div class="info-row"><span class="ir-label">Email</span><span class="ir-value">${esc(o.customer_email||'—')}</span></div>
+      <div class="info-row"><span class="ir-label">WhatsApp</span><span class="ir-value">${esc(o.customer_whatsapp||'—')}</span></div>
+      <div class="info-row"><span class="ir-label">Company</span><span class="ir-value">${esc(o.customer_company||'—')}</span></div>
       <div class="section-title">// ORDER</div>
-      <div class="info-row"><span class="ir-label">Order No</span><span class="ir-value g">${o.order_no}</span></div>
+      <div class="info-row"><span class="ir-label">Order No</span><span class="ir-value g">${esc(o.order_no)}</span></div>
       <div class="info-row"><span class="ir-label">Service</span><span class="ir-value">${modeBadge(o.mode)}</span></div>
       <div class="info-row"><span class="ir-label">Status</span><span class="ir-value">${badge(o.status)}</span></div>
       <div class="info-row"><span class="ir-label">Estimate</span><span class="ir-value">${fmtMoney(o.estimate)}</span></div>
       <div class="info-row"><span class="ir-label">Created</span><span class="ir-value">${fmtDate(o.created_at)}</span></div>
-      <div class="info-row"><span class="ir-label">Notes</span><span class="ir-value">${o.notes||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">Notes</span><span class="ir-value">${esc(o.notes||'—')}</span></div>
       <div class="section-title">// PARAMETERS</div>
-      ${Object.entries(params).map(([k,v]) => `<div class="info-row"><span class="ir-label">${k}</span><span class="ir-value">${v||'—'}</span></div>`).join('')}
+      ${Object.entries(params).map(([k,v]) => `<div class="info-row"><span class="ir-label">${esc(k)}</span><span class="ir-value">${esc(v||'—')}</span></div>`).join('')}
       <div class="section-title">// FILES</div>
-      ${(()=>{ try{ const fs=JSON.parse(o.files||"[]"); return fs.length ? fs.map(f=>`<div class="info-row"><span class="ir-label">${f.name}</span><span class="ir-value"><a href="${f.url}" target="_blank" style="color:var(--green)">⬇ DOWNLOAD</a> <span style="color:var(--muted);font-size:.75rem">(${(f.size/1024/1024).toFixed(1)}MB)</span></span></div>`).join("") : "<div class=\"info-row\"><span class=\"ir-value muted\">No files uploaded</span></div>"; }catch(e){return "";} })()}
+      ${(()=>{ try{ const fs=JSON.parse(o.files||"[]"); return fs.length ? fs.map(f=>`<div class="info-row"><span class="ir-label">${esc(f.name)}</span><span class="ir-value"><a href="${safeDownloadUrl(f.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--green)">⬇ DOWNLOAD</a> <span style="color:var(--muted);font-size:.75rem">(${Number(f.size||0)>0?(Number(f.size)/1024/1024).toFixed(1):'0.0'}MB)</span></span></div>`).join("") : "<div class=\"info-row\"><span class=\"ir-value muted\">No files uploaded</span></div>"; }catch(e){return "";} })()}
       <div class="section-title">// QUOTE & UPDATE</div>
-      <div class="form-group"><label>QUOTED PRICE (USD)</label><input type="number" id="dp-quoted" value="${o.quoted_price||''}" placeholder="0.00" step="0.01"></div>
-      <div class="form-group"><label>SHIPPING FEE (USD)</label><input type="number" id="dp-shipping" value="${o.shipping_fee||''}" placeholder="0.00" step="0.01"></div>
-      <div class="form-group"><label>TRACKING NUMBER</label><input type="text" id="dp-tracking" value="${o.tracking_no||''}" placeholder="DHL / FedEx tracking no"></div>
+      <div class="form-group"><label>QUOTED PRICE (USD)</label><input type="number" id="dp-quoted" value="${escAttr(o.quoted_price||'')}" placeholder="0.00" step="0.01"></div>
+      <div class="form-group"><label>SHIPPING FEE (USD)</label><input type="number" id="dp-shipping" value="${escAttr(o.shipping_fee||'')}" placeholder="0.00" step="0.01"></div>
+      <div class="form-group"><label>TRACKING NUMBER</label><input type="text" id="dp-tracking" value="${escAttr(o.tracking_no||'')}" placeholder="DHL / FedEx tracking no"></div>
       <div class="form-group"><label>STATUS</label>
         <select id="dp-status">
           ${['pending','quoted','paid','production','shipped','completed','cancelled'].map(s =>
@@ -838,10 +849,10 @@ async function openOrder(id) {
           ).join('')}
         </select>
       </div>
-      <div class="form-group"><label>ADMIN NOTE</label><textarea id="dp-note" placeholder="Internal notes...">${o.admin_note||''}</textarea></div>
+      <div class="form-group"><label>ADMIN NOTE</label><textarea id="dp-note" placeholder="Internal notes...">${esc(o.admin_note||'')}</textarea></div>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-        <button class="btn btn-green" onclick="saveOrder('${o.id}')">💾 SAVE CHANGES</button>
-        ${o.status==='pending'||o.status==='quoted' ? `<button class="btn btn-amber" onclick="sendPayment('${o.id}','${o.order_no}')">📧 SEND PAYMENT LINK</button>` : ''}
+        <button class="btn btn-green" onclick="saveOrder(${jsArg(o.id)})">💾 SAVE CHANGES</button>
+        ${o.status==='pending'||o.status==='quoted' ? `<button class="btn btn-amber" onclick="sendPayment(${jsArg(o.id)},${jsArg(o.order_no)})">📧 SEND PAYMENT LINK</button>` : ''}
       </div>`;
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -889,13 +900,13 @@ async function loadCustomers() {
     if (!data.length) { tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">No customers found</td></tr>`; return; }
     tbody.innerHTML = data.map(c => `
       <tr>
-        <td><div style="color:var(--white)">${c.name||'—'}</div><div style="font-size:.72rem;color:var(--muted)">${c.email}</div></td>
-        <td style="color:var(--muted);font-size:.8rem">${c.company||'—'}</td>
+        <td><div style="color:var(--white)">${esc(c.name||'—')}</div><div style="font-size:.72rem;color:var(--muted)">${esc(c.email)}</div></td>
+        <td style="color:var(--muted);font-size:.8rem">${esc(c.company||'—')}</td>
         <td>${badge(c.customer_type==='normal'?'normal':c.customer_type==='vip'?'vip':'blacklist')}</td>
         <td class="mono" style="text-align:center">${c.order_count||0}</td>
         <td class="mono" style="color:var(--green)">${fmtMoney(c.total_spent)}</td>
         <td style="color:var(--muted);font-size:.78rem">${fmtDate(c.created_at)}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="openCustomer('${c.id}')">VIEW →</button></td>
+        <td><button class="btn btn-outline btn-sm" onclick="openCustomer(${jsArg(c.id)})">VIEW →</button></td>
       </tr>`).join('');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -909,10 +920,10 @@ async function openCustomer(id) {
     const c = await apiFetch(`/api/admin/customers/${id}`);
     document.getElementById('dp-body').innerHTML = `
       <div class="section-title">// PROFILE</div>
-      <div class="info-row"><span class="ir-label">Name</span><span class="ir-value">${c.name||'—'}</span></div>
-      <div class="info-row"><span class="ir-label">Email</span><span class="ir-value">${c.email}</span></div>
-      <div class="info-row"><span class="ir-label">Company</span><span class="ir-value">${c.company||'—'}</span></div>
-      <div class="info-row"><span class="ir-label">WhatsApp</span><span class="ir-value">${c.whatsapp||'—'}</span></div>
+      <div class="info-row"><span class="ir-label">Name</span><span class="ir-value">${esc(c.name||'—')}</span></div>
+      <div class="info-row"><span class="ir-label">Email</span><span class="ir-value">${esc(c.email)}</span></div>
+      <div class="info-row"><span class="ir-label">Company</span><span class="ir-value">${esc(c.company||'—')}</span></div>
+      <div class="info-row"><span class="ir-label">WhatsApp</span><span class="ir-value">${esc(c.whatsapp||'—')}</span></div>
       <div class="info-row"><span class="ir-label">Verified</span><span class="ir-value" style="color:${c.email_verified?'var(--green)':'var(--red)'}">${c.email_verified?'YES':'NO'}</span></div>
       <div class="info-row"><span class="ir-label">Joined</span><span class="ir-value">${fmtDate(c.created_at)}</span></div>
       <div class="section-title">// MANAGE</div>
@@ -923,17 +934,17 @@ async function openCustomer(id) {
           <option value="blacklist"${c.customer_type==='blacklist'?' selected':''}>BLACKLIST</option>
         </select>
       </div>
-      <div class="form-group"><label>INTERNAL NOTE</label><textarea id="c-note" placeholder="Internal notes...">${c.note||''}</textarea></div>
+      <div class="form-group"><label>INTERNAL NOTE</label><textarea id="c-note" placeholder="Internal notes...">${esc(c.note||'')}</textarea></div>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem">
-        <button class="btn btn-green btn-sm" onclick="saveCustomer('${c.id}')">💾 SAVE</button>
-        <button class="btn btn-amber btn-sm" onclick="adminResetPassword('${c.id}','${c.email}')">📧 RESET PASSWORD</button>
-        ${c.google_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth('${c.id}','google')">Unbind Google</button>`:''}
-        ${c.github_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth('${c.id}','github')">Unbind GitHub</button>`:''}
+        <button class="btn btn-green btn-sm" onclick="saveCustomer(${jsArg(c.id)})">💾 SAVE</button>
+        <button class="btn btn-amber btn-sm" onclick="adminResetPassword(${jsArg(c.id)},${jsArg(c.email)})">📧 RESET PASSWORD</button>
+        ${c.google_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth(${jsArg(c.id)},'google')">Unbind Google</button>`:''}
+        ${c.github_id?`<button class="btn btn-red btn-sm" onclick="unbindOAuth(${jsArg(c.id)},'github')">Unbind GitHub</button>`:''}
       </div>
       <div class="section-title">// ORDER HISTORY (${c.orders?.length||0})</div>
       ${c.orders?.length ? c.orders.map(o =>
-        `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid #e3e8f0;cursor:pointer" onclick="openOrder('${o.order_no}')">
-          <div><div class="mono" style="font-size:.75rem;color:var(--white)">${o.order_no}</div><div style="font-size:.7rem;color:var(--muted)">${modeBadge(o.mode)} · ${fmtDate(o.created_at)}</div></div>
+        `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid #e3e8f0;cursor:pointer" onclick="openOrder(${jsArg(o.order_no)})">
+          <div><div class="mono" style="font-size:.75rem;color:var(--white)">${esc(o.order_no)}</div><div style="font-size:.7rem;color:var(--muted)">${modeBadge(o.mode)} · ${fmtDate(o.created_at)}</div></div>
           <div style="text-align:right">${badge(o.status)}<div style="font-size:.75rem;color:var(--green);margin-top:.2rem">${fmtMoney(o.quoted_price||o.estimate)}</div></div>
         </div>`
       ).join('') : '<div style="color:var(--muted);font-size:.8rem;padding:.5rem 0">No orders yet</div>'}`;
@@ -975,9 +986,9 @@ async function loadPosts() {
         <td class="mono" style="text-align:center">${p.views||0}</td>
         <td style="color:var(--muted);font-size:.78rem">${fmtDate(p.published_at)}</td>
         <td style="white-space:nowrap">
-          <button class="btn btn-outline btn-sm" onclick="editPost('${p.id}')">EDIT</button>
-          <button class="btn btn-red btn-sm" style="margin-left:.4rem" onclick="deletePost('${p.id}','${esc(p.title)}')">DEL</button>
-          <a href="/blog/${encodeURIComponent(p.slug)}" target="_blank" class="btn btn-outline btn-sm" style="margin-left:.4rem">VIEW</a>
+          <button class="btn btn-outline btn-sm" onclick="editPost(${jsArg(p.id)})">EDIT</button>
+          <button class="btn btn-red btn-sm" style="margin-left:.4rem" onclick="deletePost(${jsArg(p.id)},${jsArg(p.title)})">DEL</button>
+          <a href="/blog/${escAttr(encodeURIComponent(p.slug))}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="margin-left:.4rem">VIEW</a>
         </td>
       </tr>`;
     }).join('');
@@ -1132,7 +1143,7 @@ async function insertImgUpload() {
       toast('Uploading image...');
       const r = await fetch('/api/admin/upload/image', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + adminToken },
+        credentials: 'same-origin',
         body: form
       });
       const data = await r.json();
@@ -1160,7 +1171,7 @@ async function uploadCoverImage(input) {
     toast('Uploading cover image...');
     const r = await fetch('/api/admin/upload/image', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + adminToken },
+      credentials: 'same-origin',
       body: form
     });
     const data = await r.json();
@@ -1208,13 +1219,13 @@ async function loadPayments() {
     const tbody = document.getElementById('payments-tbody');
     tbody.innerHTML = all.length ? all.map(r => `
       <tr>
-        <td class="mono" style="color:var(--white)">${r.order_no}</td>
-        <td><div>${r.customer_name||'—'}</div><div style="font-size:.7rem;color:var(--muted)">${r.customer_email||'—'}</div></td>
+        <td class="mono" style="color:var(--white)">${esc(r.order_no)}</td>
+        <td><div>${esc(r.customer_name||'—')}</div><div style="font-size:.7rem;color:var(--muted)">${esc(r.customer_email||'—')}</div></td>
         <td><span style="font-family:'Inter',sans-serif;font-size:.72rem">${modeBadge(r.mode)}</span></td>
         <td class="mono" style="color:var(--green)">${fmtMoney(r.quoted_price)}</td>
         <td>${badge(r.status)}</td>
         <td style="color:var(--muted);font-size:.78rem">${fmtDate(r.created_at)}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="openOrder('${r.id}')">VIEW →</button></td>
+        <td><button class="btn btn-outline btn-sm" onclick="openOrder(${jsArg(r.id)})">VIEW →</button></td>
       </tr>`).join('')
     : `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted)">No pending payments</td></tr>`;
   } catch(e) { toast('Error: ' + e.message, 'error'); }
@@ -1249,14 +1260,14 @@ async function loadSettings() {
     const displaySettings = settingsData.filter(s => !MAIL_KEYS.includes(s.key));
     document.getElementById('settings-grid').innerHTML = displaySettings.map(s =>
       `<div class="setting-item">
-        <div class="setting-key">${s.key}</div>
-        <div class="setting-desc">${LABELS[s.key]||s.description||''}</div>
+        <div class="setting-key">${esc(s.key)}</div>
+        <div class="setting-desc">${esc(LABELS[s.key]||s.description||'')}</div>
         <div class="setting-input-wrap">
           ${BOOL_KEYS.includes(s.key)
-            ? `<select id="setting-${s.key}"><option value="true"${s.value==='true'?' selected':''}>ENABLED</option><option value="false"${s.value!=='true'?' selected':''}>DISABLED</option></select>`
-            : `<input type="text" id="setting-${s.key}" value="${esc(s.value||'')}" placeholder="—">`
+            ? `<select id="setting-${escAttr(s.key)}"><option value="true"${s.value==='true'?' selected':''}>ENABLED</option><option value="false"${s.value!=='true'?' selected':''}>DISABLED</option></select>`
+            : `<input type="text" id="setting-${escAttr(s.key)}" value="${escAttr(s.value||'')}" placeholder="—">`
           }
-          <button class="btn btn-outline btn-sm" onclick="saveSetting('${s.key}')">SAVE</button>
+          <button class="btn btn-outline btn-sm" onclick="saveSetting(${jsArg(s.key)})">SAVE</button>
         </div>
       </div>`
     ).join('');
@@ -1332,11 +1343,11 @@ async function loadAdmins() {
     const data = await apiFetch('/api/admin/admins');
     tbody.innerHTML = data.map(a => `
       <tr>
-        <td style="color:var(--white)">${a.name}</td>
-        <td class="mono" style="font-size:.78rem">${a.email}</td>
-        <td><span style="font-family:'Inter',sans-serif;font-size:.7rem;color:${a.role==='superadmin'?'var(--green)':'var(--muted)'}">${a.role.toUpperCase()}</span></td>
+        <td style="color:var(--white)">${esc(a.name)}</td>
+        <td class="mono" style="font-size:.78rem">${esc(a.email)}</td>
+        <td><span style="font-family:'Inter',sans-serif;font-size:.7rem;color:${a.role==='superadmin'?'var(--green)':'var(--muted)'}">${esc(String(a.role||'admin').toUpperCase())}</span></td>
         <td style="color:var(--muted);font-size:.78rem">${fmtDate(a.last_login_at)}</td>
-        <td><button class="btn btn-outline btn-sm" onclick="changeAdminPwd('${a.id}')">CHANGE PWD</button></td>
+        <td><button class="btn btn-outline btn-sm" onclick="changeAdminPwd(${jsArg(a.id)})">CHANGE PWD</button></td>
       </tr>`).join('');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -1368,7 +1379,7 @@ function changeAdminPwd(id) {
   document.getElementById('dp-body').innerHTML = `
     <div class="section-title">// CHANGE ADMIN PASSWORD</div>
     <div class="form-group"><label>NEW PASSWORD</label><input type="password" id="new-pwd" placeholder="Min 8 chars" inputmode="none"></div>
-    <button class="btn btn-green" onclick="doChangePwd('${id}')">UPDATE PASSWORD →</button>`;
+    <button class="btn btn-green" onclick="doChangePwd(${jsArg(id)})">UPDATE PASSWORD →</button>`;
 }
 
 async function doChangePwd(id) {
@@ -1388,15 +1399,12 @@ async function adminResetPassword(id, email) {
 
 // ── INIT ────────────────────────────────────────────
 document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeBlogEditor(); closeDetail(); } });
-if (adminToken) {
-  adminInfo = { name: 'Admin' };
-  apiFetch('/api/admin/stats', {}, true)
-    .then(() => { showApp(); })
-    .catch(() => {
-      adminToken = null;
-      localStorage.removeItem('cc_admin_token');
-    });
-}
+apiFetch('/api/admin/stats')
+  .then(() => {
+    adminInfo = { name: 'Admin' };
+    showApp();
+  })
+  .catch(() => {});
 </script>
 </body>
 </html>

@@ -5,7 +5,14 @@
  */
 (function () {
   var STORAGE_KEY = 'pcbaf_cookie_consent';
-  var stored = localStorage.getItem(STORAGE_KEY);
+
+  function readConsent() {
+    try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
+  }
+
+  function writeConsent(value) {
+    try { localStorage.setItem(STORAGE_KEY, value); } catch (e) {}
+  }
 
   function hydrateEmailLinks() {
     document.querySelectorAll('[data-email-user][data-email-domain]').forEach(function (link) {
@@ -29,31 +36,17 @@
     window.gtag('consent', 'default', {
       analytics_storage: 'denied',
       ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
       wait_for_update: 2000
     });
   }
 
-  if (stored) return; // already decided
-
-  // Build banner
-  var compact = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
-  var banner = document.createElement('div');
-  banner.id = 'cookie-banner';
-  banner.innerHTML = [
-    '<div id="cb-inner">',
-    '  <div id="cb-text">',
-    '    <span id="cb-title">🍪 We use cookies</span>',
-    '    <span id="cb-desc">' + (compact ? 'Analytics cookies improve the site. <a href="/privacy">Privacy</a>.' : 'We use analytics cookies to understand how visitors use our site and improve your experience. See our <a href="/privacy">Privacy Policy</a>.') + '</span>',
-    '  </div>',
-    '  <div id="cb-btns">',
-    '    <button id="cb-decline">Decline</button>',
-    '    <button id="cb-accept">Accept</button>',
-    '  </div>',
-    '</div>'
-  ].join('');
-
-  var style = document.createElement('style');
-  style.textContent = [
+  function ensureStyles() {
+    if (document.getElementById('cookie-consent-style')) return;
+    var style = document.createElement('style');
+    style.id = 'cookie-consent-style';
+    style.textContent = [
     '#cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;',
     'background:#ffffff;border-top:1px solid #e3e8f0;padding:.75rem 1.2rem;',
     'font-family:Inter,sans-serif;font-size:.85rem;color:#334155;',
@@ -80,31 +73,90 @@
     '#cb-title{font-size:.82rem;}',
     '#cb-desc{font-size:.72rem;line-height:1.35;}',
     '#cb-btns{width:auto;justify-content:flex-end;gap:.45rem;}',
-    '#cb-decline,#cb-accept{padding:.42rem .7rem;font-size:.74rem;}}'
-  ].join('');
+    '#cb-decline,#cb-accept{padding:.42rem .7rem;font-size:.74rem;}}',
+    '#cookie-settings{position:fixed;left:.75rem;bottom:.75rem;z-index:9998;border:1px solid #cbd5e1;',
+    'background:#fff;color:#475569;border-radius:999px;padding:.42rem .75rem;font:700 .72rem Inter,sans-serif;',
+    'box-shadow:0 6px 18px rgba(20,32,51,.1);cursor:pointer}#cookie-settings:hover{border-color:#16a34a;color:#11843d}'
+    ].join('');
+    document.head.appendChild(style);
+  }
 
-  document.head.appendChild(style);
-  document.body.appendChild(banner);
+  function ensureSettingsButton() {
+    var button = document.getElementById('cookie-settings');
+    if (button) return button;
+    button = document.createElement('button');
+    button.type = 'button';
+    button.id = 'cookie-settings';
+    button.textContent = 'Cookie settings';
+    button.setAttribute('aria-label', 'Review cookie consent settings');
+    button.addEventListener('click', showBanner);
+    document.body.appendChild(button);
+    return button;
+  }
 
-  function dismiss(accepted) {
-    localStorage.setItem(STORAGE_KEY, accepted ? 'accepted' : 'declined');
-    banner.style.transition = 'transform .3s';
-    banner.style.transform = 'translateY(100%)';
-    setTimeout(function () { banner.remove(); }, 320);
-
-    if (window.PCBAForge && typeof window.PCBAForge.setAnalyticsConsent === 'function') {
-      window.PCBAForge.setAnalyticsConsent(accepted);
-    } else if (typeof window.gtag === 'function') {
-      window.gtag('consent', 'update', {
-        analytics_storage: accepted ? 'granted' : 'denied',
-        ad_storage: 'denied'
-      });
-    }
+  function updateConsent(accepted) {
+    var handledByRuntime = Boolean(window.PCBAForge && typeof window.PCBAForge.setAnalyticsConsent === 'function');
     window.dispatchEvent(new CustomEvent('pcbaf:cookie-consent', {
       detail: { accepted: accepted }
     }));
+    if (!handledByRuntime && typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        analytics_storage: accepted ? 'granted' : 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied'
+      });
+    }
   }
 
-  document.getElementById('cb-accept').addEventListener('click', function () { dismiss(true); });
-  document.getElementById('cb-decline').addEventListener('click', function () { dismiss(false); });
+  function dismiss(banner, accepted) {
+    writeConsent(accepted ? 'accepted' : 'declined');
+    banner.style.transition = 'transform .3s';
+    banner.style.transform = 'translateY(100%)';
+    setTimeout(function () {
+      banner.remove();
+      ensureSettingsButton().style.display = 'block';
+    }, 320);
+    updateConsent(accepted);
+  }
+
+  function showBanner() {
+    if (document.getElementById('cookie-banner')) return;
+    ensureStyles();
+    var settingsButton = ensureSettingsButton();
+    settingsButton.style.display = 'none';
+    var compact = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+    var banner = document.createElement('div');
+    banner.id = 'cookie-banner';
+    banner.setAttribute('role', 'dialog');
+    banner.setAttribute('aria-modal', 'false');
+    banner.setAttribute('aria-labelledby', 'cb-title');
+    banner.setAttribute('aria-describedby', 'cb-desc');
+    banner.innerHTML = [
+      '<div id="cb-inner">',
+      '  <div id="cb-text">',
+      '    <span id="cb-title">🍪 Cookie choices</span>',
+      '    <span id="cb-desc">' + (compact ? 'Optional analytics help improve the site. <a href="/privacy">Privacy</a>.' : 'Optional analytics cookies help us understand site use. Essential security functions remain active. See our <a href="/privacy">Privacy Policy</a>.') + '</span>',
+      '  </div>',
+      '  <div id="cb-btns">',
+      '    <button type="button" id="cb-decline">Decline analytics</button>',
+      '    <button type="button" id="cb-accept">Accept analytics</button>',
+      '  </div>',
+      '</div>'
+    ].join('');
+    document.body.appendChild(banner);
+    document.getElementById('cb-accept').addEventListener('click', function () { dismiss(banner, true); });
+    document.getElementById('cb-decline').addEventListener('click', function () { dismiss(banner, false); });
+  }
+
+  document.addEventListener('click', function (event) {
+    var trigger = event.target.closest && event.target.closest('[data-cookie-settings]');
+    if (!trigger) return;
+    event.preventDefault();
+    showBanner();
+  });
+
+  ensureStyles();
+  ensureSettingsButton();
+  if (!readConsent()) showBanner();
 })();

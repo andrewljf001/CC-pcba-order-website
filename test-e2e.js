@@ -37,7 +37,7 @@ async function run() {
   console.log(`\n🧪 PCBAForge E2E 完整链路测试 — target: ${BASE}\n${'─'.repeat(54)}\n`);
 
   let orderNo = null;
-  let adminToken = null;
+  let adminCookie = null;
 
   // ── 1. 首页 + 本地图片 ──
   try {
@@ -97,7 +97,11 @@ async function run() {
     try {
       const r = await get('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASS }) });
       const d = await r.json();
-      if (r.ok && d.token) { adminToken = d.token; ok('管理员登录'); }
+      const setCookie = r.headers.get('set-cookie') || '';
+      if (r.ok && d.success && setCookie.includes('pcbaf_admin_session=')) {
+        adminCookie = setCookie.split(';')[0];
+        ok('管理员登录', 'HttpOnly session cookie issued');
+      }
       else if (d.error && d.error.includes('verification')) sk('管理员登录', 'Turnstile拦截');
       else no('管理员登录', d.error || `HTTP ${r.status}`);
     } catch (e) { no('管理员登录', e.message); }
@@ -106,9 +110,9 @@ async function run() {
   }
 
   // ── 8. 管理员给订单报价（quoted）──
-  if (orderNo && adminToken) {
+  if (orderNo && adminCookie) {
     try {
-      const r = await get('/api/admin/orders/' + orderNo, { method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken}, body: JSON.stringify({ status:'quoted', quoted_price: 88, shipping_fee: 25 }) });
+      const r = await get('/api/admin/orders/' + orderNo, { method:'PUT', headers:{'Content-Type':'application/json','Cookie':adminCookie}, body: JSON.stringify({ status:'quoted', quoted_price: 88, shipping_fee: 25 }) });
       const d = await r.json();
       if (r.ok && d.success) ok('管理员改报价', 'quoted, $88 + $25运费'); else no('管理员改报价', d.error || `HTTP ${r.status}`);
     } catch (e) { no('管理员改报价', e.message); }

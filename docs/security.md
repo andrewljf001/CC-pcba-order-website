@@ -1,6 +1,6 @@
 # PCBAForge 安全手册
 
-> 最后更新：2026-05-27  
+> 最后更新：2026-07-14
 > 适用范围：pcbaforge.com · VPS (Contabo, Ubuntu 22.04) · Cloudflare
 
 ---
@@ -72,10 +72,12 @@ server_tokens off;
 ## 4. 应用层安全
 
 ### 认证与授权
-- 管理员 JWT：`JWT_ADMIN_SECRET`（12小时有效）
+- 管理员会话：服务端签发 JWT（`JWT_ADMIN_SECRET`，12 小时有效），仅通过 `HttpOnly`、`SameSite=Strict` Cookie 传递；前端不再把令牌写入 `localStorage`
+- 管理接口：`/api/admin/*` 由统一服务端守卫保护，除登录、退出外均需管理员会话；跨站请求直接拒绝
 - 用户 JWT：`JWT_SECRET`（7天有效）
 - 密码：bcrypt 加密，cost factor 12
 - 敏感配置：AES-256-GCM 加密存储（SMTP密码、API Key）
+- 后台输出：用户、订单、文件和文章字段进入 HTML 前必须转义；下载链接仅允许本站及 `static.pcbaforge.com` 的 HTTPS 地址
 
 ### 人机验证
 - Cloudflare Turnstile 接入后台登录
@@ -118,6 +120,7 @@ server_tokens off;
 
 | 任务 | 优先级 | 说明 |
 |------|--------|------|
+| Cloudflare Access 保护 `/admin*` | 🔴 高 | 需先确认允许登录的邮箱/SSO 组，避免误锁管理员；不能替代应用层鉴权 |
 | Turnstile 接入用户注册/登录 | 🔴 高 | quote.html + account.html |
 | Turnstile 接入询价表单 | 🔴 高 | quote.html |
 | 文件上传迁移至 R2 | 🟡 中 | 防 VPS 重启丢文件 |

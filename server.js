@@ -63,6 +63,8 @@ const app  = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET       = process.env.JWT_SECRET;
 const JWT_ADMIN_SECRET = process.env.JWT_ADMIN_SECRET;
+const ADMIN_SESSION_COOKIE = 'pcbaf_admin_session';
+const ADMIN_SESSION_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 if (!JWT_SECRET || !JWT_ADMIN_SECRET) {
   console.error('❌ JWT_SECRET and JWT_ADMIN_SECRET environment variables must be set');
   process.exit(1);
@@ -307,6 +309,19 @@ const INDEXED_LEGACY_BLOG_SLUGS = new Set([
   'functional-testing-pcba-worth-the-cost'
 ]);
 
+const BUILT_IN_BLOG_COVERS = new Map([
+  ['2026-pcba-rfq-approved-alternates-inventory-windows', '/images/blog/2026-pcba-rfq-approved-alternates-inventory-windows.webp'],
+  ['pcba-rfq-bom-risk-plan', '/images/blog/pcba-rfq-bom-risk-plan.webp']
+]);
+
+function withResolvedPostCover(post) {
+  if (!post) return post;
+  return {
+    ...post,
+    cover_url: post.cover_url || BUILT_IN_BLOG_COVERS.get(post.slug) || ''
+  };
+}
+
 function canonicalSiteUrl() {
   return (process.env.SITE_URL || 'https://pcbaforge.com').replace(/\/$/, '');
 }
@@ -483,7 +498,7 @@ async function loadPublicPostsPage({ tag, page, limit }) {
     [...params, limit, offset]
   );
   const { rows: countRows } = await pool.query(`SELECT COUNT(*) as total FROM posts ${where}`, params);
-  return { posts: rows, total: Number(countRows[0]?.total || 0) };
+  return { posts: rows.map(withResolvedPostCover), total: Number(countRows[0]?.total || 0) };
 }
 
 async function renderBlogListHtml({ page, activeTag }) {
@@ -546,7 +561,7 @@ async function renderBlogPostHtml(slug) {
   if (!normalizedSlug) return null;
   const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [normalizedSlug]);
   if (!rows.length) return null;
-  return renderBlogPostPage(rows[0]);
+  return renderBlogPostPage(withResolvedPostCover(rows[0]));
 }
 
 function contactFaqStructuredData() {
@@ -1077,6 +1092,24 @@ function renderBlogPostNotFound(message) {
   return replaceArticleWrap(html, renderArticleStatus('Article Not Found', message));
 }
 
+function renderSiteNotFound() {
+  let html = readPublicHtml('404.html');
+  html = injectPageHead(html, {
+    title: 'Page Not Found — PCBAForge',
+    description: 'The requested PCBAForge page could not be found.',
+    robots: 'noindex,follow',
+    image: `${canonicalSiteUrl()}/images/hero-banner-20260607.webp`,
+    type: 'website'
+  });
+  return html;
+}
+
+function sendSiteNotFound(req, res) {
+  res.set('Cache-Control', 'no-store, max-age=0');
+  res.set('X-Robots-Tag', 'noindex, follow');
+  res.status(404).type('html').send(renderSiteNotFound());
+}
+
 function renderBlogPostUnavailable(message) {
   let html = readPublicHtml('blog-post.html');
   html = injectPageHead(html, {
@@ -1303,7 +1336,7 @@ app.get('/index.html', (req, res) => {
   res.redirect(301, '/');
 });
 app.get(/^\/[^/]+\.html$/, (req, res) => {
-  res.status(404).send('Not found');
+  sendSiteNotFound(req, res);
 });
 app.use((req, res, next) => {
   const baseName = path.basename(req.path || '');
@@ -1578,15 +1611,52 @@ function userAuth(req, res, next) {
   } catch { res.status(401).json({ error: 'Token expired or invalid' }); }
 }
 
+function readCookie(req, name) {
+  const raw = String(req.headers.cookie || '');
+  for (const part of raw.split(';')) {
+    const separator = part.indexOf('=');
+    if (separator < 0) continue;
+    const key = part.slice(0, separator).trim();
+    if (key !== name) continue;
+    try {
+      return decodeURIComponent(part.slice(separator + 1).trim());
+    } catch {
+      return '';
+    }
+  }
+  return '';
+}
+
+function adminSessionCookieOptions(req) {
+  return {
+    httpOnly: true,
+    secure: Boolean(req.secure || process.env.NODE_ENV === 'production'),
+    sameSite: 'strict',
+    maxAge: ADMIN_SESSION_MAX_AGE_MS,
+    path: '/api/admin'
+  };
+}
+
 function adminAuth(req, res, next) {
-  const header = req.headers.authorization || '';
-  const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
+  const token = readCookie(req, ADMIN_SESSION_COOKIE);
   if (!token) return res.status(401).json({ error: 'Admin not authenticated' });
   try {
     req.admin = jwt.verify(token, JWT_ADMIN_SECRET);
     next();
   } catch { res.status(401).json({ error: 'Admin token expired or invalid' }); }
 }
+
+// Central guard: every present and future /api/admin route is authenticated
+// unless it is one of the deliberately public session endpoints.
+app.use('/api/admin', (req, res, next) => {
+  const fetchSite = String(req.get('Sec-Fetch-Site') || '').toLowerCase();
+  const origin = String(req.get('Origin') || '').replace(/\/$/, '');
+  if (fetchSite === 'cross-site' || (origin && !allowedOrigins().has(origin))) {
+    return res.status(403).json({ error: 'Cross-site admin request blocked' });
+  }
+  if (req.method === 'POST' && (req.path === '/login' || req.path === '/logout')) return next();
+  return adminAuth(req, res, next);
+});
 
 // ═══════════════════════════════════════════════════════
 // PUBLIC APIS
@@ -1669,10 +1739,10 @@ app.post('/api/inquiry', publicWriteLimiter, upload.array('files', 3), async (re
         subject: `[PCBAForge] New Inquiry ${order_no} — ${mode.toUpperCase()}`,
         html: `<h2>New Inquiry Received</h2>
           <p><b>Order:</b> ${order_no}</p>
-          <p><b>Customer:</b> ${name} &lt;${email}&gt;</p>
-          <p><b>Mode:</b> ${mode}</p>
+          <p><b>Customer:</b> ${htmlEscape(name)} &lt;${htmlEscape(email)}&gt;</p>
+          <p><b>Mode:</b> ${htmlEscape(mode)}</p>
           <p><b>Files:</b> ${files.length} file(s) uploaded to R2</p>
-          <p><b>Notes:</b> ${notes || '—'}</p>
+          <p><b>Notes:</b> ${htmlEscape(notes || '—')}</p>
           <p><a href="${process.env.SITE_URL || ''}/admin">Open Admin Panel</a></p>`
       });
     }
@@ -1730,13 +1800,13 @@ app.post('/api/gdpr/delete-request', publicWriteLimiter, async (req, res) => {
           to: adminCfg[0].value,
           subject: `[PCBAForge] GDPR Delete Request — ${email}`,
           html: `<h2>GDPR Data Deletion Request</h2>
-            <p><b>Email:</b> ${email}</p>
-            <p><b>Name:</b> ${user.name || '—'}</p>
-            <p><b>Reason:</b> ${reason || '—'}</p>
+            <p><b>Email:</b> ${htmlEscape(email)}</p>
+            <p><b>Name:</b> ${htmlEscape(user.name || '—')}</p>
+            <p><b>Reason:</b> ${htmlEscape(reason || '—')}</p>
             <p><b>Requested at:</b> ${new Date().toISOString()}</p>
             <hr>
             <p>To delete this user, run in admin panel or DB:</p>
-            <code>DELETE FROM users WHERE email='${email}';</code>
+            <code>DELETE FROM users WHERE email='${htmlEscape(email)}';</code>
             <p>Also delete associated orders if required by your retention policy.</p>`
         });
       }
@@ -1746,7 +1816,7 @@ app.post('/api/gdpr/delete-request', publicWriteLimiter, async (req, res) => {
         to: email,
         subject: '[PCBAForge] Data Deletion Request Received',
         html: `<h2>We received your request</h2>
-          <p>Hi ${user.name || 'there'},</p>
+          <p>Hi ${htmlEscape(user.name || 'there')},</p>
           <p>We have received your request to delete your personal data from PCBAForge.</p>
           <p>We will process your request within <strong>30 days</strong> and send a confirmation email once complete.</p>
           <p>If you have active orders in production or shipment, those records may be retained for legal/accounting purposes as outlined in our <a href="${process.env.SITE_URL || 'https://pcbaforge.com'}/privacy">Privacy Policy</a>.</p>
@@ -1965,7 +2035,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       const new_token = uuidv4();
       await pool.query('UPDATE users SET verify_token=$1, name=$2 WHERE email=$3', [new_token, name, email.toLowerCase()]);
       const verifyUrl2 = (process.env.SITE_URL || 'https://pcbaforge.com') + '/api/auth/verify?token=' + new_token;
-      await sendMail({ to: email, subject: 'Verify your PCBAForge account', html: '<h2>Welcome to PCBAForge</h2><p>Hi ' + name + ', please verify your email:</p><p><a href="' + verifyUrl2 + '" style="background:#16a34a;color:#fff;padding:10px 20px;text-decoration:none;font-weight:bold">VERIFY EMAIL</a></p><p>Link expires in 24 hours.</p>' });
+      await sendMail({ to: email, subject: 'Verify your PCBAForge account', html: '<h2>Welcome to PCBAForge</h2><p>Hi ' + htmlEscape(name) + ', please verify your email:</p><p><a href="' + htmlEscape(verifyUrl2) + '" style="background:#16a34a;color:#fff;padding:10px 20px;text-decoration:none;font-weight:bold">VERIFY EMAIL</a></p><p>Link expires in 24 hours.</p>' });
       return res.json({ success: true, message: 'Verification email resent. Please check your inbox.' });
     }
 
@@ -1981,7 +2051,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       to: email,
       subject: 'Verify your PCBAForge account',
       html: `<h2>Welcome to PCBAForge</h2>
-        <p>Hi ${name}, please verify your email:</p>
+        <p>Hi ${htmlEscape(name)}, please verify your email:</p>
         <p><a href="${verifyUrl}" style="background:#00FF41;color:#000;padding:10px 20px;text-decoration:none;font-weight:bold">VERIFY EMAIL</a></p>
         <p>Link expires in 24 hours.</p>`
     });
@@ -2039,7 +2109,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
         to: email,
         subject: '[PCBAForge] Password Reset Request',
         html: `<h2>Password Reset</h2>
-          <p>Hi ${rows[0].name},</p>
+          <p>Hi ${htmlEscape(rows[0].name || 'there')},</p>
           <p><a href="${resetUrl}" style="background:#00FF41;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">RESET PASSWORD →</a></p>
           <p>This link expires in <strong>1 hour</strong>.</p>`
       });
@@ -2240,8 +2310,16 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
     if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
     await pool.query("UPDATE admin_users SET last_login_at=datetime('now') WHERE id=$1", [rows[0].id]);
     const token = jwt.sign({ id: rows[0].id, email: rows[0].email, role: rows[0].role }, JWT_ADMIN_SECRET, { expiresIn: '12h' });
-    res.json({ success: true, token, admin: { id: rows[0].id, name: rows[0].name, role: rows[0].role } });
+    res.cookie(ADMIN_SESSION_COOKIE, token, adminSessionCookieOptions(req));
+    res.json({ success: true, admin: { id: rows[0].id, name: rows[0].name, role: rows[0].role } });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/logout', (req, res) => {
+  const options = adminSessionCookieOptions(req);
+  delete options.maxAge;
+  res.clearCookie(ADMIN_SESSION_COOKIE, options);
+  res.json({ success: true });
 });
 
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
@@ -2336,10 +2414,10 @@ app.post('/api/admin/orders/:id/send-payment', adminAuth, async (req, res) => {
       to: order.customer_email,
       subject: `[PCBAForge] Your Quote is Ready — ${order.order_no}`,
       html: `<h2 style="color:#00C832">Your Quote is Ready</h2>
-        <p>Hi ${order.customer_name},</p>
-        <p>Our engineer has reviewed your inquiry <b>${order.order_no}</b>.</p>
+        <p>Hi ${htmlEscape(order.customer_name || 'Customer')},</p>
+        <p>Our engineer has reviewed your inquiry <b>${htmlEscape(order.order_no)}</b>.</p>
         <table style="border-collapse:collapse;width:100%;max-width:400px">
-          <tr><td style="padding:8px;color:#666">Service</td><td style="padding:8px"><b>${order.mode.toUpperCase()}</b></td></tr>
+          <tr><td style="padding:8px;color:#666">Service</td><td style="padding:8px"><b>${htmlEscape(String(order.mode || '').toUpperCase())}</b></td></tr>
           <tr style="background:#f9f9f9"><td style="padding:8px;color:#666">Quoted Price</td><td style="padding:8px"><b style="color:#00C832;font-size:1.2em">USD $${order.quoted_price}</b></td></tr>
           ${order.shipping_fee ? `<tr><td style="padding:8px;color:#666">Shipping Fee</td><td style="padding:8px"><b>USD $${order.shipping_fee}</b></td></tr>` : ''}
         </table>
@@ -2419,7 +2497,7 @@ app.post('/api/admin/customers/:id/reset-password', adminAuth, async (req, res) 
       to: rows[0].email,
       subject: '[PCBAForge] Password Reset — Admin Action',
       html: `<h2>Password Reset</h2>
-        <p>Hi ${rows[0].name},</p>
+        <p>Hi ${htmlEscape(rows[0].name || 'there')},</p>
         <p><a href="${resetUrl}" style="background:#00FF41;color:#000;padding:12px 24px;text-decoration:none;font-weight:bold;font-family:monospace">RESET PASSWORD →</a></p>
         <p>This link expires in <strong>1 hour</strong>.</p>`
     });
@@ -2521,7 +2599,7 @@ app.get('/api/posts/:slug', async (req, res) => {
     const { rows } = await pool.query(`SELECT * FROM posts WHERE slug=? AND status='published'`, [req.params.slug]);
     if (!rows.length) return res.status(404).json({ error: 'Post not found' });
     await pool.query(`UPDATE posts SET views=views+1 WHERE slug=?`, [req.params.slug]);
-    res.json({ ...rows[0], content: sanitizeBlogHtml(rows[0].content) });
+    res.json({ ...withResolvedPostCover(rows[0]), content: sanitizeBlogHtml(rows[0].content) });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -2618,6 +2696,14 @@ app.delete('/api/admin/posts/:id', adminAuth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
+
+app.use((req, res) => {
+  sendSiteNotFound(req, res);
+});
+
 app.use((err, req, res, next) => {
   if (!err) return next();
   if (err instanceof multer.MulterError) {
@@ -2631,6 +2717,17 @@ app.use((err, req, res, next) => {
 });
 
 async function warmPublicMemoryCache() {
+  try {
+    for (const [slug, coverUrl] of BUILT_IN_BLOG_COVERS) {
+      await pool.query(
+        "UPDATE posts SET cover_url=?, updated_at=datetime('now') WHERE slug=? AND (cover_url IS NULL OR trim(cover_url)='')",
+        [coverUrl, slug]
+      );
+    }
+  } catch (err) {
+    console.warn('[BLOG COVER SYNC]', err.message);
+  }
+
   const tasks = [
     getOrSetPublicMemoryCache('settings|public', loadPublicSettingsConfig),
     getOrSetPublicMemoryCache(publicMemoryCacheKey('blog-list', 1, ''), () => (

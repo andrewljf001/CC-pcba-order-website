@@ -9,7 +9,7 @@
 
 <link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=20260703">
-<script src="/site-runtime.js?v=20260703"></script>
+<script src="/site-runtime.js?v=20260714"></script>
 <style>
 :root{
   --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
@@ -50,6 +50,8 @@ nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between
 .doc li{color:var(--text);font-size:.95rem;line-height:1.8;margin-bottom:.4rem}
 .doc a{color:var(--green2);font-weight:600;text-decoration:underline}
 .doc strong{color:var(--ink);font-weight:700}
+.cookie-choice-btn{display:inline-flex;align-items:center;border:1px solid var(--green);background:#f0fdf4;color:var(--green2);border-radius:7px;padding:.55rem .9rem;font:800 .82rem var(--font);cursor:pointer}
+.cookie-choice-btn:hover{background:#dcfce7}
 .info-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:1.1rem 1.3rem;margin:1.2rem 0;font-size:.9rem;color:var(--text);line-height:1.7}
 .tbl{width:100%;border-collapse:collapse;font-size:.9rem;margin:1.2rem 0;background:#fff;border-radius:10px;overflow:hidden}
 .tbl th{background:#f8fafc;color:var(--ink);padding:.7rem 1rem;text-align:left;font-size:.82rem;font-weight:900;border:1px solid var(--line)}
@@ -126,7 +128,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
 <div class="wrap">
   <div class="page-label">// LEGAL</div>
   <h1 class="page-title">Privacy Policy</h1>
-  <div class="page-date">Last updated: May 2026</div>
+  <div class="page-date">Last updated: July 14, 2026</div>
 
   <div class="doc">
     <p>PCBAForge ("we", "us", or "our") operates <strong>pcbaforge.com</strong>. This Privacy Policy explains how we collect, use, and protect your personal information when you use our website and services.</p>
@@ -139,7 +141,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
       <li>Upload files for quotation (Gerber, BOM, placement files)</li>
       <li>Contact us via email or WhatsApp</li>
     </ul>
-    <p>We also automatically collect certain technical data including IP address, browser type, and pages visited for analytics and security purposes.</p>
+    <p>We automatically process limited technical data such as IP address, browser type, and security events to operate and protect the service. With your permission, Google Analytics also measures pages visited and site interactions.</p>
 
     <h2>2. How We Use Your Information</h2>
     <ul>
@@ -157,12 +159,24 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
     <p>We do not sell your personal data. We may share limited data with:</p>
     <ul>
       <li><strong>Cloudflare</strong> — infrastructure and CDN provider</li>
+      <li><strong>Google Analytics</strong> — optional website measurement, enabled only after you accept analytics cookies</li>
       <li><strong>PayPal</strong> — for payment processing (only what is necessary to complete the transaction)</li>
       <li><strong>DHL / FedEx</strong> — shipping carriers (name, address, phone)</li>
     </ul>
 
-    <h2>5. Cookies</h2>
-    <p>Our website uses minimal cookies necessary for session management and security. We do not use advertising or tracking cookies. By continuing to use our website, you consent to our use of essential cookies.</p>
+    <h2>5. Cookies and Analytics Choices</h2>
+    <p>Essential storage and security technologies support sign-in, fraud prevention, form protection, payment processing, and your cookie choice. These functions do not depend on analytics consent.</p>
+    <p>Google Analytics is optional. It is disabled by default and its script is not loaded until you select <strong>Accept analytics</strong>. We do not enable advertising storage, advertising user data, or advertising personalization through Google Consent Mode.</p>
+    <table class="tbl">
+      <thead><tr><th>Technology</th><th>Purpose</th><th>When active</th></tr></thead>
+      <tbody>
+        <tr><td>PCBAForge session and local storage</td><td>Account, security, and remembering your cookie choice</td><td>As required for the feature you use</td></tr>
+        <tr><td>Cloudflare Turnstile and security services</td><td>Bot, abuse, and fraud prevention</td><td>On protected forms and requests</td></tr>
+        <tr><td>Google Analytics 4</td><td>Aggregate website usage measurement</td><td>Only after analytics consent</td></tr>
+      </tbody>
+    </table>
+    <p>You may accept, decline, or later change your analytics choice. Withdrawing consent stops future analytics collection on this browser.</p>
+    <p><button type="button" class="cookie-choice-btn" data-cookie-settings>Review cookie settings</button></p>
 
     <h2>6. Your Rights (GDPR)</h2>
     <p>If you are located in the European Union, you have the right to:</p>
@@ -205,6 +219,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
       <a href="/privacy">Privacy Policy</a>
       <a href="/shipping">Shipping Policy</a>
       <a href="/terms">Terms of Service</a>
+      <a href="#" data-cookie-settings>Cookie Settings</a>
     </div>
     <div class="fcopy">© 2026 PCBAForge · PCB Fabrication · SMT + DIP Assembly · Full Turnkey · Functional Testing · Worldwide</div>
   </div>
@@ -244,7 +259,7 @@ footer{background:#fff;border-top:1px solid var(--line);padding:2.5rem 5%}
   }
 })();
 </script>
-<script src="/cookie-consent.js?v=20260701"></script>
+<script src="/cookie-consent.js?v=20260714"></script>
 <script>(function(){var t=localStorage.getItem("cc_token");if(t){document.querySelectorAll(".nav-signin").forEach(function(el){el.textContent="My Account";});}})();</script>
 </body>
 </html>
