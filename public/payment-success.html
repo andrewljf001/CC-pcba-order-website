@@ -8,7 +8,7 @@
 
 <link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=20260703">
-<script src="/site-runtime.js?v=20260714"></script>
+<script src="/site-runtime.js?v=20260818"></script>
 <style>
 :root{
   --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
@@ -184,6 +184,15 @@ async function init() {
     const o = data.order;
     const modeName = { pcb: 'PCB Fabrication', smt: 'PCB + SMT Assembly', turnkey: 'Full Turnkey + Testing' };
     const leadTime = { pcb: '5–7 business days', smt: '7–12 business days', turnkey: '10–18 business days' };
+
+    if (window.PCBAForge && window.PCBAForge.trackEvent) {
+      window.PCBAForge.trackEvent('purchase', {
+        transaction_id: o.order_no,
+        value: Number(o.total_paid) || 0,
+        currency: 'USD',
+        items: [{ item_name: modeName[o.mode] || o.mode, item_category: 'PCBA Service', quantity: 1 }]
+      });
+    }
 
     wrap.innerHTML = `
       <div class="success-icon"><span class="check">✓</span></div>

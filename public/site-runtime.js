@@ -104,6 +104,33 @@
     runIdle(loadAnalytics, timeout || 2500);
   }
 
+  app.trackEvent = function trackEvent(eventName, parameters) {
+    if (!analyticsAllowed() || !eventName) return false;
+    loadAnalytics();
+    var eventParameters = parameters && typeof parameters === 'object' ? parameters : {};
+    window.gtag('event', String(eventName), eventParameters);
+    return true;
+  };
+
+  function bindConversionTracking() {
+    document.addEventListener('click', function (event) {
+      var link = event.target && event.target.closest ? event.target.closest('a[href]') : null;
+      if (!link) return;
+      var href = link.getAttribute('href') || '';
+      var eventName = '';
+      if (/^https:\/\/wa\.me\//i.test(href)) eventName = 'contact_whatsapp';
+      else if (/^mailto:/i.test(href)) eventName = 'contact_email';
+      else if (/^\/quote(?:\?|$)/.test(href) || href === '/#quote') eventName = 'quote_cta_click';
+      else if (/^\/track(?:\?|$)/.test(href)) eventName = 'track_order_click';
+      if (!eventName) return;
+      app.trackEvent(eventName, {
+        link_url: href.slice(0, 200),
+        link_text: (link.textContent || '').trim().slice(0, 100),
+        page_path: window.location.pathname
+      });
+    }, true);
+  }
+
   app.setAnalyticsConsent = function setAnalyticsConsent(accepted) {
     window.gtag('consent', 'update', {
       analytics_storage: accepted ? 'granted' : 'denied',
@@ -206,8 +233,12 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindTurnstileLazyLoad, { once: true });
+    document.addEventListener('DOMContentLoaded', function () {
+      bindTurnstileLazyLoad();
+      bindConversionTracking();
+    }, { once: true });
   } else {
     bindTurnstileLazyLoad();
+    bindConversionTracking();
   }
 })();

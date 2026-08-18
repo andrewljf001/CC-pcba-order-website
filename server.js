@@ -250,6 +250,153 @@ const PUBLIC_PAGE_ROUTES = new Map([
   ['/payment-success', 'payment-success.html']
 ]);
 
+const SERVICE_LANDING_PAGES = new Map([
+  ['pcb-fabrication', {
+    title: 'PCB Fabrication Services for Prototypes & Small Batches',
+    description: 'PCB fabrication from Gerber files for prototypes and small batches, with DFM review, multilayer options, controlled impedance review, and worldwide delivery.',
+    label: 'PCB FABRICATION',
+    h1: 'PCB Fabrication for Prototypes and Small Batches',
+    lead: 'Send your Gerber package and board requirements. Our engineers review manufacturability, confirm the build specification, and keep fabrication aligned with your assembly plan.',
+    image: '/images/pcb-fabrication-20260607.webp',
+    imageAlt: 'PCB fabrication for prototype and small batch circuit boards',
+    quoteServices: 'pcb',
+    introTitle: 'From Gerber files to assembly-ready boards',
+    intro: 'PCBAForge supports bare-board fabrication as a standalone service or as the first stage of a complete PCBA build. Your stackup, finish, copper weight, drill size, impedance requirements, quantity, and delivery priorities are reviewed together before the order is confirmed.',
+    benefits: [
+      ['Engineering file review', 'We check the submitted fabrication package for missing layers, unclear notes, and specifications that need confirmation before production.'],
+      ['Prototype-friendly quantities', 'Start with a small build, confirm the design, and move to a repeat order without changing suppliers.'],
+      ['Assembly-aware planning', 'When assembly is also required, board fabrication and component placement requirements are reviewed as one connected build.']
+    ],
+    workflow: ['Upload Gerber files and fabrication notes', 'Confirm board specification and any open engineering questions', 'Fabricate and inspect the bare boards', 'Ship the boards or release them to PCBA assembly'],
+    requirements: ['Gerber or ODB++ fabrication package', 'Drill files and board outline', 'Layer count, material, thickness, copper weight, and surface finish', 'Quantity and any controlled-impedance requirements'],
+    faqs: [
+      ['Can I order bare PCBs without assembly?', 'Yes. PCB fabrication can be ordered by itself, or combined with SMT, through-hole assembly, and testing.'],
+      ['Can you review controlled-impedance requirements?', 'Yes. Include the target impedance, tolerance, relevant layer or net information, and any preferred stackup notes so the requirement can be reviewed before quoting.'],
+      ['What happens if my fabrication notes are incomplete?', 'An engineer will flag missing or conflicting information and ask for confirmation before the build is approved.']
+    ]
+  }],
+  ['smt-assembly', {
+    title: 'SMT Assembly Services for Prototype & Small-Batch PCBAs',
+    description: 'SMT and through-hole PCB assembly for prototypes and small batches, using customer-supplied or sourced components with engineering review before production.',
+    label: 'SMT + DIP ASSEMBLY',
+    h1: 'SMT Assembly for Prototype and Small-Batch PCBAs',
+    lead: 'Combine surface-mount and through-hole assembly in one build. Supply the boards and components yourself, or ask PCBAForge to coordinate fabrication and component sourcing.',
+    image: '/images/smt-assembly-20260607.webp',
+    imageAlt: 'SMT assembly for prototype printed circuit board assemblies',
+    quoteServices: 'assy',
+    introTitle: 'A practical assembly route for early production',
+    intro: 'The assembly review connects your BOM, placement data, board files, polarity information, and special handling notes. This helps resolve package, footprint, and substitution questions before material is committed to production.',
+    benefits: [
+      ['SMT and through-hole in one order', 'Use one assembly workflow for surface-mount parts, connectors, headers, and other through-hole components.'],
+      ['Flexible material supply', 'Choose customer-supplied materials or request component sourcing based on a complete manufacturer-part-number BOM.'],
+      ['Clear pre-production review', 'Potential BOM, placement, polarity, and footprint questions are collected for confirmation before assembly starts.']
+    ],
+    workflow: ['Submit BOM, placement data, and board files', 'Review parts, footprints, polarity, and build notes', 'Confirm material supply and assembly scope', 'Assemble, inspect, and prepare boards for test or shipment'],
+    requirements: ['BOM with manufacturer part numbers', 'Pick-and-place or centroid file', 'Gerber files and assembly drawings', 'Quantity, board side count, and special process notes'],
+    faqs: [
+      ['Can I provide my own components?', 'Yes. Customer-supplied materials are supported. Provide a packing list and clearly identify any approved alternatives.'],
+      ['Can SMT and through-hole parts be assembled together?', 'Yes. Include both sets of components in the BOM and identify any special insertion, soldering, or mechanical requirements.'],
+      ['Do you accept assembly-only projects?', 'Yes. You can provide fabricated PCBs for assembly, or combine PCB fabrication and assembly in the same inquiry.']
+    ]
+  }],
+  ['turnkey-pcba', {
+    title: 'Turnkey PCBA Manufacturing: PCB, Components & Assembly',
+    description: 'Turnkey PCBA manufacturing that coordinates PCB fabrication, component sourcing, SMT and through-hole assembly, inspection, and optional functional testing.',
+    label: 'FULL TURNKEY PCBA',
+    h1: 'Turnkey PCBA Manufacturing from One File Package',
+    lead: 'Coordinate PCB fabrication, BOM sourcing, SMT and through-hole assembly, inspection, and optional functional testing through one engineering review and one order.',
+    image: '/images/turnkey-testing-20260607.webp',
+    imageAlt: 'Full turnkey PCBA manufacturing and testing service',
+    quoteServices: 'pcb,assy,test',
+    introTitle: 'One connected build instead of separate suppliers',
+    intro: 'A turnkey inquiry lets the same team review how the PCB specification, component availability, placement data, assembly process, and test requirements affect one another. You approve the clarified scope and quote before production begins.',
+    benefits: [
+      ['Single engineering handoff', 'Submit one project package and keep fabrication, sourcing, assembly, and test questions in one conversation.'],
+      ['BOM risk visibility', 'Unclear part numbers, availability constraints, and proposed alternatives are surfaced for approval during review.'],
+      ['Optional functional verification', 'Add a documented power-on or functional test when assembled boards must be checked before shipment.']
+    ],
+    workflow: ['Upload Gerber, BOM, placement, and test documents', 'Resolve DFM, BOM, and substitution questions', 'Confirm the full quote and production scope', 'Fabricate, source, assemble, inspect, test, and ship'],
+    requirements: ['Complete Gerber package and board specification', 'BOM with manufacturer part numbers and approved alternatives', 'Pick-and-place data and assembly drawings', 'Firmware, fixtures, or test instructions when functional testing is requested'],
+    faqs: [
+      ['What does turnkey PCBA include?', 'The confirmed scope can include PCB fabrication, component sourcing, SMT and through-hole assembly, inspection, testing, and shipment.'],
+      ['Will component substitutions be made automatically?', 'No substitution should be treated as approved unless it is included in your BOM or confirmed with you during the engineering review.'],
+      ['Can I start with a small turnkey batch?', 'Yes. The final quantity, sourcing plan, and lead time are confirmed after your project files are reviewed.']
+    ]
+  }],
+  ['prototype-pcba', {
+    title: 'Prototype PCBA Assembly for Engineering Validation',
+    description: 'Prototype PCBA assembly for engineering validation, combining file review, small-batch PCB fabrication, assembly, and optional testing before scaling.',
+    label: 'PROTOTYPE PCBA',
+    h1: 'Prototype PCBA Builds for Faster Engineering Validation',
+    lead: 'Build a small quantity first, uncover manufacturing questions early, and verify the assembled design before committing to a larger production run.',
+    image: '/images/hero-banner-20260607.webp',
+    imageAlt: 'Prototype PCBA assembly for engineering validation',
+    quoteServices: 'pcb,assy,test',
+    introTitle: 'Use the first build to reduce the next build’s risk',
+    intro: 'Prototype assembly is most valuable when design files, BOM choices, assembly notes, firmware, and validation criteria are reviewed as a complete package. The resulting questions and confirmations create a cleaner handoff for repeat production.',
+    benefits: [
+      ['Small-batch starting point', 'Validate fit, function, and build assumptions with a limited quantity before scaling.'],
+      ['Engineering feedback loop', 'Manufacturing and test questions are documented so revisions can be made with specific evidence.'],
+      ['Path to repeat production', 'Keep confirmed files, BOM decisions, and test requirements aligned for the next batch.']
+    ],
+    workflow: ['Define prototype goals and quantity', 'Review manufacturing files and BOM risks', 'Build and inspect the prototype batch', 'Run the agreed checks and capture changes for the next revision'],
+    requirements: ['Gerber files, BOM, and pick-and-place data', 'Prototype quantity and revision identifier', 'Assembly drawings and mechanical constraints', 'Firmware and clear acceptance criteria when testing is required'],
+    faqs: [
+      ['How many boards should I build for a prototype run?', 'Choose enough units to cover engineering validation, destructive checks if needed, and a small number of spares. The final quantity depends on your test plan.'],
+      ['Can prototype boards be functionally tested?', 'Yes. Provide a repeatable test procedure, required firmware, power requirements, expected outputs, and any fixtures or cables.'],
+      ['Can the same files be used for the next batch?', 'Yes, once any revision changes are incorporated and the manufacturing package is clearly versioned.']
+    ]
+  }],
+  ['functional-testing', {
+    title: 'PCBA Functional Testing Before Shipment',
+    description: 'PCBA functional testing based on your specification, including power-on checks, programmed validation steps, result review, and engineering coordination.',
+    label: 'FUNCTIONAL TESTING',
+    h1: 'PCBA Functional Testing Before Your Boards Ship',
+    lead: 'Move beyond visual inspection by checking assembled boards against a repeatable test procedure, expected signals, firmware, and pass/fail criteria that you define.',
+    image: '/images/turnkey-testing-20260607.webp',
+    imageAlt: 'Engineer performing functional testing on a completed PCBA',
+    quoteServices: 'test',
+    introTitle: 'Test the behavior that matters to your product',
+    intro: 'Functional testing is quoted after the procedure and required resources are reviewed. A useful test package explains how to power the board, load firmware, connect fixtures or peripherals, run each check, and decide whether the result passes.',
+    benefits: [
+      ['Documented acceptance criteria', 'Turn product expectations into steps and observable pass/fail results that can be repeated across the batch.'],
+      ['Pre-shipment issue detection', 'Identify power, programming, communication, interface, or functional problems before boards are packed and shipped.'],
+      ['Remote engineering coordination', 'For complex validation, the test method and results can be reviewed with your engineering team before release.']
+    ],
+    workflow: ['Review the test specification and required resources', 'Confirm firmware, connections, fixtures, and expected results', 'Run the agreed procedure on the assembled boards', 'Record the outcome and resolve exceptions before shipment'],
+    requirements: ['Step-by-step test specification', 'Power requirements, firmware, and programming instructions', 'Expected readings, outputs, or user-interface behavior', 'Required fixtures, cables, loads, peripherals, or remote access details'],
+    faqs: [
+      ['Is functional testing the same as AOI?', 'No. AOI checks visible assembly features, while functional testing powers or operates the board to evaluate defined behavior.'],
+      ['Who creates the test procedure?', 'The customer should provide the product-specific requirements and acceptance criteria. PCBAForge reviews the procedure for repeatability and production use.'],
+      ['Can you test only part of the function?', 'Yes. The scope can focus on critical power rails, programming, communications, interfaces, or another clearly defined subset.']
+    ]
+  }],
+  ['bga-xray-inspection', {
+    title: 'BGA X-Ray Inspection for PCBA Assembly',
+    description: 'BGA X-ray inspection for assembled PCBAs to review hidden solder-joint conditions as part of a defined assembly and quality-control plan.',
+    label: 'BGA X-RAY INSPECTION',
+    h1: 'BGA X-Ray Inspection for Hidden Solder-Joint Review',
+    lead: 'Use X-ray inspection where solder joints cannot be evaluated visually, with the inspection scope agreed during the assembly review.',
+    image: '/images/smt-assembly-20260607.webp',
+    imageAlt: 'BGA and fine-pitch component assembly prepared for X-ray inspection',
+    quoteServices: 'assy',
+    introTitle: 'Visibility for area-array packages',
+    intro: 'BGA and other bottom-terminated packages hide their solder connections beneath the component body. X-ray review can be included in the quality plan for selected devices when package type, board design, assembly risk, and acceptance needs justify it.',
+    benefits: [
+      ['Review hidden connections', 'Evaluate selected solder-joint conditions that cannot be seen with ordinary visual inspection.'],
+      ['Target critical packages', 'Define which BGA, QFN, or other bottom-terminated devices need additional review instead of treating every component the same.'],
+      ['Connect findings to the build', 'Inspection observations can be assessed alongside placement, stencil, reflow, and board-design information.']
+    ],
+    workflow: ['Identify packages and locations requiring X-ray review', 'Agree the inspection scope and acceptance approach', 'Inspect the selected assemblies after soldering', 'Review exceptions before boards proceed to test or shipment'],
+    requirements: ['Assembly drawing with reference designators', 'Package and component information for selected devices', 'Any customer-specific acceptance criteria', 'Quantity or sampling expectation for the inspection'],
+    faqs: [
+      ['Why is X-ray used for BGA components?', 'The solder joints are located beneath the package, so they cannot be fully reviewed through direct visual inspection.'],
+      ['Does every assembled board need X-ray inspection?', 'The appropriate scope depends on package risk, quality requirements, quantity, and the agreed inspection plan.'],
+      ['Can X-ray replace functional testing?', 'No. X-ray evaluates assembly conditions; functional testing evaluates defined electrical or product behavior. They answer different questions.']
+    ]
+  }]
+]);
+
 // Google indexed these legacy URLs on 2026-06-29; keep 301s only for this SEO migration set.
 const INDEXED_LEGACY_HTML_REDIRECTS = new Map([
   ['/index.html', '/'],
@@ -636,8 +783,8 @@ function getStaticPageHead(fileName) {
       ])
     },
     'quote.html': {
-      title: 'Submit Inquiry - PCBAForge',
-      description: 'Submit a PCB fabrication, SMT assembly, or full turnkey PCBA inquiry to PCBAForge for engineering review and pricing.',
+      title: 'Get a PCB Assembly Quote | PCBAForge',
+      description: 'Request a PCB fabrication, SMT assembly, turnkey PCBA, or functional testing quote. Upload your files for engineering review and confirmed pricing.',
       canonical: `${base}/quote`,
       jsonLd: jsonLdGraph([
         organizationStructuredData(base),
@@ -647,8 +794,8 @@ function getStaticPageHead(fileName) {
           '@type': 'WebPage',
           '@id': `${base}/quote#webpage`,
           url: `${base}/quote`,
-          name: 'Submit Inquiry - PCBAForge',
-          description: 'Submit a PCB fabrication, SMT assembly, or full turnkey PCBA inquiry to PCBAForge for engineering review and pricing.',
+          name: 'Get a PCB Assembly Quote | PCBAForge',
+          description: 'Request a PCB fabrication, SMT assembly, turnkey PCBA, or functional testing quote with engineering file review.',
           isPartOf: { '@id': `${base}/#website` },
           about: { '@id': `${base}/#pcba-service` },
           inLanguage: 'en'
@@ -806,7 +953,7 @@ function formatSitemapDate(value) {
 
 function getPublicSitemapPages() {
   const publicDir = path.join(__dirname, 'public');
-  return SITEMAP_PAGE_ORDER
+  const staticPages = SITEMAP_PAGE_ORDER
     .map((file) => {
       const filePath = path.join(publicDir, file);
       if (!fs.existsSync(filePath)) return null;
@@ -820,6 +967,17 @@ function getPublicSitemapPages() {
       };
     })
     .filter(Boolean);
+  const serviceTemplate = path.join(publicDir, 'service.html');
+  const serviceLastmod = fs.existsSync(serviceTemplate)
+    ? formatSitemapDate(fs.statSync(serviceTemplate).mtime)
+    : '';
+  const servicePages = [...SERVICE_LANDING_PAGES.keys()].map((slug) => ({
+    loc: `/${slug}`,
+    priority: '0.8',
+    freq: 'monthly',
+    lastmod: serviceLastmod
+  }));
+  return [...staticPages, ...servicePages];
 }
 
 function htmlEscape(value) {
@@ -976,6 +1134,139 @@ function injectPageHead(html, { title, description, canonical, robots, jsonLd, i
   return out.replace('</head>', `${headTags.join('\n')}\n</head>`);
 }
 
+function serviceFaqStructuredData(slug, page) {
+  return {
+    '@type': 'FAQPage',
+    '@id': `${canonicalSiteUrl()}/${slug}#faq`,
+    mainEntity: page.faqs.map(([question, answer]) => ({
+      '@type': 'Question',
+      name: question,
+      acceptedAnswer: { '@type': 'Answer', text: answer }
+    }))
+  };
+}
+
+function renderServiceLandingPage(slug, page) {
+  const base = canonicalSiteUrl();
+  const canonical = `${base}/${slug}`;
+  const image = absoluteSiteUrl(page.image);
+  const benefits = page.benefits.map(([title, description], index) => [
+    '<article class="card">',
+    `<div class="card-num">0${index + 1}</div>`,
+    `<h3>${htmlEscape(title)}</h3>`,
+    `<p>${htmlEscape(description)}</p>`,
+    '</article>'
+  ].join('')).join('\n');
+  const steps = page.workflow.map((step) => `<div class="step"><span>${htmlEscape(step)}</span></div>`).join('\n');
+  const requirements = page.requirements.map((item) => `<li>${htmlEscape(item)}</li>`).join('\n');
+  const faqs = page.faqs.map(([question, answer]) => [
+    '<article class="faq">',
+    `<h3>${htmlEscape(question)}</h3>`,
+    `<p>${htmlEscape(answer)}</p>`,
+    '</article>'
+  ].join('')).join('\n');
+  const related = [...SERVICE_LANDING_PAGES.entries()]
+    .filter(([relatedSlug]) => relatedSlug !== slug)
+    .map(([relatedSlug, relatedPage]) => `<a href="/${relatedSlug}">${htmlEscape(relatedPage.label)}</a>`)
+    .join('\n');
+  const quoteUrl = `/quote?services=${encodeURIComponent(page.quoteServices)}`;
+  const body = [
+    '<section class="hero">',
+    '<div>',
+    `<div class="eyebrow">// ${htmlEscape(page.label)}</div>`,
+    `<h1>${htmlEscape(page.h1)}</h1>`,
+    `<p class="hero-lead">${htmlEscape(page.lead)}</p>`,
+    '<div class="hero-actions">',
+    `<a class="btn-primary" href="${quoteUrl}">REQUEST A QUOTE →</a>`,
+    '<a class="btn-secondary" href="/contact">ASK AN ENGINEER</a>',
+    '</div>',
+    '<div class="trust-row"><span>ENGINEERING FILE REVIEW</span><span>PROTOTYPE & SMALL BATCH</span><span>WORLDWIDE DELIVERY</span></div>',
+    '</div>',
+    `<div class="hero-media"><img src="${htmlEscape(page.image)}" alt="${htmlEscape(page.imageAlt)}" width="620" height="388" fetchpriority="high" decoding="async"></div>`,
+    '</section>',
+    '<section class="section alt"><div class="inner">',
+    '<div class="section-label">// SERVICE OVERVIEW</div>',
+    `<h2>${htmlEscape(page.introTitle)}</h2>`,
+    `<p class="section-intro">${htmlEscape(page.intro)}</p>`,
+    `<div class="card-grid">${benefits}</div>`,
+    '</div></section>',
+    '<section class="section">',
+    '<div class="section-label">// HOW TO START</div>',
+    '<h2>A clear handoff for a faster review</h2>',
+    '<div class="two-col">',
+    `<div class="panel"><h3>Project workflow</h3><div class="steps">${steps}</div></div>`,
+    `<div class="panel"><h3>What to send</h3><ul class="check-list">${requirements}</ul></div>`,
+    '</div>',
+    '</section>',
+    '<section class="section alt"><div class="inner">',
+    '<div class="section-label">// COMMON QUESTIONS</div>',
+    `<h2>${htmlEscape(page.label)} FAQ</h2>`,
+    `<div class="faq-list">${faqs}</div>`,
+    '<h2 style="font-size:1.35rem;margin-top:2.5rem">Explore related PCBA services</h2>',
+    `<div class="related">${related}</div>`,
+    '</div></section>',
+    '<section class="cta">',
+    `<div><h2>Ready to review your ${htmlEscape(page.label.toLowerCase())} project?</h2><p>Upload your files and receive a confirmed scope after engineering review.</p></div>`,
+    `<a class="btn-primary" href="${quoteUrl}">START YOUR INQUIRY →</a>`,
+    '</section>'
+  ].join('\n');
+
+  let html = readPublicHtml('service.html').replace(
+    /<main id="service-page">[\s\S]*?<\/main>/,
+    `<main id="service-page">\n${body}\n</main>`
+  );
+  html = injectPageHead(html, {
+    title: page.title,
+    description: page.description,
+    canonical,
+    image,
+    preloadImage: image,
+    type: 'website',
+    jsonLd: jsonLdGraph([
+      organizationStructuredData(base),
+      websiteStructuredData(base),
+      {
+        '@type': 'Service',
+        '@id': `${canonical}#service`,
+        name: page.h1,
+        serviceType: page.label,
+        description: page.description,
+        provider: { '@id': `${base}/#organization` },
+        areaServed: 'Worldwide',
+        url: canonical
+      },
+      {
+        '@type': 'WebPage',
+        '@id': `${canonical}#webpage`,
+        url: canonical,
+        name: page.title,
+        description: page.description,
+        isPartOf: { '@id': `${base}/#website` },
+        about: { '@id': `${canonical}#service` },
+        inLanguage: 'en'
+      },
+      serviceFaqStructuredData(slug, page),
+      breadcrumbStructuredData([
+        { name: 'Home', url: `${base}/` },
+        { name: page.label, url: canonical }
+      ])
+    ])
+  });
+  return html;
+}
+
+const BLOG_SEO_TITLE_OVERRIDES = new Map([
+  ['functional-testing-pcba-worth-the-cost', 'Is PCBA Functional Testing Worth the Cost? | PCBAForge'],
+  ['ai-generated-pcb-dfm-functional-test-review', 'AI-Generated PCB Review: DFM & Functional Testing'],
+  ['controlling-differential-impedance-pcb-manufacturing-stackup-tdr', 'PCB Differential Impedance: Stackup & TDR Guide'],
+  ['2026-pcba-rfq-approved-alternates-inventory-windows', '2026 PCBA RFQ Guide: Alternates & Inventory Windows'],
+  ['pcba-rfq-bom-risk-plan', 'PCBA RFQ Guide: Build a BOM Risk Plan | PCBAForge']
+]);
+
+function getBlogSeoTitle(post) {
+  return BLOG_SEO_TITLE_OVERRIDES.get(post.slug) || `${truncateText(post.title, 44)} | PCBAForge`;
+}
+
 function replaceArticleWrap(html, contentHtml) {
   return html.replace(
     /<div class="article-wrap" id="article-wrap">[\s\S]*?(?=<footer>)/,
@@ -1016,6 +1307,11 @@ function renderArticleBody(post) {
     '<div class="article-cta-btns">',
     '<a href="/#quote" class="btn-green">GET INSTANT QUOTE</a>',
     '<a href="/quote" class="btn-outline">SUBMIT INQUIRY &rarr;</a>',
+    '</div>',
+    '<div style="margin-top:1rem;font-size:.78rem;color:var(--muted)">',
+    'Related services: <a href="/functional-testing" style="color:var(--green2);font-weight:700">Functional testing</a> · ',
+    '<a href="/turnkey-pcba" style="color:var(--green2);font-weight:700">Turnkey PCBA</a> · ',
+    '<a href="/prototype-pcba" style="color:var(--green2);font-weight:700">Prototype assembly</a>',
     '</div>',
     '</div>'
   ].join('\n');
@@ -1070,7 +1366,7 @@ function renderBlogPostPage(post) {
 
   let html = readPublicHtml('blog-post.html');
   html = injectPageHead(html, {
-    title: `${post.title} - PCBAForge Blog`,
+    title: getBlogSeoTitle(post),
     description,
     canonical,
     jsonLd,
@@ -1271,8 +1567,9 @@ async function sendBlogList(req, res) {
     res.send(html);
   } catch (err) {
     console.error('[BLOG_LIST]', err.message);
-    setPublicCache(res, 60);
-    res.status(200).send(renderBlogListUnavailable());
+    res.set('Retry-After', '60');
+    res.set('Cache-Control', 'no-store, max-age=0');
+    res.status(503).send(renderBlogListUnavailable());
   }
 }
 
@@ -1298,13 +1595,39 @@ async function sendBlogPost(req, res, slug) {
     res.send(html);
   } catch (err) {
     console.error('[BLOG_POST]', err.message);
-    setPublicCache(res, 60);
-    res.status(200).send(renderBlogPostUnavailable('Articles cannot be loaded right now. Please return to the blog index or try again later.'));
+    res.set('Retry-After', '60');
+    res.set('Cache-Control', 'no-store, max-age=0');
+    res.status(503).send(renderBlogPostUnavailable('Articles cannot be loaded right now. Please return to the blog index or try again later.'));
   }
 }
 
+app.get('/favicon.ico', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.type('image/svg+xml').sendFile(path.join(__dirname, 'public', 'favicon.svg'));
+});
+
+app.get(/\/$/, (req, res, next) => {
+  if (req.path === '/') return next();
+  const canonicalPath = req.path.replace(/\/+$/, '');
+  const isPublicPage = (
+    PUBLIC_PAGE_ROUTES.has(canonicalPath) ||
+    canonicalPath === '/blog' ||
+    canonicalPath.startsWith('/blog/') ||
+    SERVICE_LANDING_PAGES.has(canonicalPath.slice(1))
+  );
+  if (!isPublicPage) return next();
+  return redirectPreservingQuery(req, res, canonicalPath, 301);
+});
+
 for (const [route, fileName] of PUBLIC_PAGE_ROUTES.entries()) {
   app.get(route, (req, res) => sendPublicPage(req, res, fileName));
+}
+
+for (const [slug, page] of SERVICE_LANDING_PAGES.entries()) {
+  app.get(`/${slug}`, (req, res) => {
+    setPublicCache(res, 300);
+    res.type('html').send(renderServiceLandingPage(slug, page));
+  });
 }
 
 app.get('/', (req, res) => sendPublicPage(req, res, 'index.html'));

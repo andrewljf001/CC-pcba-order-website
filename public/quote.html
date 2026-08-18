@@ -9,7 +9,7 @@
 
 <link rel="preload" as="font" href="/fonts/inter.woff2" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=20260703">
-<script src="/site-runtime.js?v=20260714"></script>
+<script src="/site-runtime.js?v=20260818"></script>
 <style>
 :root{
   --bg:#f6f8fb;--bg2:#ffffff;--bg3:#f8fafc;--dim:#f0fdf4;
@@ -621,6 +621,7 @@ footer{position:relative;z-index:1;background:#fff;border-top:1px solid var(--li
       Save your order number to track your project status.
     </div>
     <a href="#" class="track-btn" id="track-link">TRACK MY ORDER →</a>
+    <div style="margin-top:1rem;font-size:.78rem;color:var(--muted)">Want an order history? <a href="/account?tab=register" style="color:var(--green2);font-weight:800">Create an optional account</a>.</div>
   </div>
 
 </div><!-- /page-wrap -->
@@ -1014,6 +1015,13 @@ function doSubmit(fd) {
     try {
       var data = JSON.parse(xhr.responseText);
       if (data.success) {
+        if (window.PCBAForge && window.PCBAForge.trackEvent) {
+          window.PCBAForge.trackEvent('generate_lead', {
+            form_name: 'quote_inquiry',
+            service_type: [svc.pcb ? 'pcb' : '', svc.assy ? 'assembly' : '', svc.test ? 'testing' : ''].filter(Boolean).join('_'),
+            order_number: data.order_no
+          });
+        }
         document.getElementById('inquiry-form').style.display = 'none';
         var sb = document.getElementById('success-box'); sb.classList.add('show');
         document.getElementById('success-order').textContent = 'Order #' + data.order_no;
@@ -1072,8 +1080,7 @@ document.getElementById('inquiry-form').addEventListener('submit', function(e) {
     if (!tdEl.value.trim()) { scrollToField(tdEl); return; }
   }
 
-  if (currentUser) { doSubmit(collectFormData()); }
-  else { showAuthModal(); }
+  doSubmit(collectFormData());
 });
 
 function showAuthModal() {
