@@ -1260,11 +1260,39 @@ const BLOG_SEO_TITLE_OVERRIDES = new Map([
   ['ai-generated-pcb-dfm-functional-test-review', 'AI-Generated PCB Review: DFM & Functional Testing'],
   ['controlling-differential-impedance-pcb-manufacturing-stackup-tdr', 'PCB Differential Impedance: Stackup & TDR Guide'],
   ['2026-pcba-rfq-approved-alternates-inventory-windows', '2026 PCBA RFQ Guide: Alternates & Inventory Windows'],
-  ['pcba-rfq-bom-risk-plan', 'PCBA RFQ Guide: Build a BOM Risk Plan | PCBAForge']
+  ['pcba-rfq-bom-risk-plan', 'PCBA RFQ Guide: Build a BOM Risk Plan | PCBAForge'],
+  ['two-layer-pcb-price-600-rmb-per-square-meter-2026', 'Why Two-Layer PCB Prices Stay High in 2026']
 ]);
 
 function getBlogSeoTitle(post) {
   return BLOG_SEO_TITLE_OVERRIDES.get(post.slug) || `${truncateText(post.title, 44)} | PCBAForge`;
+}
+
+function blogFaqStructuredData(post, canonical) {
+  const content = sanitizeBlogHtml(post.content);
+  const section = content.match(/<h2[^>]*>\s*Frequently Asked Questions\s*<\/h2>([\s\S]*)/i);
+  if (!section) return null;
+
+  const mainEntity = [];
+  const questionPattern = /<h3[^>]*>([\s\S]*?)<\/h3>\s*<p[^>]*>([\s\S]*?)<\/p>/gi;
+  let match;
+  while ((match = questionPattern.exec(section[1])) && mainEntity.length < 8) {
+    const name = stripHtml(match[1]).trim();
+    const text = stripHtml(match[2]).trim();
+    if (!name || !text) continue;
+    mainEntity.push({
+      '@type': 'Question',
+      name,
+      acceptedAnswer: { '@type': 'Answer', text }
+    });
+  }
+
+  if (!mainEntity.length) return null;
+  return {
+    '@type': 'FAQPage',
+    '@id': `${canonical}#faq`,
+    mainEntity
+  };
 }
 
 function replaceArticleWrap(html, contentHtml) {
@@ -1357,6 +1385,7 @@ function renderBlogPostPage(post) {
       isPartOf: { '@id': `${base}/blog#blog` },
       inLanguage: 'en'
     },
+    blogFaqStructuredData(post, canonical),
     breadcrumbStructuredData([
       { name: 'Home', url: `${base}/` },
       { name: 'Blog', url: `${base}/blog` },
