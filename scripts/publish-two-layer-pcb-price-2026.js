@@ -190,7 +190,7 @@ const content = `
 if (require.main === module) {
   require('dotenv').config();
   const pool = require('../database');
-  const { v4: uuidv4 } = require('uuid');
+  const { randomUUID } = require('crypto');
 
   (async () => {
     try {
@@ -214,7 +214,7 @@ if (require.main === module) {
           `INSERT INTO posts
            (id, slug, title, excerpt, content, cover_url, tags, status, author, published_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [uuidv4(), slug, title, excerpt, content, coverUrl, tags, status, author, publishedAt]
+          [randomUUID(), slug, title, excerpt, content, coverUrl, tags, status, author, publishedAt]
         );
         console.log(`Published new article: ${slug}`);
       }
